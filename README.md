@@ -24,16 +24,22 @@ Follow these steps to set up your development environment:
 
 1) Clone the repository:
 
-    git clone https://github.com/StatistikStadtZuerich/ld-pipeline-2024.git
-    cd ld-pipeline-2024
+   `git clone https://github.com/StatistikStadtZuerich/ld-pipeline-2024.git`
+   `cd ld-pipeline-2024`
 
 2) Install the required Python dependencies:
 
-    pip install -r requirements.txt
+   `pip install -r requirements.txt`
+
+   It is recommended to use a virtual environment.
+
+    * `python -m venv .venv`
+    * `source .venv/bin/activate`
+    * `pip install -r requirements.txt`
 
 3) Configure the access credentials for both the Harmonized Database and the RDF
-database within the configuration files.
+   database within the configuration files.
 
 4) Execute the pipeline:
 
-    python main.py
+   `python main.py`
