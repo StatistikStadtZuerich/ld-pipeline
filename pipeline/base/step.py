@@ -5,6 +5,9 @@ import logging
 
 
 class Step(Base):
+    """
+    The base class for pipeline steps
+    """
 
     def __init__(self):
         super().__init__()
@@ -12,4 +15,8 @@ class Step(Base):
 
     @abstractmethod
     def run(self, environment: Environment):
+        """
+        This methode is called by the pipeline
+        :param environment: the current environment, managed by the pipeline
+        """
         pass

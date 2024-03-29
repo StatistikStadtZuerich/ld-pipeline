@@ -1,31 +1,8 @@
-from enum import Enum
-from .services import Connection, Template
+from typing import Iterator
+from contextlib import contextmanager
+from .config import Config, Env
+from .services import DbConnection, TemplateEngine
 from .base import Base
-import configparser
-
-
-class Env(str, Enum):
-    test = 'test'
-    int = 'int'
-    prod = 'prod'
-
-
-class Config(Base):
-
-    def __init__(self, env: Env):
-        super().__init__()
-        self._env = env.value
-        self._config = configparser.ConfigParser()
-        self._config.read('config.ini')
-
-    def get(self, name, return_type=str, fallback=None):
-        if return_type == int:
-            return self._config.getint(self._env, name, fallback=fallback)
-        elif return_type == float:
-            return self._config.getfloat(self._env, name, fallback=fallback)
-        elif return_type == bool:
-            return self._config.getboolean(self._env, name, fallback=fallback)
-        return self._config.get(self._env, name, fallback=fallback)
 
 
 class Environment(Base):
@@ -34,13 +11,37 @@ class Environment(Base):
         super().__init__()
         self._config = Config(env)
 
-    def get_db_connection(self) -> Connection:
-        # TODO implement
-        pass
+    @contextmanager
+    def get_db_connection(self) -> Iterator[DbConnection]:
+        """
+        Returns the db connection for the environment
+        :return: a database connection
+        """
+        connection = DbConnection(self._config)
+        try:
+            self.logger.info('establish connection')
+            yield connection
+        except Exception as e:
+            self.logger.error('caught:', e)
+            raise
+        else:
+            self.logger.info('end connection')
+        finally:
+            self.logger.info('final cleanup connection')
 
-    def get_template_engine(self, template_filepath: str, output_filepath: str) -> Template:
-        # TODO implement
-        pass
+    @contextmanager
+    def get_template_engine(self, template_filepath: str, output_filepath: str) -> Iterator[TemplateEngine]:
+        """
+        Returns the template engine for the environment, the template file and the defined output
+        :param template_filepath: the template file that is used by the engine
+        :param output_filepath: the output file where the
+        :return:
+        """
+        engine = TemplateEngine(self._config, template_filepath, output_filepath)
+        try:
+            yield engine
+        except Exception:
+            raise
 
     def get_config_value(self, name: str, return_type=str, fallback=None):
         return self._config.get(name, return_type, fallback)

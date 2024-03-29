@@ -1,9 +1,6 @@
 import typer
-import logging
-import sys
 from pipeline import Pipeline, Env, Copy
 
-# logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 app = typer.Typer()
 
 
