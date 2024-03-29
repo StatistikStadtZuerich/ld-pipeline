@@ -38,5 +38,5 @@ Follow these steps to set up your development environment:
 
    * Get help: `python main.py --help`
    * Run pipeline: `python main.py run`
-   * Run pipeline in env:int: `python main.py run --env test`
-   * Run single step in env:int: `python main.py step --env test --name copy` 
+   * Run pipeline in env:test: `python main.py run --env test`
+   * Run single step in env:test: `python main.py step --env test --name copy` 
