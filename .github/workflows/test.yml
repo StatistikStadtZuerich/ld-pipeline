@@ -20,6 +20,8 @@ jobs:
           pip install -r requirements.txt
       - name: Run unittest
         run: python -m pytest --doctest-modules --junitxml=junit/test-results.xml
+      - name: Archive test results
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: junit/test-results.xml
