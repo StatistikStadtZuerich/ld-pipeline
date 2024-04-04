@@ -1,5 +1,6 @@
 from enum import Enum
 import configparser
+import os
 from .base import Base
 
 
@@ -15,7 +16,8 @@ class Config(Base):
         super().__init__()
         self._env = env.value
         self._config = configparser.ConfigParser()
-        self._config.read('config.ini')
+        path = os.path.join(os.path.dirname(__file__), '../../', 'config.ini')
+        self._config.read(path)
 
     def get(self, name, return_type=str, fallback=None):
         if return_type == int:

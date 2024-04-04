@@ -34,9 +34,17 @@ Follow these steps to set up your development environment:
 
    * `pip install -r requirements.txt`
 
-5) Execute the pipeline:
+4) Execute the pipeline:
 
    * Get help: `python main.py --help`
    * Run pipeline: `python main.py run`
    * Run pipeline in env:test: `python main.py run --env test`
-   * Run single step in env:test: `python main.py step --env test --name copy` 
+   * Run single step in env:test: `python main.py step --env test --name copy`
+
+### Development
+
+1) Testing
+   * Run tests: `python -m pytest`
+2) Local Pipeline execution
+   * Install act from https://nektosact.com/
+   * Execute pipeline: `act --container-architecture linux/amd64`
