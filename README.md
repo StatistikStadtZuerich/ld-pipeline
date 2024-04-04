@@ -43,8 +43,11 @@ Follow these steps to set up your development environment:
 
 ### Development
 
-1) Testing
-   * Run tests: `python -m pytest`
-2) Local Pipeline execution
+1) Unit Tests
+   * Run: `python -m pytest tests/unit`
+2) Integration Tests
+   * Be sure docker is up and running
+   * Run: `python -m pytest --container-scope=session tests/integration`
+3) Local Pipeline execution
    * Install act from https://nektosact.com/
    * Execute pipeline: `act --container-architecture linux/amd64`
