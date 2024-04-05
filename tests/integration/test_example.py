@@ -1,32 +1,27 @@
 import pytest
-import requests
+import mysql.connector
 
-from requests.exceptions import ConnectionError
-
-
-def is_responsive(url):
+def is_responsive(docker_ip, port):
     try:
-        response = requests.get(url)
-        if response.status_code == 200:
+        cnx = mysql.connector.connect(user='pipeline', password='pipeline', host=docker_ip, port=port, database='hdb')
+        if cnx and cnx.is_connected():
+            cnx.close()
             return True
-    except ConnectionError:
+        else:
+            return False
+
+    except mysql.connector.errors.DatabaseError:
         return False
 
 
 @pytest.fixture(scope="session")
-def http_service(docker_ip, docker_services):
-    """Ensure that HTTP service is up and responsive."""
-
-    # `port_for` takes a container port and returns the corresponding host port
-    port = docker_services.port_for("httpbin", 80)
-    url = "http://{}:{}".format(docker_ip, port)
+def mysql_service(docker_ip, docker_services):
+    port = docker_services.port_for("db", 3306)
     docker_services.wait_until_responsive(
-        timeout=30.0, pause=0.1, check=lambda: is_responsive(url)
+        timeout=100, pause=2, check=lambda: is_responsive(docker_ip, port)
     )
-    return url
+    return True
 
 
-def test_status_code(http_service):
-    status = 418
-    response = requests.get(http_service + "/status/{}".format(status))
-    assert response.status_code == status
+def test_mysql_connection(mysql_service):
+    assert mysql_service
