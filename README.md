@@ -14,9 +14,7 @@ local machine for development and testing purposes.
 
 Before you begin, ensure you have the following installed and configured:
 
-- Python 3.6 or higher
-- Access to a Microsoft SQL Server Database (HDB)
-- An installed and configured RDF database
+- Python 3.6 or higher, development is done with python 3.10
 
 ### Installation
 
@@ -24,22 +22,21 @@ Follow these steps to set up your development environment:
 
 1) Clone the repository:
 
-   `git clone https://github.com/StatistikStadtZuerich/ld-pipeline-2024.git`
-   `cd ld-pipeline-2024`
+   1) `git clone https://github.com/StatistikStadtZuerich/ld-pipeline-2024.git`
+   2) `cd ld-pipeline-2024`
 
-2) Install the required Python dependencies:
+2) It is recommended to use a virtual environment.
 
-   `pip install -r requirements.txt`
+   1) `python -m venv .venv`
+   2) `source .venv/bin/activate`
 
-   It is recommended to use a virtual environment.
+3) Install the required Python dependencies:
 
-    * `python -m venv .venv`
-    * `source .venv/bin/activate`
-    * `pip install -r requirements.txt`
+   * `pip install -r requirements.txt`
 
-3) Configure the access credentials for both the Harmonized Database and the RDF
-   database within the configuration files.
+5) Execute the pipeline:
 
-4) Execute the pipeline:
-
-   `python main.py`
+   * Get help: `python main.py --help`
+   * Run pipeline: `python main.py run`
+   * Run pipeline in env:test: `python main.py run --env test`
+   * Run single step in env:test: `python main.py step --env test --name copy` 
