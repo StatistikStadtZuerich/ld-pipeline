@@ -1,17 +1,22 @@
+import shutil
 from ..base import Step, Environment
 
 
 class Copy(Step):
     """
-    A simple step that logs a line, noting else
+    The Copy step reads the source file and writes its contents to the destination file,
+    creating it if it doesn’t exist, and overwriting it if it does.
     """
+
+    def __init__(self, source, target):
+        """
+        Copy file from source to target
+        :param source absolute filepath (or relative to runner file)
+        :param target absolute filepath (or relative to runner file)
+        """
+        super().__init__()
+        self._source = source
+        self._target = target
+
     def run(self, environment: Environment):
-        """
-        TODO just a simple stub
-        """
-        self.logger.info("Start a copy step")
-
-        with (environment.get_db_connection()) as db:
-            self.logger.info(db.query("Query something"))
-
-        self.logger.info("End a copy step")
+        shutil.copyfile(self._source, self._target)
