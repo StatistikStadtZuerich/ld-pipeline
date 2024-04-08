@@ -39,7 +39,12 @@ Follow these steps to set up your development environment:
    * Get help: `python main.py --help`
    * Run pipeline: `python main.py run`
    * Run pipeline in env:test: `python main.py run --env test`
-   * Run single step in env:test: `python main.py step --env test --name copy`
+   * List all supported step names: `python main.py list-step-names `
+   * Run single step in env:test: `python main.py step --env test --name copyStatic`
+
+## Pipeline Steps
+### Copy Step
+Copies file from
 
 ### Development
 

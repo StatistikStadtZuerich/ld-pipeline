@@ -3,11 +3,15 @@ from pipeline import Pipeline, Env, Copy
 
 app = typer.Typer()
 
+steps = {
+    'copyStatic': Copy('static/static.n3', 'static.n3')
+}
+
 
 @app.command(short_help="Run pipeline on given environment")
 def run(env: Env = Env.test):
     Pipeline(env).run(
-        Copy()
+        steps['copyStatic']
     )
 
 
@@ -18,12 +22,12 @@ def step(
         ),
         env: Env = Env.test
 ):
-    Pipeline(env).step(name)
+    Pipeline(env).step(steps[name])
 
 
 @app.command(name="list-step-names", short_help="List names of all steps supported")
 def list_step_names():
-    print(Pipeline.step_names())
+    print([key for key in steps.keys()])
 
 
 if __name__ == "__main__":
