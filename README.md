@@ -43,8 +43,7 @@ Follow these steps to set up your development environment:
    * Run single step in env:test: `python main.py step --env test --name copyStatic`
 
 ## Pipeline Steps
-### Copy Step
-Copies file from
+* "copyStatic": Copies static.n3 files from /static to defined output folder
 
 ## Run with docker
 
