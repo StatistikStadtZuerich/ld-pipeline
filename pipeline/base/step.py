@@ -20,3 +20,18 @@ class Step(Base):
         :param environment: the current environment, managed by the pipeline
         """
         pass
+
+
+class StepDefinition():
+
+    def __init__(self, step: Step, description: str = ''):
+        self._step = step
+        self._description = description
+
+    @property
+    def step(self):
+        return self._step
+
+    @property
+    def description(self):
+        return self._description
