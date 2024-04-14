@@ -26,9 +26,12 @@ class TestCopy(unittest.TestCase):
             copy = Copy(input_file, output_file)
             copy.run(env)
 
-            content = open(TestCopy.__abs_path('tmp/' + output_file), 'r').read()
+            with open(TestCopy.__abs_path('tmp/' + output_file), 'r') as file:
+                content = file.read()
             self.assertEqual(content, 'Hello World\n')
 
         finally:
             shutil.rmtree(tmp_dir)
 
+if __name__ == '__main__':
+    unittest.main()
