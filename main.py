@@ -3,24 +3,20 @@ from pipeline import Pipeline, Env, Copy
 
 app = typer.Typer()
 
-steps = {
-    'copyStatic': Copy('static/static.n3', 'static.n3')
-}
+steps = {"copyStatic": Copy("static/static.n3", "static.n3")}
 
 
 @app.command(short_help="Run pipeline on given environment")
 def run(env: Env = Env.test):
-    Pipeline(env).run(
-        steps['copyStatic']
-    )
+    Pipeline(env).run(steps["copyStatic"])
 
 
 @app.command(short_help="Run single step on given environment")
 def step(
-        name: str = typer.Option(
-            help="The name of the step to be executed. Get supported names with command 'list_steps'"
-        ),
-        env: Env = Env.test
+    name: str = typer.Option(
+        help="The name of the step to be executed. Get supported names with command 'list_steps'"
+    ),
+    env: Env = Env.test,
 ):
     Pipeline(env).step(steps[name])
 

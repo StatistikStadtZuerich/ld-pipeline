@@ -20,6 +20,8 @@ class Copy(Step):
         self._target = target
 
     def run(self, environment: Environment):
-        out_dir = environment.get_config_value('output_path')
+        out_dir = environment.get_config_value("output_path")
         os.makedirs(out_dir, exist_ok=True)
-        shutil.copyfile(self._source, environment.get_config_value('output_path') + self._target)
+        shutil.copyfile(
+            self._source, environment.get_config_value("output_path") + self._target
+        )
