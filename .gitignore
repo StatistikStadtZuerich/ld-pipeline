@@ -1,3 +1,6 @@
 .venv
 .idea
 pipeline.log
+reports
+Pipfile
+Pipfile.lock

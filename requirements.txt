@@ -1,1 +1,4 @@
 typer[all]
+mysql-connector-python
+pytest
+pytest-docker

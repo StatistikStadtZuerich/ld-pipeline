@@ -34,9 +34,23 @@ Follow these steps to set up your development environment:
 
    * `pip install -r requirements.txt`
 
-5) Execute the pipeline:
+4) Execute the pipeline:
 
    * Get help: `python main.py --help`
    * Run pipeline: `python main.py run`
    * Run pipeline in env:test: `python main.py run --env test`
-   * Run single step in env:test: `python main.py step --env test --name copy` 
+   * Run single step in env:test: `python main.py step --env test --name copy`
+
+### Development
+
+1) Unit Tests
+   * Unit tests can be found under tests/unit
+   * Run: `python -m pytest tests/unit`
+2) Integration Tests
+   * Integration tests can be found under tests/integration
+   * The tests create the environment using docker (test/integration/docker-compose.yaml)
+   * Be sure docker is up and running
+   * Run: `python -m pytest --container-scope=session tests/integration`
+3) Local Pipeline execution
+   * Install act from https://nektosact.com/
+   * Execute pipeline: `act --container-architecture linux/amd64`
