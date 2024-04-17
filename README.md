@@ -46,7 +46,7 @@ Follow these steps to set up your development environment:
 
 ### Copy Step
 
-Copies file from
+- "copyStatic": Copies static.n3 files from /static to defined output folder
 
 ## Run with docker
 
