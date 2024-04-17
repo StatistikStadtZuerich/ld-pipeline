@@ -1,5 +1,6 @@
 .venv
 .idea
+tmp
 pipeline.log
 reports
 Pipfile

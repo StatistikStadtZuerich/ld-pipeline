@@ -1,14 +1,14 @@
 import typer
-from pipeline import Pipeline, Env, Copy
+from pipeline import Pipeline, Env, Copy, Templating
 
 app = typer.Typer()
 
-steps = {"copyStatic": Copy("static/static.n3", "static.n3")}
+steps = {"copyStatic": Copy("static/static.n3", "static.n3"), "template": Templating()}
 
 
 @app.command(short_help="Run pipeline on given environment")
 def run(env: Env = Env.test):
-    Pipeline(env).run(steps["copyStatic"])
+    Pipeline(env).run(steps["template"])
 
 
 @app.command(short_help="Run single step on given environment")

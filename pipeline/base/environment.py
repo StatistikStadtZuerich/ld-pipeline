@@ -30,15 +30,15 @@ class Environment(Base):
 
     @contextmanager
     def get_template_engine(
-        self, template_filepath: str, output_filepath: str
+        self, template_filename: str, output_filename: str
     ) -> Iterator[TemplateEngine]:
         """
         Returns the template engine for the environment, the template file and the defined output
-        :param template_filepath: the template file that is used by the engine
-        :param output_filepath: the output file where the
+        :param template_filename: the template file that is used by the engine
+        :param output_filename: the output file where the
         :return:
         """
-        engine = TemplateEngine(self._config, template_filepath, output_filepath)
+        engine = TemplateEngine(self._config, template_filename, output_filename)
         try:
             yield engine
         except Exception:

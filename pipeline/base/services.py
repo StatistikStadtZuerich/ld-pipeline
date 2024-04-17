@@ -28,7 +28,6 @@ class TemplateEngine(TemplateEngine):
     """TODO defined the interface methods for TemplateEngine"""
 
     def __init__(self, config: Config, template_filename: str, output_filename: str):
-        super().__init__()
         self._config = config
         self._env = Environment(loader=FileSystemLoader(config.get("template_path")))
         self._template = self._env.get_template(template_filename)
@@ -37,8 +36,8 @@ class TemplateEngine(TemplateEngine):
     def template(self, data: Dict):
         content = self._template.render(data)
         if not self._output_file.closed:
-            self._output_file.write(content)
-            print("wrote", self._output_path)
+            self._output_file.write(content + "\n")
+            print("Successfully wrote " + self._output_path + " file.")
         else:
             print(
                 "File ist closed. Please open the file first and call the template function again."

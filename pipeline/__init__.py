@@ -1,2 +1,2 @@
 from .pipeline import Pipeline, Env, Step
-from .steps.copy import Copy
+from .steps import Copy, Templating
