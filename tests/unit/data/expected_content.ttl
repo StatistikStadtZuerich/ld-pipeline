@@ -1,0 +1,2 @@
+<https://ld.stadt-zuerich.ch/statistics/property/ABG> a rdf:Property ; <https://schema.org/name> "Arbeitslosengrad" ; <https://schema.org/identifier> "ABG" .
+<https://ld.stadt-zuerich.ch/statistics/property/ABT> a rdf:Property ; <https://schema.org/name> "Abteilung" ; <https://schema.org/identifier> "ABT" .
