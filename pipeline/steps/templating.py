@@ -13,6 +13,7 @@ class Templating(Step):
         output_filepath = (
             environment.get_config_value("output_path") + self._output_filename
         )
+
         with environment.get_template_engine(
             self._template_filename, output_filepath
         ) as templating_engine:
