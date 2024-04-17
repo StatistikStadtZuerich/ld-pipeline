@@ -45,7 +45,7 @@ class TemplateEngine(TemplateEngine):
             )
         else:
             print(
-                "File ist closed. Please open the file first and call the template function again."
+                "File is closed! Please open the file first and call the template function again."
             )
 
     def open(self):
