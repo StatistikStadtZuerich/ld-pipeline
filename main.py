@@ -3,12 +3,17 @@ from pipeline import Pipeline, Env, Copy, Templating
 
 app = typer.Typer()
 
-steps = {"copyStatic": Copy("static/static.n3", "static.n3"), "template": Templating()}
+steps = {
+    "copyStatic": Copy("static/static.n3", "static.n3"),
+    "dimensionTemplating": Templating(
+        "ttl_template.jinja", "dimensionen.ttl", "./HDB_DIMENSIONEN.csv"
+    ),
+}
 
 
 @app.command(short_help="Run pipeline on given environment")
 def run(env: Env = Env.test):
-    Pipeline(env).run(steps["template"])
+    Pipeline(env).run(steps["copyStatic"], steps["dimensionTemplating"])
 
 
 @app.command(short_help="Run single step on given environment")

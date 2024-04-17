@@ -40,9 +40,12 @@ class Environment(Base):
         """
         engine = TemplateEngine(self._config, template_filename, output_filename)
         try:
+            engine.open()
             yield engine
         except Exception:
             raise
+        finally:
+            engine.close()
 
     def get_config_value(self, name: str, return_type=str, fallback=None):
         return self._config.get(name, return_type, fallback)

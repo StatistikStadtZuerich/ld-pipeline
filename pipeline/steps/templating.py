@@ -3,21 +3,17 @@ import csv
 
 
 class Templating(Step):
-    def __init__(self):
+    def __init__(self, template_filename: str, output_filename: str, csv_path: str):
         super().__init__()
+        self._template_filename = template_filename
+        self._output_filename = output_filename
+        self._csv_path = csv_path
 
     def run(self, environment: Environment):
         with environment.get_template_engine(
-            "ttl_template.txt", "my_output.ttl"
+            self._template_filename, self._output_filename
         ) as templating_engine:
-            templating_engine.open()
-            with open("./HDB_DIMENSIONEN.csv", newline="") as csv_file:
+            with open(self._csv_path, newline="") as csv_file:
                 csv_reader = csv.DictReader(csv_file)
                 for row in csv_reader:
-                    templating_engine.template(
-                        {
-                            "Dimension": row["Dimension"],
-                            "Dimensionname": row["Dimensionname"],
-                        }
-                    )
-            templating_engine.close()
+                    templating_engine.template(row)

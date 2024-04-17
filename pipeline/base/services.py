@@ -36,8 +36,13 @@ class TemplateEngine(TemplateEngine):
     def template(self, data: Dict):
         content = self._template.render(data)
         if not self._output_file.closed:
-            self._output_file.write(content + "\n")
-            print("Successfully wrote " + self._output_path + " file.")
+            characters_wrote = self._output_file.write(content + "\n")
+            print(
+                "Successfully wrote "
+                + str(characters_wrote)
+                + " characters in "
+                + self._output_path
+            )
         else:
             print(
                 "File ist closed. Please open the file first and call the template function again."
