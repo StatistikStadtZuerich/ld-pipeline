@@ -6,4 +6,3 @@ reports
 Pipfile
 Pipfile.lock
 **/__pycache__
-tmp
