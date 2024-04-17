@@ -46,7 +46,11 @@ Follow these steps to set up your development environment:
 
 ### Copy Step
 
-- "copyStatic": Copies static.n3 files from /static to defined output folder
+- "copyStatic": Copies static.n3 files from /static to defined output folder.
+
+### Templating Step
+
+- "dimensionTemplating": Creates a .ttl RDF file out of the given csv data.
 
 ## Run with docker
 
