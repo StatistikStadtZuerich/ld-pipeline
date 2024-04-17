@@ -1,0 +1,1 @@
+<{{ propertyIri }}> a rdf:Property; <https://schema.org/>:name "{{ Dimensionsname }}"; <https://schema.org/>:identifier "{{ Dimension }}";
