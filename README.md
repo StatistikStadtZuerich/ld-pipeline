@@ -73,3 +73,6 @@ _HINT_: be sure to use only _local_, _int_ or _prod_ as environment within docke
 3. Local Pipeline execution
    - Install act from https://nektosact.com/
    - Execute pipeline: `act --container-architecture linux/amd64`
+4. Linter
+   - Run `ruff check` to lint all files in the current directory
+   - Run `ruff format` to format all files in the current directory

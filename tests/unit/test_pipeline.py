@@ -1,6 +1,6 @@
 import unittest
-from pipeline import Pipeline, Env, Step
-from pipeline.base import Environment
+from pipeline import Pipeline
+from pipeline.base import Environment, Env, Step
 
 
 class TestStep(Step):
