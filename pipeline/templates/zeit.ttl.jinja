@@ -2,7 +2,7 @@
     <https://schema.org/name> "{{ STICHTAGDATUM }}" ;
     <https://schema.org/name> "{{ PERIODEENDE }}" ;
     <https://schema.org/termCode> "{{ ZEIT }}" ;
-    <https://ld.stadt-zuerich.ch/schema/hasEnd> "{{ STICHTAGDATUM }}" ;
-    <https://ld.stadt-zuerich.ch/schema/hasEnd> "{{ PERIODEENDE }}" ;
-    <https://ld.stadt-zuerich.ch/schema/hasBeginning> "{{ PERIODESTART }}" ;
+    <https://ld.stadt-zuerich.ch/schema/hasEnd> "{{ STICHTAGDATUM }}"^^<http://www.w3.org/2001/XMLSchema#date> ;
+    <https://ld.stadt-zuerich.ch/schema/hasEnd> "{{ PERIODEENDE }}"^^<http://www.w3.org/2001/XMLSchema#date> ;
+    <https://ld.stadt-zuerich.ch/schema/hasBeginning> "{{ PERIODESTART }}"^^<http://www.w3.org/2001/XMLSchema#date> ;
     <https://ld.stadt-zuerich.ch/schema/referenceTime> "{{ BEZUGSZEIT }}" .
