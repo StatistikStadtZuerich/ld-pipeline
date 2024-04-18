@@ -4,3 +4,4 @@ pytest
 pytest-docker
 ruff
 Jinja2
+pymssql

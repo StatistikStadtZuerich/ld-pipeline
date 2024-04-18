@@ -1,28 +1,34 @@
-from logging import getLogger
 from ..interfaces.services import TemplateEngine, DbConnection
 from .environment import Config
 from typing import Dict
 from jinja2 import Environment, FileSystemLoader
+import pymssql
 
 
 class MSSQLDbConnection(DbConnection):
     """TODO defined the interface methods for DB connections"""
 
     def __init__(self, config: Config):
-        super().__init__()
         self._config = config
 
-    def query(self, data):
+    def query(self, query: str):
         """
-        TODO just a simple stub
+        executes query and return cursor.
         """
-        return data
+        with self._connection.cursor(as_dict=True) as cursor:
+            cursor.execute(query)
+            return cursor
 
     def open(self):
-        pass
+        self._connection = pymssql.connect(
+            server=self._config.get("database", "host"),
+            user=self._config.get("database", "user"),
+            password=self._config.get("database", "password"),
+            database=self._config.get("database", "database"),
+        )
 
     def close(self):
-        pass
+        self._connection.close()
 
 
 class JinjaTemplateEngine(TemplateEngine):
@@ -34,7 +40,6 @@ class JinjaTemplateEngine(TemplateEngine):
         self._template = self._env.get_template(template_filename)
         self._output_filepath = output_filepath
         self._output_file = None
-        self.logger = getLogger(__name__)
 
     def template(self, data: Dict):
         content = self._template.render(data)

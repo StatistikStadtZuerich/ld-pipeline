@@ -3,11 +3,11 @@ import csv
 
 
 class Templating(Step):
-    def __init__(self, template_filename: str, output_filename: str, csv_filepath: str):
+    def __init__(self, template_filename: str, output_filename: str, sql_filepath: str):
         super().__init__()
         self._template_filename = template_filename
         self._output_filename = output_filename
-        self._csv_filepath = csv_filepath
+        self._sql_filepath = sql_filepath
 
     def run(self, environment: Environment):
         output_filepath = (
@@ -17,7 +17,10 @@ class Templating(Step):
         with environment.get_template_engine(
             self._template_filename, output_filepath
         ) as templating_engine:
-            with open(self._csv_filepath, newline="") as csv_file:
+            with environment.get_db_connection as connection:
+                with open(self._sql_filepath) as sql:
+                    cursor = connection.query(sql)
+
                 csv_reader = csv.DictReader(csv_file)
                 for row in csv_reader:
                     templating_engine.template(row)

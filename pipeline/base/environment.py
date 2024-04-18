@@ -18,6 +18,7 @@ class Environment(Base):
         """
         connection = MSSQLDbConnection(self._config)
         try:
+            connection.open()
             self.logger.info("establish connection")
             yield connection
         except Exception as e:
@@ -26,6 +27,7 @@ class Environment(Base):
         else:
             self.logger.info("end connection")
         finally:
+            connection.close()
             self.logger.info("final cleanup connection")
 
     @contextmanager
