@@ -1,10 +1,11 @@
+from logging import getLogger
 from ..interfaces.services import TemplateEngine, DbConnection
 from .environment import Config
 from typing import Dict
 from jinja2 import Environment, FileSystemLoader
 
 
-class DbConnection(DbConnection):
+class MSSQLDbConnection(DbConnection):
     """TODO defined the interface methods for DB connections"""
 
     def __init__(self, config: Config):
@@ -24,7 +25,7 @@ class DbConnection(DbConnection):
         pass
 
 
-class TemplateEngine(TemplateEngine):
+class JinjaTemplateEngine(TemplateEngine):
     """TODO defined the interface methods for TemplateEngine"""
 
     def __init__(self, config: Config, template_filename: str, output_filepath: str):
@@ -33,19 +34,20 @@ class TemplateEngine(TemplateEngine):
         self._template = self._env.get_template(template_filename)
         self._output_filepath = output_filepath
         self._output_file = None
+        self.logger = getLogger(__name__)
 
     def template(self, data: Dict):
         content = self._template.render(data)
         if not self._output_file.closed:
             characters_wrote = self._output_file.write(content + "\n")
-            print(
+            self.logger.info(
                 "Successfully wrote "
                 + str(characters_wrote)
                 + " characters in "
                 + self._output_filepath
             )
         else:
-            print(
+            self.logger.debug(
                 "File is closed! Please open the file first and call the template function again."
             )
 
@@ -54,8 +56,10 @@ class TemplateEngine(TemplateEngine):
 
     def close(self):
         if not self._output_file:
-            print("File is not yet opened. Please open the output file first.")
+            self.logger.debug(
+                "File is not yet opened. Please open the output file first."
+            )
         elif self._output_file.closed:
-            print("File already closed.")
+            self.logger.debug("File already closed.")
         else:
             self._output_file.close()

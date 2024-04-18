@@ -17,7 +17,6 @@ class Closeable(Base):
 class DbConnection(Closeable):
     """TODO defined the interface methods for DB connections"""
 
-    @abstractmethod
     def __init__(self, config: Config):
         pass
 
@@ -32,7 +31,6 @@ class DbConnection(Closeable):
 class TemplateEngine(Closeable):
     """TODO defined the interface methods for TemplateEngine"""
 
-    @abstractmethod
     def __init__(self, config: Config, template_filename: str, output_filename: str):
         pass
 
