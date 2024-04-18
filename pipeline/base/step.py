@@ -22,9 +22,8 @@ class Step(Base):
         pass
 
 
-class StepDefinition():
-
-    def __init__(self, step: Step, description: str = ''):
+class StepDefinition:
+    def __init__(self, step: Step, description: str = ""):
         self._step = step
         self._description = description
 

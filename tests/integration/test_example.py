@@ -10,7 +10,13 @@ def is_responsive(docker_ip, port):
     :return: if the connection can be established
     """
     try:
-        cnx = mysql.connector.connect(user='pipeline', password='pipeline', host=docker_ip, port=port, database='hdb')
+        cnx = mysql.connector.connect(
+            user="pipeline",
+            password="pipeline",
+            host=docker_ip,
+            port=port,
+            database="hdb",
+        )
         if cnx and cnx.is_connected():
             cnx.close()
             return True
