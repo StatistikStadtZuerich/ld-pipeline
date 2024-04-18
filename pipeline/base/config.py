@@ -6,6 +6,7 @@ from .base import Base
 
 class Env(str, Enum):
     test = 'test'
+    local = 'local'
     int = 'int'
     prod = 'prod'
 

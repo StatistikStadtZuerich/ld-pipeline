@@ -45,7 +45,15 @@ Follow these steps to set up your development environment:
 ## Pipeline Steps
 * "copyStatic": Copies static.n3 files from /static to defined output folder
 
-### Development
+## Run with docker
+
+1) Build docker image: `docker build -t ssz/ld-pipeline .`
+2) Run dockerized application (e.g. help command): `docker run ssz/ld-pipeline --help`
+3) Mount an output directory, e.g.: `docker run --mount type=bind,source="$(pwd)"/tmp,target=/out ssz/ld-pipeline step --env local --name copyStatic`.
+
+*HINT*: be sure to use only _local_, _int_ or _prod_ as environment within docker.
+
+## Development
 
 1) Unit Tests
    * Unit tests can be found under tests/unit
