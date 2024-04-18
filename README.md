@@ -66,3 +66,6 @@ Follow these steps to set up your development environment:
 3) Local Pipeline execution
    * Install act from https://nektosact.com/
    * Execute pipeline: `act --container-architecture linux/amd64`
+4) Linter
+   * Run `ruff check` to lint all files in the current directory
+   * Run `ruff format` to format all files in the current directory
