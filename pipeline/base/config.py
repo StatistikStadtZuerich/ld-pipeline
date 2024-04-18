@@ -5,19 +5,18 @@ from .base import Base
 
 
 class Env(str, Enum):
-    test = 'test'
-    local = 'local'
-    int = 'int'
-    prod = 'prod'
+    test = "test"
+    local = "local"
+    int = "int"
+    prod = "prod"
 
 
 class Config(Base):
-
     def __init__(self, env: Env):
         super().__init__()
         self._env = env.value
         self._config = configparser.ConfigParser()
-        path = os.path.join(os.path.dirname(__file__), '../../', 'config.ini')
+        path = os.path.join(os.path.dirname(__file__), "../../", "config.ini")
         self._config.read(path)
 
     def get(self, name, return_type=str, fallback=None):
