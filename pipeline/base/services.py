@@ -21,16 +21,19 @@ class MSSQLDbConnection(DbConnection):
             cursor.execute(query)
             return cursor
 
-    def open(self):
+    def __enter__(self):
         self._connection = pymssql.connect(
-            server=self._config.get("database", "host"),
-            user=self._config.get("database", "user"),
-            password=self._config.get("database", "password"),
-            database=self._config.get("database", "database"),
+            server=self._config.get("mssql_server"),
+            user=self._config.get("mssql_user"),
+            password=self._config.get("mssql_password"),
+            database=self._config.get("mssql_database"),
         )
+        self.logger.info("Database connection established...")
+        return self
 
-    def close(self):
+    def __exit__(self, *exc_details):
         self._connection.close()
+        self.logger.info("Database connection closed...")
 
 
 class JinjaTemplateEngine(TemplateEngine):
@@ -61,10 +64,11 @@ class JinjaTemplateEngine(TemplateEngine):
                 "File is closed! Please open the file first and call the template function again."
             )
 
-    def open(self):
+    def __enter__(self):
         self._output_file = open(file=self._output_filepath, mode="a", encoding="utf-8")
+        return self
 
-    def close(self):
+    def __exit__(self, *exc_details):
         if not self._output_file:
             self.logger.debug(
                 "File is not yet opened. Please open the output file first."

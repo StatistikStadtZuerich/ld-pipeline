@@ -5,11 +5,9 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: hdb
-      MYSQL_USER: pipeline
-      MYSQL_PASSWORD: pipeline
-      MYSQL_TCP_PORT: 3306
+      ACCEPT_EULA: 'Y'
+      MSSQL_SA_PASSWORD: 'password'
+      MSSQL_TCP_PORT: '3306'
     ports:
       - '3306:3306'
     volumes:

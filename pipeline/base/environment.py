@@ -1,5 +1,4 @@
 from typing import Iterator
-from contextlib import contextmanager
 from .config import Config, Env
 from .services import MSSQLDbConnection, JinjaTemplateEngine
 from .base import Base
@@ -14,27 +13,13 @@ class Environment(Base):
     def config(self):
         return self._config
 
-    @contextmanager
     def get_db_connection(self) -> Iterator[MSSQLDbConnection]:
         """
         Returns the db connection for the environment
         :return: a database connection
         """
-        connection = MSSQLDbConnection(self)
-        try:
-            connection.open()
-            self.logger.info("establish connection")
-            yield connection
-        except Exception as e:
-            self.logger.error("caught:", e)
-            raise
-        else:
-            self.logger.info("end connection")
-        finally:
-            connection.close()
-            self.logger.info("final cleanup connection")
+        return MSSQLDbConnection(self)
 
-    @contextmanager
     def get_template_engine(
         self, template_filename: str, output_filepath: str
     ) -> Iterator[JinjaTemplateEngine]:
@@ -44,11 +29,4 @@ class Environment(Base):
         :param output_filepath: the output file where the templated data will be written in
         :return:
         """
-        engine = JinjaTemplateEngine(self, template_filename, output_filepath)
-        try:
-            engine.open()
-            yield engine
-        except Exception:
-            raise
-        finally:
-            engine.close()
+        return JinjaTemplateEngine(self, template_filename, output_filepath)

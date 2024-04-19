@@ -1,37 +1,34 @@
-from ..base.base import Base
-from ..base.environment import Config
-from typing import Dict
+from ..base import Base
+from typing import Dict, TYPE_CHECKING
 from abc import abstractmethod
 
+if TYPE_CHECKING:
+    from ..base import Environment
 
-class Closeable(Base):
+
+class ContextManager(Base):
     @abstractmethod
-    def open(self):
+    def __enter__(self):
         pass
 
     @abstractmethod
-    def close(self):
+    def __exit__(self, *exc_details):
         pass
 
 
-class DbConnection(Closeable):
-    """TODO defined the interface methods for DB connections"""
-
-    def __init__(self, config: Config):
+class DbConnection(ContextManager):
+    def __init__(self, environment: "Environment"):
         pass
 
     @abstractmethod
     def query(self, data):
-        """
-        TODO just a simple stub
-        """
         pass
 
 
-class TemplateEngine(Closeable):
-    """TODO defined the interface methods for TemplateEngine"""
-
-    def __init__(self, config: Config, template_filename: str, output_filename: str):
+class TemplateEngine(ContextManager):
+    def __init__(
+        self, environment: "Environment", template_filename: str, output_filepath: str
+    ):
         pass
 
     @abstractmethod
