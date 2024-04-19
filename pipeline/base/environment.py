@@ -10,13 +10,17 @@ class Environment(Base):
         super().__init__()
         self._config = Config(env)
 
+    @property
+    def config(self):
+        return self._config
+
     @contextmanager
     def get_db_connection(self) -> Iterator[MSSQLDbConnection]:
         """
         Returns the db connection for the environment
         :return: a database connection
         """
-        connection = MSSQLDbConnection(self._config)
+        connection = MSSQLDbConnection(self)
         try:
             connection.open()
             self.logger.info("establish connection")
@@ -40,7 +44,7 @@ class Environment(Base):
         :param output_filepath: the output file where the templated data will be written in
         :return:
         """
-        engine = JinjaTemplateEngine(self._config, template_filename, output_filepath)
+        engine = JinjaTemplateEngine(self, template_filename, output_filepath)
         try:
             engine.open()
             yield engine
@@ -48,6 +52,3 @@ class Environment(Base):
             raise
         finally:
             engine.close()
-
-    def get_config_value(self, name: str, return_type=str, fallback=None):
-        return self._config.get(name, return_type, fallback)

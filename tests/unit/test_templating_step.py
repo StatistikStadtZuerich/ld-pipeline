@@ -1,7 +1,7 @@
 import os
 import shutil
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 from pipeline.steps import Templating
 from pipeline.base import Environment, Env
 from tests.unit.test import UnitTest
@@ -13,11 +13,19 @@ class TestTemplating(unittest.TestCase):
         os.mkdir(tmp_dir)
 
         env = Environment(Env.test)
-        env.get_config_value = MagicMock(return_value=UnitTest.abs_path("tmp/"))
+        mocked_config = {
+            "output_path": UnitTest.abs_path("tmp/"),
+            "template_path": UnitTest.abs_path("data/"),
+        }
+
+        def side_effect(arg):
+            return mocked_config[arg]
+
+        env.config.get = Mock(side_effect=side_effect)
 
         try:
             csv_filepath = UnitTest.abs_path("data/sample.csv")
-            template_filename = "ttl_template.jinja"
+            template_filename = "template.ttl.jinja"
             output_filename = "test_output.ttl"
 
             template = Templating(template_filename, output_filename, csv_filepath)
