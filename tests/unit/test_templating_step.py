@@ -17,7 +17,7 @@ class TestTemplating(unittest.TestCase):
 
         try:
             csv_filepath = UnitTest.abs_path("data/sample.csv")
-            template_filename = "ttl_template.jinja"
+            template_filename = "template.ttl.jinja"
             output_filename = "test_output.ttl"
 
             template = Templating(template_filename, output_filename, csv_filepath)
