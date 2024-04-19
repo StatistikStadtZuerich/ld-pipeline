@@ -17,14 +17,12 @@ class Pipeline:
         logger_config = {
             "encoding": "utf-8",
             "level": logging.getLevelName(
-                self._environment.get_config_value("logger.log_level")
+                self._environment.config.get("logger.log_level")
             ),
             "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         }
-        if self._environment.get_config_value("logger.log_to_file", bool, True):
-            logger_config["filename"] = self._environment.get_config_value(
-                "logger.filename"
-            )
+        if self._environment.config.get("logger.log_to_file", bool, True):
+            logger_config["filename"] = self._environment.config.get("logger.filename")
         else:
             logger_config["stream"] = sys.stdout
 

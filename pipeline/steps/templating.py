@@ -10,9 +10,7 @@ class Templating(Step):
         self._csv_filepath = csv_filepath
 
     def run(self, environment: Environment):
-        output_filepath = (
-            environment.get_config_value("output_path") + self._output_filename
-        )
+        output_filepath = environment.config.get("output_path") + self._output_filename
 
         with environment.get_template_engine(
             self._template_filename, output_filepath
