@@ -6,9 +6,9 @@ services:
     restart: always
     environment:
       ACCEPT_EULA: 'Y'
-      MSSQL_SA_PASSWORD: 'password'
-      MSSQL_TCP_PORT: '3306'
+      MSSQL_SA_PASSWORD: 'password!Strong'
+      MSSQL_TCP_PORT: '1433'
     ports:
-      - '3306:3306'
+      - '1433:1433'
     volumes:
       - ./data:/docker-entrypoint-initdb.d
