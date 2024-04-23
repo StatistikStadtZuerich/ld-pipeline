@@ -13,7 +13,7 @@ class Environment(Base):
     def config(self):
         return self._config
 
-    def get_db_connection(self) -> Iterator[MSSQLDbConnection]:
+    def get_db_connection(self) -> MSSQLDbConnection:
         """
         Returns the db connection for the environment
         :return: a database connection
@@ -22,7 +22,7 @@ class Environment(Base):
 
     def get_template_engine(
         self, template_filename: str, output_filepath: str
-    ) -> Iterator[JinjaTemplateEngine]:
+    ) -> JinjaTemplateEngine:
         """
         Returns the template engine for the environment, the template file and the defined output
         :param template_filename: the template file that is used by the engine

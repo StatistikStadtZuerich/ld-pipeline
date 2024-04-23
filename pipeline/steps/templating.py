@@ -14,7 +14,7 @@ class Templating(Step):
         # with environment.get_template_engine(
         #     self._template_filename, output_filepath
         # ) as templating_engine:
-        with environment.get_db_connection as connection:
+        with environment.get_db_connection() as connection:
             print(connection)
             # with open(self._sql_filepath) as sql:
             #     cursor = connection.query(sql)
