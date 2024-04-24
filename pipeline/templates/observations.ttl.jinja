@@ -11,7 +11,7 @@
     <https://ld.stadt-zuerich.ch/statistics/measure/{{ KENNZAHL }}> {% if IS_WERT_NAN %}"{{ WERT }}"^^<https://cube.link/Undefined>{% else %}"{{ WERT|int }}"^^<http://www.w3.org/2001/XMLSchema#decimal>{% endif %} ;
     <https://cube.link/observedBy> <https://ld.stadt-zuerich.ch/org/SSZ> ;
     <https://ld.stadt-zuerich.ch/statistics/property/STATUS> <https://ld.stadt-zuerich.ch/statistics/code/{% if DATENSTATUS == "veröffentlicht" %}STATUS_VEROEFFENTLICHT{% elif DATENSTATUS == "definitiv" %}STATUS_DEFINITIV{% else %}STATUS_PROVISORISCH{% endif %}> .
-{% for cube_id in CUBE_IDS if cube_id -%}
-<https://ld.integ.stadt-zuerich.ch/statistics/{{ cube_id }}/observation> <https://cube.link/observation> <https://ld.integ.stadt-zuerich.ch/statistics/observation/{{ DIMENSIONCODE1 }}-{{ DIMENSIONCODE2 }}-{{ DIMENSIONCODE3 }}-{{ DIMENSIONCODE4 }}-{{ DIMENSIONCODE5 }}-{{ RAUM }}-{{ ZEIT }}> .{% if not loop.last %}
+{% for CID in CUBE_IDS if CID -%}
+<https://ld.integ.stadt-zuerich.ch/statistics/{{ CID }}/observation> <https://cube.link/observation> <https://ld.integ.stadt-zuerich.ch/statistics/observation/{{ DIMENSIONCODE1 }}-{{ DIMENSIONCODE2 }}-{{ DIMENSIONCODE3 }}-{{ DIMENSIONCODE4 }}-{{ DIMENSIONCODE5 }}-{{ RAUM }}-{{ ZEIT }}> .{% if not loop.last %}
 {% endif %}
 {%- endfor %}
