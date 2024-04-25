@@ -1,8 +1,8 @@
 .venv
 .idea
+tmp
 pipeline.log
 reports
 Pipfile
 Pipfile.lock
-tmp
 **/__pycache__

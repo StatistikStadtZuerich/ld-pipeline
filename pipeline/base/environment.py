@@ -1,7 +1,7 @@
 from typing import Iterator
 from contextlib import contextmanager
 from .config import Config, Env
-from .services import DbConnection, TemplateEngine
+from .services import MSSQLDbConnection, JinjaTemplateEngine
 from .base import Base
 
 
@@ -11,12 +11,12 @@ class Environment(Base):
         self._config = Config(env)
 
     @contextmanager
-    def get_db_connection(self) -> Iterator[DbConnection]:
+    def get_db_connection(self) -> Iterator[MSSQLDbConnection]:
         """
         Returns the db connection for the environment
         :return: a database connection
         """
-        connection = DbConnection(self._config)
+        connection = MSSQLDbConnection(self._config)
         try:
             self.logger.info("establish connection")
             yield connection
@@ -30,19 +30,22 @@ class Environment(Base):
 
     @contextmanager
     def get_template_engine(
-        self, template_filepath: str, output_filepath: str
-    ) -> Iterator[TemplateEngine]:
+        self, template_filename: str, output_filepath: str
+    ) -> Iterator[JinjaTemplateEngine]:
         """
         Returns the template engine for the environment, the template file and the defined output
-        :param template_filepath: the template file that is used by the engine
-        :param output_filepath: the output file where the
+        :param template_filename: the template file that is used by the engine
+        :param output_filepath: the output file where the templated data will be written in
         :return:
         """
-        engine = TemplateEngine(self._config, template_filepath, output_filepath)
+        engine = JinjaTemplateEngine(self._config, template_filename, output_filepath)
         try:
+            engine.open()
             yield engine
         except Exception:
             raise
+        finally:
+            engine.close()
 
     def get_config_value(self, name: str, return_type=str, fallback=None):
         return self._config.get(name, return_type, fallback)

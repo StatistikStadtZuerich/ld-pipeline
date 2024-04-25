@@ -11,6 +11,6 @@ services:
       MYSQL_PASSWORD: pipeline
       MYSQL_TCP_PORT: 3306
     ports:
-      - "3306:3306"
+      - '3306:3306'
     volumes:
       - ./data:/docker-entrypoint-initdb.d

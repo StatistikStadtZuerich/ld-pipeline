@@ -2,7 +2,7 @@ import typer
 from typing import Dict
 from pipeline import Pipeline
 from pipeline.base import Env, StepDefinition
-from pipeline.steps import Copy
+from pipeline.steps import Copy, Templating
 
 app = typer.Typer()
 
@@ -10,13 +10,17 @@ steps: Dict[str, StepDefinition] = {
     "copyStatic": StepDefinition(
         Copy("static/static.n3", "static.n3"),
         "Copies static.n3 files from /static to defined output folder",
-    )
+    ),
+    "dimensionTemplating": StepDefinition(
+        Templating("ttl_template.jinja", "dimensionen.ttl", "./HDB_DIMENSIONEN.csv"),
+        "Creates a .ttl file out of the given csv data.",
+    ),
 }
 
 
 @app.command(short_help="Run pipeline on given environment")
 def run(env: Env = Env.test):
-    Pipeline(env).run(steps["copyStatic"].step)
+    Pipeline(env).run(steps["copyStatic"].step, steps["dimensionTemplating"].step)
 
 
 @app.command(short_help="Run single step on given environment")
