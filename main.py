@@ -12,7 +12,11 @@ steps: Dict[str, StepDefinition] = {
         "Copies static.n3 files from /static to defined output folder",
     ),
     "dimensionsTemplating": StepDefinition(
-        Templating("dimensionen.ttl.jinja", "dimensionen.ttl", "./HDB_DIMENSIONEN.csv"),
+        Templating(
+            "dimensionen.ttl.jinja",
+            "dimensions.ttl",
+            "./tmp/sources/HDB_DIMENSIONEN.csv",
+        ),
         "Creates a .ttl file out of the given csv data.",
     ),
 }
