@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import MagicMock
 from pipeline.steps import Templating
 from pipeline.base import Environment, Env
-from tests.utils import TestUtils
+from tests.unit.utils import TestUtils
 
 
 class TestTemplating(unittest.TestCase):
