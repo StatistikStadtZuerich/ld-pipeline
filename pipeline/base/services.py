@@ -42,7 +42,7 @@ class JinjaTemplateEngine(TemplateEngine):
 
     def template(self, data: Dict):
         content = self._template.render(data)
-        if not self._output_file.closed:
+        try:
             characters_wrote = self._output_file.write(content + "\n")
             self.logger.info(
                 "Successfully wrote "
@@ -50,10 +50,9 @@ class JinjaTemplateEngine(TemplateEngine):
                 + " characters in "
                 + self._output_filepath
             )
-        else:
-            self.logger.debug(
-                "File is closed! Please open the file first and call the template function again."
-            )
+        except Exception as e:
+            self.logger.error("Caught:", e)
+            raise
 
     def open(self):
         self._output_file = open(file=self._output_filepath, mode="a", encoding="utf-8")
