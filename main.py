@@ -11,7 +11,7 @@ steps: Dict[str, StepDefinition] = {
         Copy("static/static.n3", "static.n3"),
         "Copies static.n3 files from /static to defined output folder",
     ),
-    "dimensionsTemplating": StepDefinition(
+    "dimensionTemplating": StepDefinition(
         Templating(
             "dimensionen.ttl.jinja",
             "dimensions.ttl",
@@ -35,7 +35,7 @@ steps: Dict[str, StepDefinition] = {
 def run(env: Env = Env.test):
     Pipeline(env).run(
         steps["copyStatic"].step,
-        steps["dimensionsTemplating"].step,
+        steps["dimensionTemplating"].step,
         steps["observationTemplating"].step,
         steps["cubeTemplating"].step,
     )
