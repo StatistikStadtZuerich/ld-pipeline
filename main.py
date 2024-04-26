@@ -22,7 +22,7 @@ steps: Dict[str, StepDefinition] = {
         ObservationTemplating(
             "observations.ttl.jinja",
             "observations.ttl",
-            "./HDB_small.csv",
+            "./tmp/sources/HDB_small.csv",
         )
     ),
     "cubeTemplating": StepDefinition(
