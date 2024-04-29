@@ -1,0 +1,10 @@
+<https://ld.stadt-zuerich.ch/statistics/code/{{ Dimensioncode }}> a <https://schema.org/DefinedTerm> ;
+    <https://schema.org/name> "{{ Dimensioncodename }}" ;
+    <https://schema.org/description> "{{ BESCHREIBUNG }}" ;
+    <https://schema.org/termCode> "{{ Dimensioncode }}" ;
+    <https://schema.org/position> "{{ Dimensioncodesort }}" ;
+    <https://schema.org/isPartOf> <https://ld.stadt-zuerich.ch/statistics/code/{{ PARENTCODE }}> ;
+    <https://example.org/dimensionsfilter> <transform://{{ Dimension }}/{{ Dimensionfilter }}> ;
+    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/{{ Dimension }}> ;
+    <https://example.org/GLOSSARID> "{{ GLOSSARID }}" ;
+    <https://schema.org/url> "{{ LINK }}" .

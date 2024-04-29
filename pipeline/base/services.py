@@ -1,16 +1,17 @@
 from logging import getLogger
 from ..interfaces.services import TemplateEngine, DbConnection
-from .environment import Config
-from typing import Dict
-from jinja2 import Environment, FileSystemLoader
+from typing import Dict, TYPE_CHECKING
+from jinja2 import Environment as JinjaEnv, FileSystemLoader
+
+if TYPE_CHECKING:
+    from .environment import Environment
 
 
 class MSSQLDbConnection(DbConnection):
     """TODO defined the interface methods for DB connections"""
 
-    def __init__(self, config: Config):
+    def __init__(self, environment: "Environment"):
         super().__init__()
-        self._config = config
 
     def query(self, data):
         """
@@ -28,9 +29,12 @@ class MSSQLDbConnection(DbConnection):
 class JinjaTemplateEngine(TemplateEngine):
     """TODO defined the interface methods for TemplateEngine"""
 
-    def __init__(self, config: Config, template_filename: str, output_filepath: str):
-        self._config = config
-        self._env = Environment(loader=FileSystemLoader(config.get("template_path")))
+    def __init__(
+        self, environment: "Environment", template_filename: str, output_filepath: str
+    ):
+        self._env = JinjaEnv(
+            loader=FileSystemLoader(environment.config.get("template_path"))
+        )
         self._template = self._env.get_template(template_filename)
         self._output_filepath = output_filepath
         self._output_file = None
