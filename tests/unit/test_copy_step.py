@@ -1,7 +1,7 @@
 import os
 import shutil
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 from pipeline.steps import Copy
 from pipeline.base import Environment, Env
 from tests.unit.utils import TestUtils
@@ -13,7 +13,12 @@ class TestCopy(unittest.TestCase):
         os.mkdir(tmp_dir)
 
         env = Environment(Env.test)
-        env.get_config_value = MagicMock(return_value=TestUtils.abs_path("tmp") + "/")
+        mocked_config = {"output_path": TestUtils.abs_path("tmp/")}
+
+        def side_effect(arg):
+            return mocked_config[arg]
+
+        env.config.get = Mock(side_effect=side_effect)
 
         try:
             input_file = TestUtils.abs_path("data/copy-text.txt")

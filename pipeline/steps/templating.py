@@ -1,3 +1,4 @@
+from typing import Dict
 from ..base import Step, Environment
 import csv
 
@@ -10,9 +11,7 @@ class Templating(Step):
         self._csv_filepath = csv_filepath
 
     def run(self, environment: Environment):
-        output_filepath = (
-            environment.get_config_value("output_path") + self._output_filename
-        )
+        output_filepath = environment.config.get("output_path") + self._output_filename
 
         with environment.get_template_engine(
             self._template_filename, output_filepath
@@ -20,4 +19,7 @@ class Templating(Step):
             with open(self._csv_filepath, newline="") as csv_file:
                 csv_reader = csv.DictReader(csv_file)
                 for row in csv_reader:
-                    templating_engine.template(row)
+                    templating_engine.template(self._preprocess(row))
+
+    def _preprocess(self, row: Dict) -> Dict:
+        return row
