@@ -1,3 +1,4 @@
+from typing import Dict
 from ..base import Step, Environment
 
 
@@ -20,3 +21,6 @@ class Templating(Step):
             #     cursor = connection.query(sql)
             #     for row in cursor:
             #         templating_engine.template(row)
+
+    def _preprocess(self, row: Dict) -> Dict:
+        return row
