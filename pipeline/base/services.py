@@ -1,5 +1,5 @@
 from ..interfaces.services import TemplateEngine, DbConnection
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from jinja2 import Environment as JinjaEnv, FileSystemLoader
 import pymssql
 
@@ -37,20 +37,18 @@ class MSSQLDbConnection(DbConnection):
 
 
 class JinjaTemplateEngine(TemplateEngine):
-    """TODO defined the interface methods for TemplateEngine"""
-
     def __init__(
         self, environment: "Environment", template_filename: str, output_filepath: str
     ):
+        super().__init__()
         self._env = JinjaEnv(
             loader=FileSystemLoader(environment.config.get("template_path"))
         )
         self._template = self._env.get_template(template_filename)
         self._output_filepath = output_filepath
         self._output_file = None
-        super().__init__()
 
-    def template(self, data: Dict):
+    def template(self, data):
         content = self._template.render(data)
         try:
             characters_wrote = self._output_file.write(content + "\n")
