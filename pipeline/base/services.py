@@ -48,6 +48,7 @@ class JinjaTemplateEngine(TemplateEngine):
         self._template = self._env.get_template(template_filename)
         self._output_filepath = output_filepath
         self._output_file = None
+        super().__init__()
 
     def template(self, data: Dict):
         content = self._template.render(data)

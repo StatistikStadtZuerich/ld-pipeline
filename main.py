@@ -11,22 +11,44 @@ steps: Dict[str, StepDefinition] = {
         Copy("static/static.n3", "static.n3"),
         "Copies static.n3 files from /static to defined output folder",
     ),
-    "dimensionTemplating": StepDefinition(
+    "codeTemplating": StepDefinition(
+        Templating("code.ttl.jinja", "code.ttl", "./tmp/sources/view_code.csv")
+    ),
+    "cubeTemplating": StepDefinition(
+        Templating("cube.ttl.jinja", "cube.ttl", "./tmp/sources/view_cube.csv")
+    ),
+    "hierarchyTemplating": StepDefinition(
         Templating(
-            "dimensionen.ttl.jinja",
-            "dimensions.ttl",
-            "./tmp/sources/HDB_DIMENSIONEN.csv",
+            "hierarchy.ttl.jinja", "hierarchy.ttl", "./tmp/sources/view_hierarchy.csv"
         )
+    ),
+    "measureTemplating": StepDefinition(
+        Templating("measure.ttl.jinja", "measure.ttl", "./tmp/sources/view_measure.csv")
     ),
     "observationTemplating": StepDefinition(
         ObservationTemplating(
-            "observations.ttl.jinja",
-            "observations.ttl",
-            "./tmp/sources/HDB_small.csv",
+            "observation.ttl.jinja",
+            "observation.ttl",
+            "./tmp/sources/view_observation.csv",
         )
     ),
-    "cubeTemplating": StepDefinition(
-        Templating("cubes.ttl.jinja", "cubes.ttl", "./tmp/sources/HDB_CUBES.csv")
+    "propertyTemplating": StepDefinition(
+        Templating(
+            "property.ttl.jinja", "property.ttl", "./tmp/sources/view_property.csv"
+        )
+    ),
+    "room_hierarchyTemplating": StepDefinition(
+        Templating(
+            "room_hierarchy.ttl.jinja",
+            "room_hierarchy.ttl",
+            "./tmp/sources/view_room_hierarchy.csv",
+        )
+    ),
+    "roomTemplating": StepDefinition(
+        Templating("room.ttl.jinja", "room.ttl", "./tmp/sources/view_room.csv")
+    ),
+    "timeTemplating": StepDefinition(
+        Templating("time.ttl.jinja", "time.ttl", "./tmp/sources/view_time.csv")
     ),
 }
 
@@ -35,9 +57,15 @@ steps: Dict[str, StepDefinition] = {
 def run(env: Env = Env.test):
     Pipeline(env).run(
         steps["copyStatic"].step,
-        steps["dimensionTemplating"].step,
-        steps["observationTemplating"].step,
+        steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
+        steps["hierarchyTemplating"].step,
+        steps["measureTemplating"].step,
+        steps["observationTemplating"].step,
+        steps["propertyTemplating"].step,
+        steps["room_hierarchyTemplating"].step,
+        steps["roomTemplating"].step,
+        steps["timeTemplating"].step,
     )
 
 

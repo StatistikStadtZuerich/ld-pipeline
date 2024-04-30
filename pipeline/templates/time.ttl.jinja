@@ -1,0 +1,14 @@
+<https://ld.stadt-zuerich.ch/statistics/code/{{ term_code }}> a <http://www.w3.org/2006/time#TemporalEntity> , <https://schema.org/DefinedTerm> ;
+    <https://schema.org/name> "{{ zeit_wert }}" ;
+    {# <https://schema.org/name> "{{ PERIODEENDE }}" ; #}
+    <https://schema.org/termCode> "{{ term_code }}" ;
+    <https://ld.stadt-zuerich.ch/schema/hasEnd> "{{ zeit_wert }}"^^<http://www.w3.org/2001/XMLSchema#date> ;
+    {# <https://ld.stadt-zuerich.ch/schema/hasEnd> "{{ PERIODEENDE }}"^^<http://www.w3.org/2001/XMLSchema#date> ;
+    <https://ld.stadt-zuerich.ch/schema/hasBeginning> "{{ PERIODESTART }}"^^<http://www.w3.org/2001/XMLSchema#date> ;
+    <https://ld.stadt-zuerich.ch/schema/referenceTime> "{{ BEZUGSZEIT }}" . #}
+    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Tag> ,
+        <https://ld.stadt-zuerich.ch/statistics/termset/Monat> ,
+        <https://ld.stadt-zuerich.ch/statistics/termset/Trimester> ,
+        <https://ld.stadt-zuerich.ch/statistics/termset/Quartal> ,
+        <https://ld.stadt-zuerich.ch/statistics/termset/Semester> ,
+        <https://ld.stadt-zuerich.ch/statistics/termset/Jahr> .

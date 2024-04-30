@@ -1,9 +1,6 @@
 from ..base import Base
-from typing import Dict, TYPE_CHECKING
+from typing import Dict
 from abc import abstractmethod
-
-if TYPE_CHECKING:
-    from ..base import Environment
 
 
 class ContextManager(Base):
@@ -17,20 +14,12 @@ class ContextManager(Base):
 
 
 class DbConnection(ContextManager):
-    def __init__(self, environment: "Environment"):
-        pass
-
     @abstractmethod
     def query(self, data):
         pass
 
 
 class TemplateEngine(ContextManager):
-    def __init__(
-        self, environment: "Environment", template_filename: str, output_filepath: str
-    ):
-        pass
-
     @abstractmethod
     def template(self, data: Dict):
         pass
