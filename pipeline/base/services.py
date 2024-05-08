@@ -1,39 +1,38 @@
 from ..interfaces.services import TemplateEngine, DbConnection
 from typing import TYPE_CHECKING
 from jinja2 import Environment as JinjaEnv, FileSystemLoader
-import pymssql
+import mysql.connector
 
 if TYPE_CHECKING:
     from .environment import Environment
 
 
 class MSSQLDbConnection(DbConnection):
-    """TODO defined the interface methods for DB connections"""
-
     def __init__(self, environment: "Environment"):
+        super().__init__()
         self._config = environment.config
 
     def query(self, query: str):
         """
-        executes query and return cursor.
+        Executes query and returns cursor.
         """
-        with self._connection.cursor(as_dict=True) as cursor:
-            cursor.execute(query)
-            return cursor
+        self._cursor.execute(query)
+        return self._cursor
 
     def __enter__(self):
-        self._connection = pymssql.connect(
-            server=self._config.get("mssql_server"),
-            user=self._config.get("mssql_user"),
-            password=self._config.get("mssql_password"),
-            database=self._config.get("mssql_database"),
+        self._connection = mysql.connector.connect(
+            host=self._config.get("mysql_host"),
+            database=self._config.get("mysql_database"),
+            user=self._config.get("mysql_user"),
+            password=self._config.get("mysql_password"),
         )
+        self._cursor = self._connection.cursor(dictionary=True)
         self.logger.info("Database connection established...")
         return self
 
     def __exit__(self, *exc_details):
         self._connection.close()
-        self.logger.info("Database connection closed...")
+        self.logger.info("Database connection closed.")
 
 
 class JinjaTemplateEngine(TemplateEngine):
@@ -68,7 +67,7 @@ class JinjaTemplateEngine(TemplateEngine):
 
     def __exit__(self, *exc_details):
         if not self._output_file:
-            self.logger.debug(
+            self.logger.warning(
                 "File is not yet opened. Please open the output file first."
             )
         elif self._output_file.closed:

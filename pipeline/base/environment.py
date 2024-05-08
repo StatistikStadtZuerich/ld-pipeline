@@ -1,4 +1,3 @@
-from typing import Iterator
 from .config import Config, Env
 from .services import MSSQLDbConnection, JinjaTemplateEngine
 from .base import Base
@@ -27,6 +26,6 @@ class Environment(Base):
         Returns the template engine for the environment, the template file and the defined output
         :param template_filename: the template file that is used by the engine
         :param output_filepath: the output file where the templated data will be written in
-        :return:
+        :return: a jinja template engine
         """
         return JinjaTemplateEngine(self, template_filename, output_filepath)

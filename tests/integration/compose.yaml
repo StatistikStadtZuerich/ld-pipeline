@@ -1,0 +1,14 @@
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hdb
+      MYSQL_USER: pipeline
+      MYSQL_PASSWORD: pipeline
+      MYSQL_TCP_PORT: 3306
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data:/docker-entrypoint-initdb.d

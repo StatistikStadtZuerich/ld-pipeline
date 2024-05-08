@@ -10,17 +10,17 @@ class Templating(Step):
         self._sql_filepath = sql_filepath
 
     def run(self, environment: Environment):
-        # output_filepath = environment.config.get("output_path") + self._output_filename
+        output_filepath = environment.config.get("output_path") + self._output_filename
 
-        # with environment.get_template_engine(
-        #     self._template_filename, output_filepath
-        # ) as templating_engine:
-        with environment.get_db_connection() as connection:
-            print(connection)
-            # with open(self._sql_filepath) as sql:
-            #     cursor = connection.query(sql)
-            #     for row in cursor:
-            #         templating_engine.template(row)
+        with environment.get_template_engine(
+            self._template_filename, output_filepath
+        ) as template_engine:
+            with environment.get_db_connection() as connection:
+                with open(self._sql_filepath) as sql_file:
+                    sql = sql_file.read()
+                    with connection.query(sql) as cursor:
+                        for row in cursor:
+                            template_engine.template(row)
 
     def _preprocess(self, row: Dict) -> Dict:
         return row
