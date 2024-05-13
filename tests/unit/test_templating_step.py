@@ -14,7 +14,7 @@ class TestTemplating(unittest.TestCase):
 
         env = Environment(Env.test)
         mocked_config = {
-            "output_path": TestUtils.abs_path("tmp/"),
+            "test_output_path": TestUtils.abs_path("tmp/"),
             "template_path": TestUtils.abs_path("data/"),
         }
 

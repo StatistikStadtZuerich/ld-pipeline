@@ -2,7 +2,7 @@ import typer
 from typing import Dict
 from pipeline import Pipeline
 from pipeline.base import Env, StepDefinition
-from pipeline.steps import Copy, Templating, ObservationTemplating
+from pipeline.steps import Copy, Templating, ObservationTemplating, Zipping
 
 app = typer.Typer()
 
@@ -12,44 +12,45 @@ steps: Dict[str, StepDefinition] = {
         "Copies static.n3 files from /static to defined output folder",
     ),
     "codeTemplating": StepDefinition(
-        Templating("code.ttl.jinja", "code.ttl", "./tmp/sources/view_code.csv")
+        Templating("code.ttl.jinja", "code.ttl", "./tmp/sources/view_code.sql")
     ),
     "cubeTemplating": StepDefinition(
-        Templating("cube.ttl.jinja", "cube.ttl", "./tmp/sources/view_cube.csv")
+        Templating("cube.ttl.jinja", "cube.ttl", "./tmp/sources/view_cube.sql")
     ),
     "hierarchyTemplating": StepDefinition(
         Templating(
-            "hierarchy.ttl.jinja", "hierarchy.ttl", "./tmp/sources/view_hierarchy.csv"
+            "hierarchy.ttl.jinja", "hierarchy.ttl", "./tmp/sources/view_hierarchy.sql"
         )
     ),
     "measureTemplating": StepDefinition(
-        Templating("measure.ttl.jinja", "measure.ttl", "./tmp/sources/view_measure.csv")
+        Templating("measure.ttl.jinja", "measure.ttl", "./tmp/sources/view_measure.sql")
     ),
     "observationTemplating": StepDefinition(
         ObservationTemplating(
             "observation.ttl.jinja",
             "observation.ttl",
-            "./tmp/sources/view_observation.csv",
+            "./tmp/sources/view_observation.sql",
         )
     ),
     "propertyTemplating": StepDefinition(
         Templating(
-            "property.ttl.jinja", "property.ttl", "./tmp/sources/view_property.csv"
+            "property.ttl.jinja", "property.ttl", "./tmp/sources/view_property.sql"
         )
     ),
     "room_hierarchyTemplating": StepDefinition(
         Templating(
             "room_hierarchy.ttl.jinja",
             "room_hierarchy.ttl",
-            "./tmp/sources/view_room_hierarchy.csv",
+            "./tmp/sources/view_room_hierarchy.sql",
         )
     ),
     "roomTemplating": StepDefinition(
-        Templating("room.ttl.jinja", "room.ttl", "./tmp/sources/view_room.csv")
+        Templating("room.ttl.jinja", "room.ttl", "./tmp/sources/view_room.sql")
     ),
     "timeTemplating": StepDefinition(
-        Templating("time.ttl.jinja", "time.ttl", "./tmp/sources/view_time.csv")
+        Templating("time.ttl.jinja", "time.ttl", "./tmp/sources/view_time.sql")
     ),
+    "rdfZipping": StepDefinition(Zipping("rdf.zip")),
 }
 
 
@@ -59,13 +60,14 @@ def run(env: Env = Env.test):
         steps["copyStatic"].step,
         steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
-        steps["hierarchyTemplating"].step,
-        steps["measureTemplating"].step,
-        steps["observationTemplating"].step,
-        steps["propertyTemplating"].step,
-        steps["room_hierarchyTemplating"].step,
-        steps["roomTemplating"].step,
-        steps["timeTemplating"].step,
+        steps["rdfZipping"].step,
+        # steps["hierarchyTemplating"].step,
+        # steps["measureTemplating"].step,
+        # steps["observationTemplating"].step,
+        # steps["propertyTemplating"].step,
+        # steps["room_hierarchyTemplating"].step,
+        # steps["roomTemplating"].step,
+        # steps["timeTemplating"].step,
     )
 
 

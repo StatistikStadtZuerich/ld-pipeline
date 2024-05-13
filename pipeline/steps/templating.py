@@ -10,7 +10,9 @@ class Templating(Step):
         self._sql_filepath = sql_filepath
 
     def run(self, environment: Environment):
-        output_filepath = environment.config.get("output_path") + self._output_filename
+        output_filepath = (
+            environment.config.get("template_output_path") + self._output_filename
+        )
 
         with environment.get_template_engine(
             self._template_filename, output_filepath

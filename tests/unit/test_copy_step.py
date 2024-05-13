@@ -13,7 +13,7 @@ class TestCopy(unittest.TestCase):
         os.mkdir(tmp_dir)
 
         env = Environment(Env.test)
-        mocked_config = {"output_path": TestUtils.abs_path("tmp/")}
+        mocked_config = {"test_output_path": TestUtils.abs_path("tmp/")}
 
         def side_effect(arg):
             return mocked_config[arg]
