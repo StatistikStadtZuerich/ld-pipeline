@@ -1,3 +1,4 @@
+import os
 from ..interfaces.services import TemplateEngine, DbConnection
 from typing import TYPE_CHECKING
 from jinja2 import Environment as JinjaEnv, FileSystemLoader
@@ -62,6 +63,7 @@ class JinjaTemplateEngine(TemplateEngine):
             raise
 
     def __enter__(self):
+        os.makedirs(os.path.dirname(self._output_filepath), exist_ok=True)
         self._output_file = open(file=self._output_filepath, mode="a", encoding="utf-8")
         return self
 
