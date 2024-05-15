@@ -18,7 +18,7 @@ class Zipping(Step):
             self._input_filenames = next(
                 os.walk(environment.config.get("template_output_path"))
             )[2]
-        os.makedirs(os.path.dirname(self._output_filepath), exist_ok=True)
+        os.makedirs(os.path.dirname(output_filepath), exist_ok=True)
         with zipfile.ZipFile(output_filepath, "w", zipfile.ZIP_DEFLATED) as myzip:
             self.logger.info("Zipping started...")
             for filename in self._input_filenames:

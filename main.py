@@ -2,7 +2,13 @@ import typer
 from typing import Dict
 from pipeline import Pipeline
 from pipeline.base import Env, StepDefinition
-from pipeline.steps import Copy, Templating, ObservationTemplating, Zipping
+from pipeline.steps import (
+    Copy,
+    Templating,
+    ObservationTemplating,
+    Zipping,
+    UploadToStardog,
+)
 
 app = typer.Typer()
 
@@ -51,16 +57,18 @@ steps: Dict[str, StepDefinition] = {
         Templating("time.ttl.jinja", "time.ttl", "./tmp/sources/view_time.sql")
     ),
     "rdfZipping": StepDefinition(Zipping("rdf.zip")),
+    "uploadToStardog": StepDefinition(UploadToStardog("rdf.zip")),
 }
 
 
 @app.command(short_help="Run pipeline on given environment")
 def run(env: Env = Env.test):
     Pipeline(env).run(
-        steps["copyStatic"].step,
-        steps["codeTemplating"].step,
+        # steps["copyStatic"].step,
+        # steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
         steps["rdfZipping"].step,
+        steps["uploadToStardog"].step,
         # steps["hierarchyTemplating"].step,
         # steps["measureTemplating"].step,
         # steps["observationTemplating"].step,

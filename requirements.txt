@@ -3,4 +3,5 @@ mysql-connector-python
 pytest
 pytest-docker
 ruff
-Jinja2
+jinja2
+pystardog
