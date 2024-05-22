@@ -6,7 +6,7 @@ from pipeline.steps import (
     Copy,
     Templating,
     ObservationTemplating,
-    Zipping,
+    Compressing,
     UploadToStardog,
 )
 
@@ -56,8 +56,8 @@ steps: Dict[str, StepDefinition] = {
     "timeTemplating": StepDefinition(
         Templating("time.ttl.jinja", "time.ttl", "./tmp/sources/view_time.sql")
     ),
-    "rdfZipping": StepDefinition(Zipping("rdf.zip")),
-    "uploadToStardog": StepDefinition(UploadToStardog("rdf.zip")),
+    "rdfCompressing": StepDefinition(Compressing()),
+    "uploadToStardog": StepDefinition(UploadToStardog()),
 }
 
 
@@ -67,7 +67,7 @@ def run(env: Env = Env.test):
         # steps["copyStatic"].step,
         # steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
-        steps["rdfZipping"].step,
+        steps["rdfCompressing"].step,
         steps["uploadToStardog"].step,
         # steps["hierarchyTemplating"].step,
         # steps["measureTemplating"].step,

@@ -28,3 +28,14 @@ class TemplateEngine(ContextManager):
             data (Dict): The data argument provides the data to be used in the template in the form of a dictonary.
         """
         pass
+
+
+class CompressionEngine(Base):
+    @abstractmethod
+    def compress(self, filepath: str) -> None:
+        """Compress the given file to the output path.
+
+        Args:
+            filepath (str): The file to be compressed
+        """
+        pass

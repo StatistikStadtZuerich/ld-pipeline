@@ -1,5 +1,5 @@
 from .config import Config, Env
-from .services import MSSQLDbConnection, JinjaTemplateEngine
+from .services import MSSQLDbConnection, JinjaTemplateEngine, GzipEngine
 from .base import Base
 
 
@@ -29,3 +29,6 @@ class Environment(Base):
         :return: a jinja template engine
         """
         return JinjaTemplateEngine(self, template_filename, output_filepath)
+
+    def get_compression_engine(self) -> GzipEngine:
+        return GzipEngine(self)

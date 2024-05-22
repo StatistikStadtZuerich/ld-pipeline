@@ -1,12 +1,11 @@
+import os
 import stardog
-from typing import List
 from ..base import Step, Environment
 
 
 class UploadToStardog(Step):
-    def __init__(self, zip_filename: str, input_filenames: List[str] = None):
+    def __init__(self):
         super().__init__()
-        self._zip_filename = zip_filename
 
     def run(self, environment: Environment):
         connection_details = {
@@ -15,14 +14,19 @@ class UploadToStardog(Step):
             "username": environment.config.get("stardog_username"),
             "password": environment.config.get("stardog_password"),
         }
-
-        filename = environment.config.get("zip_output_path") + self._zip_filename
+        directory = environment.config.get("compression_output_path")
+        filenames = next(os.walk(directory))[2]
 
         with stardog.Connection(**connection_details) as conn:
             conn.begin()
-            conn.add(
-                stardog.content.File(filename),
-                environment.config.get("stardog_graph_uri"),
-            )
+            i = 0
+            for filename in filenames:
+                conn.add(
+                    content=stardog.content.File(directory + filename),
+                    graph_uri=environment.config.get("stardog_graph_uri"),
+                )
+                i += 1
             conn.commit()
-            # print(conn.select("select * { ?a ?p ?o }"))
+            self.logger.info(
+                f"Added {i} file{"s" if i!=1 else ""} to {environment.config.get("stardog_url")}."
+            )

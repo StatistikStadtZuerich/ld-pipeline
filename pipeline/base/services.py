@@ -1,8 +1,9 @@
 import os
-from ..interfaces.services import TemplateEngine, DbConnection
+from ..interfaces.services import TemplateEngine, DbConnection, CompressionEngine
 from typing import TYPE_CHECKING
 from jinja2 import Environment as JinjaEnv, FileSystemLoader
 import mysql.connector
+import gzip
 
 if TYPE_CHECKING:
     from .environment import Environment
@@ -76,3 +77,16 @@ class JinjaTemplateEngine(TemplateEngine):
             self.logger.debug("File already closed.")
         else:
             self._output_file.close()
+
+
+class GzipEngine(CompressionEngine):
+    def __init__(self, environment: "Environment"):
+        super().__init__()
+        self._output_path = environment.config.get("compression_output_path")
+
+    def compress(self, filepath: str, filename: str):
+        with open(filepath, "rb") as f_in, gzip.open(
+            f"{self._output_path}{filename}.gz", "wb"
+        ) as f_out:
+            f_out.writelines(f_in)
+        self.logger.info(f"Successfully compressed {self._output_path}{filename}.gz")
