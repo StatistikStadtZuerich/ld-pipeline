@@ -4,6 +4,9 @@ from typing import TYPE_CHECKING
 from jinja2 import Environment as JinjaEnv, FileSystemLoader
 import mysql.connector
 import gzip
+import re
+from urllib.parse import quote
+from rdflib import Literal
 
 if TYPE_CHECKING:
     from .environment import Environment
@@ -42,12 +45,38 @@ class JinjaTemplateEngine(TemplateEngine):
         self, environment: "Environment", template_filename: str, output_filepath: str
     ):
         super().__init__()
+
+        def remove_umlauts(text: str) -> str:
+            translate_table = str.maketrans(
+                {
+                    "Ä": "A",
+                    "Ö": "O",
+                    "Ü": "U",
+                    "ä": "a",
+                    "ö": "o",
+                    "ü": "u",
+                }
+            )
+            return text.translate(translate_table)
+
+        def uri_encode_filter(value: str) -> str:
+            value = remove_umlauts(value)
+            value = re.sub(r"[^A-Za-z0-9-]", "", value)
+            return quote(value)
+
+        def literal_encode_filter(value: str) -> str:
+            value = value.replace("\r", " ").replace("\n", " ").strip()
+            value = re.sub(r"\s+", " ", value)
+            return Literal(value).n3()
+
+        self._output_filepath = output_filepath
+        self._output_file = None
         self._env = JinjaEnv(
             loader=FileSystemLoader(environment.config.get("template_path"))
         )
+        self._env.filters["uri_encode"] = uri_encode_filter
+        self._env.filters["literal_encode"] = literal_encode_filter
         self._template = self._env.get_template(template_filename)
-        self._output_filepath = output_filepath
-        self._output_file = None
 
     def template(self, data):
         content = self._template.render(data)

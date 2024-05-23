@@ -17,16 +17,16 @@ class UploadToStardog(Step):
         directory = environment.config.get("compression_output_path")
         filenames = next(os.walk(directory))[2]
 
-        with stardog.Connection(**connection_details) as conn:
-            conn.begin()
+        with stardog.Connection(**connection_details) as connection:
+            connection.begin()
             i = 0
             for filename in filenames:
-                conn.add(
-                    content=stardog.content.File(directory + filename),
-                    graph_uri=environment.config.get("stardog_graph_uri"),
+                connection.add(
+                    stardog.content.File(directory + filename),
+                    environment.config.get("stardog_graph_uri"),
                 )
                 i += 1
-            conn.commit()
+            connection.commit()
             self.logger.info(
                 f"Added {i} file{"s" if i!=1 else ""} to {environment.config.get("stardog_url")}."
             )

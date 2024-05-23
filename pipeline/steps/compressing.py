@@ -10,6 +10,7 @@ class Compressing(Step):
         output_path = environment.config.get("compression_output_path")
         input_path = environment.config.get("template_output_path")
         filenames = next(os.walk(input_path))[2]
+        self.logger.info("Started compression...")
         os.makedirs(
             os.path.dirname(output_path),
             exist_ok=True,
@@ -17,3 +18,4 @@ class Compressing(Step):
         for filename in filenames:
             filepath = input_path + filename
             environment.get_compression_engine().compress(filepath, filename)
+        self.logger.info("Compression completed.")

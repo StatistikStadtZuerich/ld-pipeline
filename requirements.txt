@@ -5,3 +5,4 @@ pytest-docker
 ruff
 jinja2
 pystardog
+rdflib

@@ -65,10 +65,8 @@ steps: Dict[str, StepDefinition] = {
 def run(env: Env = Env.test):
     Pipeline(env).run(
         # steps["copyStatic"].step,
-        # steps["codeTemplating"].step,
+        steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
-        steps["rdfCompressing"].step,
-        steps["uploadToStardog"].step,
         # steps["hierarchyTemplating"].step,
         # steps["measureTemplating"].step,
         # steps["observationTemplating"].step,
@@ -76,6 +74,8 @@ def run(env: Env = Env.test):
         # steps["room_hierarchyTemplating"].step,
         # steps["roomTemplating"].step,
         # steps["timeTemplating"].step,
+        steps["rdfCompressing"].step,
+        steps["uploadToStardog"].step,
     )
 
 
