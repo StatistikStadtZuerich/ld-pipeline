@@ -8,7 +8,9 @@ from pipeline.steps import (
     ObservationTemplating,
     Compressing,
     UploadToStardog,
+    UploadToFuseki,
 )
+
 
 app = typer.Typer()
 
@@ -58,6 +60,7 @@ steps: Dict[str, StepDefinition] = {
     ),
     "rdfCompressing": StepDefinition(Compressing()),
     "uploadToStardog": StepDefinition(UploadToStardog()),
+    "uploadToFuseki": StepDefinition(UploadToFuseki()),
 }
 
 
@@ -65,7 +68,7 @@ steps: Dict[str, StepDefinition] = {
 def run(env: Env = Env.test):
     Pipeline(env).run(
         # steps["copyStatic"].step,
-        steps["codeTemplating"].step,
+        # steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
         # steps["hierarchyTemplating"].step,
         # steps["measureTemplating"].step,
@@ -75,7 +78,8 @@ def run(env: Env = Env.test):
         # steps["roomTemplating"].step,
         # steps["timeTemplating"].step,
         steps["rdfCompressing"].step,
-        steps["uploadToStardog"].step,
+        # steps["uploadToStardog"].step,
+        steps["uploadToFuseki"].step,
     )
 
 
