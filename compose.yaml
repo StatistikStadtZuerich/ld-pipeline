@@ -14,10 +14,10 @@ services:
       - ./data:/docker-entrypoint-initdb.d
 
   fuseki:
-    image: stain/jena-fuseki:latest
+    image: secoresearch/fuseki:latest
     restart: always
     environment:
       ADMIN_PASSWORD: pipeline
       FUSEKI_DATASET_1: ssz
     ports:
-      - 8080:3030
+      - 3030:3030

@@ -19,8 +19,7 @@ class Templating(Step):
         ) as template_engine:
             with environment.get_db_connection() as connection:
                 with open(self._sql_filepath) as sql_file:
-                    sql = sql_file.read()
-                    with connection.query(sql) as cursor:
+                    with connection.query(sql_file.read()) as cursor:
                         for row in cursor:
                             template_engine.template(row)
 

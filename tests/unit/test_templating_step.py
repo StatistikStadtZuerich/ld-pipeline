@@ -1,7 +1,7 @@
 import os
 import shutil
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 from pipeline.steps import Templating
 from pipeline.base import Environment, Env
 from tests.unit.utils import TestUtils
@@ -13,22 +13,24 @@ class TestTemplating(unittest.TestCase):
         os.mkdir(tmp_dir)
 
         env = Environment(Env.test)
-        mocked_config = {
-            "test_output_path": TestUtils.abs_path("tmp/"),
-            "template_path": TestUtils.abs_path("data/"),
-        }
-
-        def side_effect(arg):
-            return mocked_config[arg]
-
-        env.config.get = Mock(side_effect=side_effect)
+        env.config.get = Mock(
+            side_effect=lambda arg: {
+                "template_output_path": TestUtils.abs_path("tmp/"),
+                "template_path": TestUtils.abs_path("data/"),
+            }[arg]
+        )
+        env.get_db_connection = MagicMock()
+        env.get_db_connection.return_value.__enter__.return_value.query.return_value.__enter__.return_value = [
+            {"property_code": "ABG", "title": "Arbeitslosengrad"},
+            {"property_code": "ABT", "title": "Abteilung"},
+        ]
 
         try:
-            csv_filepath = TestUtils.abs_path("data/sample.csv")
+            sql_filepath = TestUtils.abs_path("data/sample.sql")
             template_filename = "template.ttl.jinja"
             output_filename = "test_output.ttl"
 
-            template = Templating(template_filename, output_filename, csv_filepath)
+            template = Templating(template_filename, output_filename, sql_filepath)
             template.run(env)
 
             content = open(
