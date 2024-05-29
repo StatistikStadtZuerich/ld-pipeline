@@ -20,25 +20,25 @@ class TestTemplating(unittest.TestCase):
             }[arg]
         )
         env.get_db_connection = MagicMock()
-        env.get_db_connection.return_value.__enter__.return_value.query.return_value.__enter__.return_value = [
+        env.get_db_connection().__enter__().query().__enter__.return_value = [
             {"property_code": "ABG", "title": "Arbeitslosengrad"},
             {"property_code": "ABT", "title": "Abteilung"},
         ]
 
+        sql_filepath = TestUtils.abs_path("data/sample.sql")
+        template_filename = "template.ttl.jinja"
+        output_filename = "test_output.ttl"
+
         try:
-            sql_filepath = TestUtils.abs_path("data/sample.sql")
-            template_filename = "template.ttl.jinja"
-            output_filename = "test_output.ttl"
+            Templating(template_filename, output_filename, sql_filepath).run(env)
 
-            template = Templating(template_filename, output_filename, sql_filepath)
-            template.run(env)
+            env.get_db_connection().__enter__().query.assert_called_with(
+                open(sql_filepath).read()
+            )
 
-            content = open(
-                TestUtils.abs_path("tmp/" + output_filename),
-                "r",
-            ).read()
+            content = open(TestUtils.abs_path("tmp/" + output_filename)).read()
             expected_content = open(
-                TestUtils.abs_path("data/expected_content.ttl"), "r"
+                TestUtils.abs_path("data/expected_content.ttl")
             ).read()
             self.assertEqual(content, expected_content)
 
