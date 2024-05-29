@@ -2,8 +2,9 @@ import os
 import shutil
 import unittest
 from unittest.mock import Mock
+
+from pipeline.base import Env, Environment
 from pipeline.steps import Copy
-from pipeline.base import Environment, Env
 from tests.unit.utils import TestUtils
 
 

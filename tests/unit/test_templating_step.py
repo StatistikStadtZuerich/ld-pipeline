@@ -22,7 +22,7 @@ class TestTemplatingStep(unittest.TestCase):
         )
         env.get_db_connection = MagicMock()
         env.get_db_connection().__enter__().query().__enter__.return_value = [
-            {"property_code": "ABG", "title": "Arbeitslosengrad"},
+            {"property_code": "ÜBG", "title": "Arbeitslosengrad   "},
             {"property_code": "ABT", "title": "Abteilung"},
         ]
 

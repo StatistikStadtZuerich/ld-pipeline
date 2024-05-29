@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+
 from ..base import Step, Environment
 
 
@@ -15,14 +15,11 @@ class Templating(Step):
             environment.config.get("template_output_path"), self._output_filename
         )
 
-        with environment.get_template_engine(
-            self._template_filename, output_filepath
-        ) as template_engine:
-            with environment.get_db_connection() as connection:
-                with open(self._sql_filepath) as sql_file:
-                    with connection.query(sql_file.read()) as cursor:
+        with environment.get_db_connection() as connection:
+            with open(self._sql_filepath) as sql_file:
+                with connection.query(sql_file.read()) as cursor:
+                    with environment.get_template_engine(
+                        self._template_filename, output_filepath
+                    ) as template_engine:
                         for row in cursor:
                             template_engine.template(row)
-
-    def _preprocess(self, row: Dict) -> Dict:
-        return row

@@ -1,5 +1,6 @@
 import os
 import stardog
+
 from ..base import Step, Environment
 
 

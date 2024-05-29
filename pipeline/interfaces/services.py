@@ -1,6 +1,7 @@
-from ..base import Base
 from typing import Dict, Self
 from abc import abstractmethod
+
+from ..base import Base
 
 
 class ContextManager(Base):

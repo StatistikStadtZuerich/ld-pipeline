@@ -1,6 +1,7 @@
-from enum import Enum
 import configparser
 import os
+from enum import Enum
+
 from .base import Base
 
 

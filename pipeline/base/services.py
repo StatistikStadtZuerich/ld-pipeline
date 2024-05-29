@@ -1,12 +1,13 @@
 import os
-from ..interfaces.services import TemplateEngine, DbConnection, CompressionEngine
-from typing import TYPE_CHECKING
-from jinja2 import Environment as JinjaEnv, FileSystemLoader
 import mysql.connector
 import gzip
 import re
 from urllib.parse import quote
 from rdflib import Literal
+from typing import TYPE_CHECKING
+from jinja2 import Environment as JinjaEnv, FileSystemLoader
+
+from ..interfaces.services import TemplateEngine, DbConnection, CompressionEngine
 
 if TYPE_CHECKING:
     from .environment import Environment

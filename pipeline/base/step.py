@@ -1,7 +1,8 @@
+import logging
+from abc import abstractmethod
+
 from .base import Base
 from .environment import Environment
-from abc import abstractmethod
-import logging
 
 
 class Step(Base):
