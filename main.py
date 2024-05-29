@@ -79,8 +79,8 @@ def run(env: Env = Env.test):
         # steps["roomTemplating"].step,
         # steps["timeTemplating"].step,
         steps["compressing"].step,
-        # steps["uploadToStardog"].step,
-        steps["uploadToFuseki"].step,
+        steps["uploadToStardog"].step,
+        # steps["uploadToFuseki"].step,
     )
 
 

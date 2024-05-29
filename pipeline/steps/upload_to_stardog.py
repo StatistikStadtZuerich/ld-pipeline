@@ -10,7 +10,7 @@ class UploadToStardog(Step):
 
     def run(self, environment: Environment):
         connection_details = {
-            "database": environment.config.get("stardog_db"),
+            "database": environment.config.get("stardog_database"),
             "endpoint": environment.config.get("stardog_endpoint"),
             "username": environment.config.get("stardog_username"),
             "password": environment.config.get("stardog_password"),
@@ -26,8 +26,11 @@ class UploadToStardog(Step):
                     stardog.content.File(os.path.join(directory, filename)),
                     environment.config.get("stardog_graph_uri"),
                 )
+                self.logger.info(
+                    f"Added {filename} to {environment.config.get("stardog_database")} (Graph: {environment.config.get("stardog_graph_uri")})"
+                )
                 i += 1
             connection.commit()
             self.logger.info(
-                f"Added {i} file{"s" if i!=1 else ""} to {environment.config.get("stardog_url")}."
+                f"Successfully added {i} file{"s" if i!=1 else ""} to {environment.config.get("stardog_endpoint")}/{environment.config.get("stardog_database")}?graph={environment.config.get("stardog_graph_uri")}"
             )

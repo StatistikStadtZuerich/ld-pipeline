@@ -1,4 +1,3 @@
-import logging
 from abc import abstractmethod
 
 from .base import Base
@@ -12,7 +11,6 @@ class Step(Base):
 
     def __init__(self):
         super().__init__()
-        self.logger = logging.getLogger(self.__class__.__name__)
 
     @abstractmethod
     def run(self, environment: Environment):

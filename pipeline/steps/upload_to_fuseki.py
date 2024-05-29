@@ -14,7 +14,7 @@ class UploadToFuseki(Step):
         url = f"{environment.config.get("fuseki_endpoint")}/{environment.config.get("fuseki_dataset")}/data?{environment.config.get("fuseki_graph")}"
 
         for filename in filenames:
-            with open(f"{directory}{filename}", "rb") as file_data:
+            with open(os.path.join(directory, filename), "rb") as file_data:
                 response = requests.put(
                     url=url,
                     data=file_data.read(),
@@ -26,9 +26,8 @@ class UploadToFuseki(Step):
                         "Content-Type": "text/turtle",
                         "Content-Encoding": "gzip",
                     },
-                    proxies={"http": None, "https": None},
                 )
                 if response.status_code == 200:
-                    self.logger.info(f"Successfully added {filename} to {url}.")
+                    self.logger.info(f"Successfully added {filename} to {url}")
                 else:
                     self.logger.error(f"{response.status_code}: {response.text}")

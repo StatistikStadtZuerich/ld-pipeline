@@ -33,12 +33,16 @@ class MSSQLDbConnection(DbConnection):
             password=self._config.get("mysql_password"),
         )
         self._cursor = self._connection.cursor(dictionary=True)
-        self.logger.info("Database connection established...")
+        self.logger.info(
+            f"Database connection to {self._config.get("mysql_host")}/{self._config.get("mysql_database")} established..."
+        )
         return self
 
     def __exit__(self, *exc_details):
         self._connection.close()
-        self.logger.info("Database connection closed.")
+        self.logger.info(
+            f"Database connection to {self._config.get("mysql_host")}/{self._config.get("mysql_database")} closed"
+        )
 
 
 class JinjaTemplateEngine(TemplateEngine):
@@ -84,7 +88,7 @@ class JinjaTemplateEngine(TemplateEngine):
         try:
             characters_wrote = self._output_file.write(content + "\n")
             self.logger.info(
-                f"Successfully wrote {str(characters_wrote)} characters in {self._output_filepath}."
+                f"Successfully wrote {str(characters_wrote)} characters in {self._output_filepath}"
             )
         except Exception as e:
             self.logger.error("Caught:", e)
@@ -115,4 +119,4 @@ class GzipEngine(CompressionEngine):
         output_filepath = os.path.join(self._output_path, f"{filename}.gz")
         with open(filepath, "rb") as f_in, gzip.open(output_filepath, "wb") as f_out:
             f_out.writelines(f_in)
-        self.logger.info(f"Successfully compressed {output_filepath}.")
+        self.logger.info(f"Successfully compressed {filepath} to {output_filepath}")

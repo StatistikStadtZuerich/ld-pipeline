@@ -18,4 +18,4 @@ class Compressing(Step):
         for filename in filenames:
             filepath = os.path.join(input_path, filename)
             environment.get_compression_engine().compress(filepath, filename)
-        self.logger.info("Compression completed.")
+        self.logger.info("Compression completed")
