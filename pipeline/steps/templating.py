@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 from ..base import Step, Environment
 
@@ -10,8 +11,8 @@ class Templating(Step):
         self._sql_filepath = sql_filepath
 
     def run(self, environment: Environment):
-        output_filepath = (
-            environment.config.get("template_output_path") + self._output_filename
+        output_filepath = os.path.join(
+            environment.config.get("template_output_path"), self._output_filename
         )
 
         with environment.get_template_engine(

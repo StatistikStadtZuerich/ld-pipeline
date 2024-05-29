@@ -22,6 +22,6 @@ class Copy(Step):
     def run(self, environment: Environment):
         out_dir = environment.config.get("output_path")
         os.makedirs(out_dir, exist_ok=True)
-        out_file = environment.config.get("output_path") + self._target
-        self.logger.info(f"Copy {self._source} to {out_file}")
+        out_file = os.path.join(out_dir, self._target)
+        self.logger.info(f"Copy {self._source} to {out_file}.")
         shutil.copyfile(self._source, out_file)

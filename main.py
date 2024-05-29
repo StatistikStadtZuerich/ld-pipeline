@@ -58,7 +58,7 @@ steps: Dict[str, StepDefinition] = {
     "timeTemplating": StepDefinition(
         Templating("time.ttl.jinja", "time.ttl", "./tmp/sources/view_time.sql")
     ),
-    "rdfCompressing": StepDefinition(Compressing()),
+    "compressing": StepDefinition(Compressing()),
     "uploadToStardog": StepDefinition(UploadToStardog()),
     "uploadToFuseki": StepDefinition(UploadToFuseki()),
 }
@@ -77,7 +77,7 @@ def run(env: Env = Env.test):
         # steps["room_hierarchyTemplating"].step,
         # steps["roomTemplating"].step,
         # steps["timeTemplating"].step,
-        steps["rdfCompressing"].step,
+        steps["compressing"].step,
         # steps["uploadToStardog"].step,
         steps["uploadToFuseki"].step,
     )

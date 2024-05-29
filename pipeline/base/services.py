@@ -83,10 +83,7 @@ class JinjaTemplateEngine(TemplateEngine):
         try:
             characters_wrote = self._output_file.write(content + "\n")
             self.logger.info(
-                "Successfully wrote "
-                + str(characters_wrote)
-                + " characters in "
-                + self._output_filepath
+                f"Successfully wrote {str(characters_wrote)} characters in {self._output_filepath}."
             )
         except Exception as e:
             self.logger.error("Caught:", e)
@@ -114,8 +111,7 @@ class GzipEngine(CompressionEngine):
         self._output_path = environment.config.get("compression_output_path")
 
     def compress(self, filepath: str, filename: str):
-        with open(filepath, "rb") as f_in, gzip.open(
-            f"{self._output_path}{filename}.gz", "wb"
-        ) as f_out:
+        output_filepath = os.path.join(self._output_path, f"{filename}.gz")
+        with open(filepath, "rb") as f_in, gzip.open(output_filepath, "wb") as f_out:
             f_out.writelines(f_in)
-        self.logger.info(f"Successfully compressed {self._output_path}{filename}.gz")
+        self.logger.info(f"Successfully compressed {output_filepath}.")

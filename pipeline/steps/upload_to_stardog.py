@@ -22,7 +22,7 @@ class UploadToStardog(Step):
             i = 0
             for filename in filenames:
                 connection.add(
-                    stardog.content.File(directory + filename),
+                    stardog.content.File(os.path.join(directory, filename)),
                     environment.config.get("stardog_graph_uri"),
                 )
                 i += 1

@@ -13,12 +13,9 @@ class TestCopy(unittest.TestCase):
         os.mkdir(tmp_dir)
 
         env = Environment(Env.test)
-        mocked_config = {"output_path": TestUtils.abs_path("tmp/")}
-
-        def side_effect(arg):
-            return mocked_config[arg]
-
-        env.config.get = Mock(side_effect=side_effect)
+        env.config.get = Mock(
+            side_effect=lambda arg: {"output_path": TestUtils.abs_path("tmp")}[arg]
+        )
 
         try:
             input_file = TestUtils.abs_path("data/copy-text.txt")
@@ -27,7 +24,7 @@ class TestCopy(unittest.TestCase):
             copy = Copy(input_file, output_file)
             copy.run(env)
 
-            with open(TestUtils.abs_path("tmp/" + output_file), "r") as f:
+            with open(os.path.join(TestUtils.abs_path("tmp"), output_file)) as f:
                 self.assertEqual(f.read(), "Hello World\n")
 
         finally:

@@ -1,0 +1,8 @@
+<https://ld.stadt-zuerich.ch/statistics/000081> a <https://cube.link/Cube> ;
+    <https://schema.org/name> "Fertiggestellte Gebäude nach Zonenart" ;
+    <https://schema.org/creativeWorkStatus> <https://ld.admin.ch/vocabulary/CreativeWorkStatus/Draft> ;
+    <https://schema.org/workExample> <https://ld.admin.ch/application/visualize> ;
+    <https://cube.link/observationConstraint> <https://ld.stadt-zuerich.ch/statistics/000081/shape> ;
+    <https://cube.link/observationSet> <https://ld.stadt-zuerich.ch/statistics/000081/observation> .
+<https://ld.stadt-zuerich.ch/statistics/000081/observation> a <https://cube.link/ObservationSet> .
+<https://ld.stadt-zuerich.ch/catalog/SSZ/cube> <http://schema.org/dataset> <https://ld.stadt-zuerich.ch/statistics/000081> .
