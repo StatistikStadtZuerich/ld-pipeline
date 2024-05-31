@@ -1,4 +1,5 @@
 import os
+from alive_progress import alive_bar
 import stardog
 
 from ..base import Step, Environment
@@ -22,10 +23,21 @@ class UploadToStardog(Step):
             connection.begin()
             i = 0
             for filename in filenames:
-                connection.add(
-                    stardog.content.File(os.path.join(directory, filename)),
-                    environment.config.get("stardog_graph_uri"),
-                )
+                filepath = os.path.join(directory, filename)
+                with alive_bar(
+                    spinner="dots",
+                    bar=None,
+                    stats=None,
+                    elapsed="({elapsed})",
+                    monitor=None,
+                    title=f"Adding {filepath} to {environment.config.get("stardog_database")} (Graph: {environment.config.get("stardog_graph_uri")})",
+                    receipt=False,
+                    enrich_print=False,
+                ):
+                    connection.add(
+                        stardog.content.File(filepath),
+                        environment.config.get("stardog_graph_uri"),
+                    )
                 self.logger.info(
                     f"Added {filename} to {environment.config.get("stardog_database")} (Graph: {environment.config.get("stardog_graph_uri")})"
                 )

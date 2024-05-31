@@ -86,10 +86,7 @@ class JinjaTemplateEngine(TemplateEngine):
     def template(self, data):
         content = self._template.render(data)
         try:
-            characters_wrote = self._output_file.write(content + "\n")
-            self.logger.info(
-                f"Successfully wrote {str(characters_wrote)} characters in {self._output_filepath}"
-            )
+            self._output_file.write(content + "\n")
         except Exception as e:
             self.logger.error("Caught:", e)
             raise

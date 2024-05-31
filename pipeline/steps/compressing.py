@@ -1,4 +1,5 @@
 import os
+from alive_progress import alive_bar
 
 from ..base import Step, Environment
 
@@ -17,5 +18,15 @@ class Compressing(Step):
         )
         for filename in filenames:
             filepath = os.path.join(input_path, filename)
-            environment.get_compression_engine().compress(filepath, filename)
+            with alive_bar(
+                spinner="dots",
+                bar=None,
+                stats=None,
+                elapsed="({elapsed})",
+                monitor=None,
+                title=f"Compressing {filepath}",
+                receipt=False,
+                enrich_print=False,
+            ):
+                environment.get_compression_engine().compress(filepath, filename)
         self.logger.info("Compression completed")
