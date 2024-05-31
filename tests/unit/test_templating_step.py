@@ -11,7 +11,7 @@ from tests.unit.utils import TestUtils
 class TestTemplatingStep(unittest.TestCase):
     def test_templating(self):
         tmp_dir = TestUtils.abs_path("tmp")
-        os.mkdir(tmp_dir)
+        os.makedirs(tmp_dir, exist_ok=True)
 
         env = Environment(Env.test)
         env.config.get = Mock(
@@ -21,7 +21,8 @@ class TestTemplatingStep(unittest.TestCase):
             }[arg]
         )
         env.get_db_connection = MagicMock()
-        env.get_db_connection().__enter__().query().__enter__.return_value = [
+        env.get_db_connection().__enter__().query().__enter__().rowcount = 2
+        env.get_db_connection().__enter__().query().__enter__().fetchall.return_value = [
             {"property_code": "ÜBG", "title": "Arbeitslosengrad   "},
             {"property_code": "ABT", "title": "Abteilung"},
         ]

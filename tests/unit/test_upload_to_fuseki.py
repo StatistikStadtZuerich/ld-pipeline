@@ -12,7 +12,7 @@ class TestUploadToFusekiStep(unittest.TestCase):
     @patch("requests.put")
     def test_templating(self, mock_request_put):
         tmp_dir = TestUtils.abs_path("tmp")
-        os.mkdir(tmp_dir)
+        os.makedirs(tmp_dir, exist_ok=True)
 
         env = Environment(Env.test)
         env.config.get = Mock(

@@ -12,7 +12,7 @@ from tests.unit.utils import TestUtils
 class TestCompressingStep(unittest.TestCase):
     def test_compressing(self):
         tmp_dir = TestUtils.abs_path("tmp")
-        os.mkdir(tmp_dir)
+        os.makedirs(tmp_dir, exist_ok=True)
 
         env = Environment(Env.test)
         env.config.get = Mock(

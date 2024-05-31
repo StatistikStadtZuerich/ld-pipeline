@@ -11,7 +11,7 @@ from tests.unit.utils import TestUtils
 class TestCopy(unittest.TestCase):
     def test_simple_copy(self):
         tmp_dir = TestUtils.abs_path("tmp")
-        os.mkdir(tmp_dir)
+        os.makedirs(tmp_dir, exist_ok=True)
 
         env = Environment(Env.test)
         env.config.get = Mock(

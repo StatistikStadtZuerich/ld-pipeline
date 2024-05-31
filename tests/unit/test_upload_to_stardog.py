@@ -3,8 +3,6 @@ import shutil
 import unittest
 from unittest.mock import Mock, call, patch, ANY
 
-import stardog
-
 from pipeline.base import Env, Environment
 from pipeline.steps import UploadToStardog
 from tests.unit.utils import TestUtils
@@ -14,7 +12,7 @@ class TestUploadToFusekiStep(unittest.TestCase):
     @patch("stardog.Connection")
     def test_templating(self, mock_connection):
         tmp_dir = TestUtils.abs_path("tmp")
-        os.mkdir(tmp_dir)
+        os.makedirs(tmp_dir, exist_ok=True)
 
         env = Environment(Env.test)
         env.config.get = Mock(
