@@ -67,7 +67,7 @@ _HINT_: be sure to use only _local_, _int_ or _prod_ as environment within docke
    - Run: `python -m pytest tests/unit`
 2. Integration Tests
    - Integration tests can be found under tests/integration
-   - The tests create the environment using docker (test/integration/docker-compose.yaml)
+   - The tests create the environment using docker (tests/integration/compose.yaml)
    - Be sure docker is up and running
    - Run: `python -m pytest --container-scope=session tests/integration`
 3. Local Pipeline execution
