@@ -50,7 +50,21 @@ Follow these steps to set up your development environment:
 
 ### Templating Step
 
-- "dimensionTemplating": Creates a .ttl RDF file out of the given csv data.
+- "codeTemplating": Creates a `.ttl` RDF file out of the given data, requested by an sql statement.
+
+  ...
+
+### Compressing Step
+
+- "compressing": Compresses all `.ttl` files with the gzip algorithm to a new directory.
+
+### UploadToStardog Step
+
+- "uploadToStardog": Uploads all compressed `.gz` files to a configured stardog server.
+
+### UploadToFuseki Step
+
+- "uploadToFuseki": Uploads all compressed `.gz` files to a configured fuseki server.
 
 ## Run with docker
 
