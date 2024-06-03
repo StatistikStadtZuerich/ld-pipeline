@@ -1,39 +1,42 @@
-from ..base.base import Base
-from ..base.environment import Config
-from typing import Dict
+from typing import Dict, Self
 from abc import abstractmethod
 
+from ..base import Base
 
-class Closeable(Base):
+
+class ContextManager(Base):
     @abstractmethod
-    def open(self):
+    def __enter__(self) -> Self:
         pass
 
     @abstractmethod
-    def close(self):
+    def __exit__(self, *exc_details) -> None:
         pass
 
 
-class DbConnection(Closeable):
-    """TODO defined the interface methods for DB connections"""
-
-    def __init__(self, config: Config):
-        pass
-
+class DbConnection(ContextManager):
     @abstractmethod
-    def query(self, data):
+    def query(self, data: Dict):
+        pass
+
+
+class TemplateEngine(ContextManager):
+    @abstractmethod
+    def template(self, data: Dict) -> None:
+        """This method renders the template with the specified data.
+
+        Args:
+            data (Dict): The data argument provides the data to be used in the template in the form of a dictonary.
         """
-        TODO just a simple stub
-        """
         pass
 
 
-class TemplateEngine(Closeable):
-    """TODO defined the interface methods for TemplateEngine"""
-
-    def __init__(self, config: Config, template_filename: str, output_filename: str):
-        pass
-
+class CompressionEngine(Base):
     @abstractmethod
-    def template(self, data: Dict):
+    def compress(self, filepath: str) -> None:
+        """Compress the given file to the output path.
+
+        Args:
+            filepath (str): The file to be compressed
+        """
         pass

@@ -1,3 +1,3 @@
-<https://ld.stadt-zuerich.ch/statistics/property/{{ Dimension }}> a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> ;
-    <https://schema.org/name> "{{ Dimensionname }}" ;
-    <https://schema.org/identifier> "{{ Dimension }}" .
+<https://ld.stadt-zuerich.ch/statistics/property/{{ property_code|uri_encode }}> a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> ;
+    <https://schema.org/name> {{ title|literal_encode }} ;
+    <https://schema.org/identifier> {{ property_code|literal_encode }} .

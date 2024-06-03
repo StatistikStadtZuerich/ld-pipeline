@@ -2,23 +2,21 @@ import os
 import shutil
 import unittest
 from unittest.mock import Mock
+
+from pipeline.base import Env, Environment
 from pipeline.steps import Copy
-from pipeline.base import Environment, Env
 from tests.unit.utils import TestUtils
 
 
 class TestCopy(unittest.TestCase):
     def test_simple_copy(self):
         tmp_dir = TestUtils.abs_path("tmp")
-        os.mkdir(tmp_dir)
+        os.makedirs(tmp_dir, exist_ok=True)
 
         env = Environment(Env.test)
-        mocked_config = {"output_path": TestUtils.abs_path("tmp/")}
-
-        def side_effect(arg):
-            return mocked_config[arg]
-
-        env.config.get = Mock(side_effect=side_effect)
+        env.config.get = Mock(
+            side_effect=lambda arg: {"output_path": TestUtils.abs_path("tmp")}[arg]
+        )
 
         try:
             input_file = TestUtils.abs_path("data/copy-text.txt")
@@ -27,7 +25,7 @@ class TestCopy(unittest.TestCase):
             copy = Copy(input_file, output_file)
             copy.run(env)
 
-            with open(TestUtils.abs_path("tmp/" + output_file), "r") as f:
+            with open(os.path.join(TestUtils.abs_path("tmp"), output_file)) as f:
                 self.assertEqual(f.read(), "Hello World\n")
 
         finally:

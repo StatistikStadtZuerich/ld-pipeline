@@ -1,0 +1,23 @@
+services:
+  db:
+    image: mysql:lts
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hdb
+      MYSQL_USER: pipeline
+      MYSQL_PASSWORD: pipeline
+      MYSQL_TCP_PORT: 3306
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data:/docker-entrypoint-initdb.d
+
+  fuseki:
+    image: secoresearch/fuseki:latest
+    restart: always
+    environment:
+      ADMIN_PASSWORD: pipeline
+      FUSEKI_DATASET_1: ssz
+    ports:
+      - 3030:3030

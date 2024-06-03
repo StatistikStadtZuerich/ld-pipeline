@@ -1,7 +1,7 @@
 from .base import Base
 from .config import Env, Config
 from .environment import Environment
-from .services import MSSQLDbConnection, JinjaTemplateEngine
+from .services import MSSQLDbConnection, JinjaTemplateEngine, CompressionEngine
 from .step import Step, StepDefinition
 
 __all__ = [
@@ -11,6 +11,7 @@ __all__ = [
     "Environment",
     "MSSQLDbConnection",
     "JinjaTemplateEngine",
+    "CompressionEngine",
     "Step",
     "StepDefinition",
 ]

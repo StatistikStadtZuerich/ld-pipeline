@@ -9,6 +9,4 @@ def docker_compose_file(pytestconfig):
     :param pytestconfig:
     :return: the path of the docker compose file
     """
-    return os.path.join(
-        str(pytestconfig.rootdir), "tests/integration", "docker-compose.yml"
-    )
+    return os.path.join(str(pytestconfig.rootdir), "tests/integration", "compose.yaml")

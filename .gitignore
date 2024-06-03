@@ -1,8 +1,10 @@
 .venv
 .idea
 tmp
+output
 pipeline.log
 reports
 Pipfile
 Pipfile.lock
 **/__pycache__
+.DS_Store

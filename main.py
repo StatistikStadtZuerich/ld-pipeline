@@ -1,8 +1,17 @@
 import typer
 from typing import Dict
+
 from pipeline import Pipeline
 from pipeline.base import Env, StepDefinition
-from pipeline.steps import Copy, Templating, ObservationTemplating
+from pipeline.steps import (
+    Copy,
+    Templating,
+    ObservationTemplating,
+    Compressing,
+    UploadToStardog,
+    UploadToFuseki,
+)
+
 
 app = typer.Typer()
 
@@ -11,33 +20,63 @@ steps: Dict[str, StepDefinition] = {
         Copy("static/static.n3", "static.n3"),
         "Copies static.n3 files from /static to defined output folder",
     ),
-    "dimensionTemplating": StepDefinition(
-        Templating(
-            "dimensionen.ttl.jinja",
-            "dimensions.ttl",
-            "./tmp/sources/HDB_DIMENSIONEN.csv",
-        )
+    "codeTemplating": StepDefinition(
+        Templating("code.ttl.jinja", "code.ttl", "./sql/view_code.sql")
+    ),
+    "cubeTemplating": StepDefinition(
+        Templating("cube.ttl.jinja", "cube.ttl", "./sql/view_cube.sql")
+    ),
+    "hierarchyTemplating": StepDefinition(
+        Templating("hierarchy.ttl.jinja", "hierarchy.ttl", "./sql/view_hierarchy.sql")
+    ),
+    "measureTemplating": StepDefinition(
+        Templating("measure.ttl.jinja", "measure.ttl", "./sql/view_measure.sql")
     ),
     "observationTemplating": StepDefinition(
         ObservationTemplating(
-            "observations.ttl.jinja",
-            "observations.ttl",
-            "./tmp/sources/HDB_small.csv",
+            "observation.ttl.jinja",
+            "observation.ttl",
+            "./sql/view_observation.sql",
         )
     ),
-    "cubeTemplating": StepDefinition(
-        Templating("cubes.ttl.jinja", "cubes.ttl", "./tmp/sources/HDB_CUBES.csv")
+    "propertyTemplating": StepDefinition(
+        Templating("property.ttl.jinja", "property.ttl", "./sql/view_property.sql")
     ),
+    "room_hierarchyTemplating": StepDefinition(
+        Templating(
+            "room_hierarchy.ttl.jinja",
+            "room_hierarchy.ttl",
+            "./sql/view_room_hierarchy.sql",
+        )
+    ),
+    "roomTemplating": StepDefinition(
+        Templating("room.ttl.jinja", "room.ttl", "./sql/view_room.sql")
+    ),
+    "timeTemplating": StepDefinition(
+        Templating("time.ttl.jinja", "time.ttl", "./sql/view_time.sql")
+    ),
+    "compressing": StepDefinition(Compressing()),
+    "uploadToStardog": StepDefinition(UploadToStardog()),
+    "uploadToFuseki": StepDefinition(UploadToFuseki()),
 }
 
 
 @app.command(short_help="Run pipeline on given environment")
 def run(env: Env = Env.test):
     Pipeline(env).run(
-        steps["copyStatic"].step,
-        steps["dimensionTemplating"].step,
-        steps["observationTemplating"].step,
+        # steps["copyStatic"].step,
+        steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
+        # steps["hierarchyTemplating"].step,
+        # steps["measureTemplating"].step,
+        # steps["observationTemplating"].step,
+        # steps["propertyTemplating"].step,
+        # steps["room_hierarchyTemplating"].step,
+        # steps["roomTemplating"].step,
+        # steps["timeTemplating"].step,
+        steps["compressing"].step,
+        steps["uploadToStardog"].step,
+        steps["uploadToFuseki"].step,
     )
 
 
