@@ -21,43 +21,39 @@ steps: Dict[str, StepDefinition] = {
         "Copies static.n3 files from /static to defined output folder",
     ),
     "codeTemplating": StepDefinition(
-        Templating("code.ttl.jinja", "code.ttl", "./tmp/sources/view_code.sql")
+        Templating("code.ttl.jinja", "code.ttl", "./sql/view_code.sql")
     ),
     "cubeTemplating": StepDefinition(
-        Templating("cube.ttl.jinja", "cube.ttl", "./tmp/sources/view_cube.sql")
+        Templating("cube.ttl.jinja", "cube.ttl", "./sql/view_cube.sql")
     ),
     "hierarchyTemplating": StepDefinition(
-        Templating(
-            "hierarchy.ttl.jinja", "hierarchy.ttl", "./tmp/sources/view_hierarchy.sql"
-        )
+        Templating("hierarchy.ttl.jinja", "hierarchy.ttl", "./sql/view_hierarchy.sql")
     ),
     "measureTemplating": StepDefinition(
-        Templating("measure.ttl.jinja", "measure.ttl", "./tmp/sources/view_measure.sql")
+        Templating("measure.ttl.jinja", "measure.ttl", "./sql/view_measure.sql")
     ),
     "observationTemplating": StepDefinition(
         ObservationTemplating(
             "observation.ttl.jinja",
             "observation.ttl",
-            "./tmp/sources/view_observation.sql",
+            "./sql/view_observation.sql",
         )
     ),
     "propertyTemplating": StepDefinition(
-        Templating(
-            "property.ttl.jinja", "property.ttl", "./tmp/sources/view_property.sql"
-        )
+        Templating("property.ttl.jinja", "property.ttl", "./sql/view_property.sql")
     ),
     "room_hierarchyTemplating": StepDefinition(
         Templating(
             "room_hierarchy.ttl.jinja",
             "room_hierarchy.ttl",
-            "./tmp/sources/view_room_hierarchy.sql",
+            "./sql/view_room_hierarchy.sql",
         )
     ),
     "roomTemplating": StepDefinition(
-        Templating("room.ttl.jinja", "room.ttl", "./tmp/sources/view_room.sql")
+        Templating("room.ttl.jinja", "room.ttl", "./sql/view_room.sql")
     ),
     "timeTemplating": StepDefinition(
-        Templating("time.ttl.jinja", "time.ttl", "./tmp/sources/view_time.sql")
+        Templating("time.ttl.jinja", "time.ttl", "./sql/view_time.sql")
     ),
     "compressing": StepDefinition(Compressing()),
     "uploadToStardog": StepDefinition(UploadToStardog()),
@@ -69,7 +65,7 @@ steps: Dict[str, StepDefinition] = {
 def run(env: Env = Env.test):
     Pipeline(env).run(
         # steps["copyStatic"].step,
-        # steps["codeTemplating"].step,
+        steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
         # steps["hierarchyTemplating"].step,
         # steps["measureTemplating"].step,
@@ -80,7 +76,7 @@ def run(env: Env = Env.test):
         # steps["timeTemplating"].step,
         steps["compressing"].step,
         steps["uploadToStardog"].step,
-        # steps["uploadToFuseki"].step,
+        steps["uploadToFuseki"].step,
     )
 
 
