@@ -30,4 +30,4 @@ class Templating(Step):
                         )
 
     def _preprocess(self, row: Dict) -> Dict:
-        pass
+        return row
