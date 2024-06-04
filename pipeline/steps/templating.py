@@ -1,5 +1,4 @@
 import os
-from alive_progress import alive_bar
 
 from ..base import Step, Environment
 
@@ -22,16 +21,9 @@ class Templating(Step):
                     with environment.get_template_engine(
                         self._template_filename, output_filepath
                     ) as template_engine:
-                        list = cursor.fetchall()
-                        with alive_bar(
-                            cursor.rowcount,
-                            title=f"Templating {output_filepath}",
-                            length=50,
-                            spinner=None,
-                            receipt=False,
-                            enrich_print=False,
-                        ) as bar:
-                            for row in list:
-                                template_engine.template(row)
-                                bar()
-                        self.logger.info(f"Successfully created {output_filepath}")
+                        self.logger.info(f"Started templating to {output_filepath}...")
+                        for row in cursor:
+                            template_engine.template(row)
+                        self.logger.info(
+                            f"Successfully completed templating to {output_filepath}"
+                        )
