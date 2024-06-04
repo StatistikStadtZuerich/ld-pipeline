@@ -21,8 +21,7 @@ class TestTemplatingStep(unittest.TestCase):
             }[arg]
         )
         env.get_db_connection = MagicMock()
-        env.get_db_connection().__enter__().query().__enter__().rowcount = 2
-        env.get_db_connection().__enter__().query().__enter__().fetchall.return_value = [
+        env.get_db_connection().__enter__().query().__enter__.return_value = [
             {"property_code": "ÜBG", "title": "Arbeitslosengrad   "},
             {"property_code": "ABT", "title": "Abteilung"},
         ]

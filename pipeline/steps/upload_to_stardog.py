@@ -1,5 +1,4 @@
 import os
-from alive_progress import alive_bar
 import stardog
 
 from ..base import Step, Environment
@@ -18,31 +17,18 @@ class UploadToStardog(Step):
         }
         directory = environment.config.get("compression_output_path")
         filenames = next(os.walk(directory))[2]
-
+        url = f"{environment.config.get("stardog_endpoint")}/{environment.config.get("stardog_database")}?graph={environment.config.get("stardog_graph_uri")}"
+        self.logger.info(f"Uploading to {url} started...")
         with stardog.Connection(**connection_details) as connection:
+            self.logger.info(f"Connection to {url} established...")
             connection.begin()
-            i = 0
             for filename in filenames:
                 filepath = os.path.join(directory, filename)
-                with alive_bar(
-                    spinner="dots",
-                    bar=None,
-                    stats=None,
-                    elapsed="({elapsed})",
-                    monitor=None,
-                    title=f"Adding {filepath} to {environment.config.get("stardog_database")} (Graph: {environment.config.get("stardog_graph_uri")})",
-                    receipt=False,
-                    enrich_print=False,
-                ):
-                    connection.add(
-                        stardog.content.File(filepath),
-                        environment.config.get("stardog_graph_uri"),
-                    )
-                self.logger.info(
-                    f"Added {filename} to {environment.config.get("stardog_database")} (Graph: {environment.config.get("stardog_graph_uri")})"
+                connection.add(
+                    stardog.content.File(filepath),
+                    environment.config.get("stardog_graph_uri"),
                 )
-                i += 1
+                self.logger.info(f"Added {filepath} to {url}")
             connection.commit()
-            self.logger.info(
-                f"Successfully added {i} file{"s" if i!=1 else ""} to {environment.config.get("stardog_endpoint")}/{environment.config.get("stardog_database")}?graph={environment.config.get("stardog_graph_uri")}"
-            )
+        self.logger.info(f"Connection to {url} closed")
+        self.logger.info(f"Uploading to {url} completed")

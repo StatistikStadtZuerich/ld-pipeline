@@ -6,4 +6,3 @@ ruff
 jinja2
 pystardog
 rdflib
-alive_progress

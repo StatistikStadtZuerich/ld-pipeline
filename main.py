@@ -21,43 +21,60 @@ steps: Dict[str, StepDefinition] = {
         "Copies static.n3 files from /static to defined output folder",
     ),
     "codeTemplating": StepDefinition(
-        Templating("code.ttl.jinja", "code.ttl", "./sql/view_code.sql")
+        Templating("code.ttl.jinja", "code.ttl", "./sql/view_code.sql"),
+        "Creates triples from the view_code data with the code.ttl template",
     ),
     "cubeTemplating": StepDefinition(
-        Templating("cube.ttl.jinja", "cube.ttl", "./sql/view_cube.sql")
+        Templating("cube.ttl.jinja", "cube.ttl", "./sql/view_cube.sql"),
+        "Creates triples from the view_cube data with the cube.ttl template",
     ),
     "hierarchyTemplating": StepDefinition(
-        Templating("hierarchy.ttl.jinja", "hierarchy.ttl", "./sql/view_hierarchy.sql")
+        Templating("hierarchy.ttl.jinja", "hierarchy.ttl", "./sql/view_hierarchy.sql"),
+        "Creates triples from the view_hierarchy data with the hierarchy.ttl template",
     ),
     "measureTemplating": StepDefinition(
-        Templating("measure.ttl.jinja", "measure.ttl", "./sql/view_measure.sql")
+        Templating("measure.ttl.jinja", "measure.ttl", "./sql/view_measure.sql"),
+        "Creates triples from the view_measure data with the measure.ttl template",
     ),
     "observationTemplating": StepDefinition(
         ObservationTemplating(
             "observation.ttl.jinja",
             "observation.ttl",
             "./sql/view_observation.sql",
-        )
+        ),
+        "Creates triples from the view_observation data with the observation.ttl template",
     ),
     "propertyTemplating": StepDefinition(
-        Templating("property.ttl.jinja", "property.ttl", "./sql/view_property.sql")
+        Templating("property.ttl.jinja", "property.ttl", "./sql/view_property.sql"),
+        "Creates triples from the view_property data with the property.ttl template",
     ),
     "room_hierarchyTemplating": StepDefinition(
         Templating(
             "room_hierarchy.ttl.jinja",
             "room_hierarchy.ttl",
             "./sql/view_room_hierarchy.sql",
-        )
+        ),
+        "Creates triples from the view_room_hierarchy data with the room_hierarchy.ttl template",
     ),
     "roomTemplating": StepDefinition(
-        Templating("room.ttl.jinja", "room.ttl", "./sql/view_room.sql")
+        Templating("room.ttl.jinja", "room.ttl", "./sql/view_room.sql"),
+        "Creates triples from the view_room data with the room.ttl template",
     ),
     "timeTemplating": StepDefinition(
-        Templating("time.ttl.jinja", "time.ttl", "./sql/view_time.sql")
+        Templating("time.ttl.jinja", "time.ttl", "./sql/view_time.sql"),
+        "Creates triples from the view_time data with the time.ttl template",
     ),
-    "compressing": StepDefinition(Compressing()),
-    "uploadToStardog": StepDefinition(UploadToStardog()),
-    "uploadToFuseki": StepDefinition(UploadToFuseki()),
+    "compressing": StepDefinition(
+        Compressing(), "Compresses all triple files to gzip files"
+    ),
+    "uploadToStardog": StepDefinition(
+        UploadToStardog(),
+        "Uploads all compressed gzip files to a configured stardog server",
+    ),
+    "uploadToFuseki": StepDefinition(
+        UploadToFuseki(),
+        "Uploads all compressed gzip files to a configured fuseki server",
+    ),
 }
 
 
@@ -74,9 +91,9 @@ def run(env: Env = Env.test):
         # steps["room_hierarchyTemplating"].step,
         # steps["roomTemplating"].step,
         # steps["timeTemplating"].step,
-        steps["compressing"].step,
-        steps["uploadToStardog"].step,
-        steps["uploadToFuseki"].step,
+        # steps["compressing"].step,
+        # steps["uploadToStardog"].step,
+        # steps["uploadToFuseki"].step,
     )
 
 
