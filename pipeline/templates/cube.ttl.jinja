@@ -1,8 +1,7 @@
-<https://ld.stadt-zuerich.ch/statistics/{{ cube_id }}> a <https://cube.link/Cube> ;
-    <https://schema.org/name> "{{ title }}" ;
+<https://ld.stadt-zuerich.ch/statistics/{{ cube_id|uri_encode }}> a <https://cube.link/Cube> ;
+    <https://schema.org/name> {{ title|literal_encode }} ;
     <https://schema.org/creativeWorkStatus> <https://ld.admin.ch/vocabulary/CreativeWorkStatus/Draft> ;
     <https://schema.org/workExample> <https://ld.admin.ch/application/visualize> ;
-    <https://cube.link/observationConstraint> <https://ld.stadt-zuerich.ch/statistics/{{ cube_id }}/shape> ;
-    <https://cube.link/observationSet> <https://ld.stadt-zuerich.ch/statistics/{{ cube_id }}/observation> .
-<https://ld.stadt-zuerich.ch/statistics/{{ cube_id }}/observation> a <https://cube.link/ObservationSet> .
-<https://ld.stadt-zuerich.ch/catalog/SSZ/cube> <http://schema.org/dataset> <https://ld.stadt-zuerich.ch/statistics/{{ cube_id }}> .
+    <https://cube.link/observationConstraint> <https://ld.stadt-zuerich.ch/statistics/{{ cube_id|uri_encode }}/shape> ;
+    <https://cube.link/observationSet> <https://ld.stadt-zuerich.ch/statistics/{{ cube_id|uri_encode }}/observation> .
+<https://ld.stadt-zuerich.ch/statistics/{{ cube_id|uri_encode }}/observation> a <https://cube.link/ObservationSet> .

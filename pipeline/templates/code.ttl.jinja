@@ -1,8 +1,4 @@
-<https://ld.stadt-zuerich.ch/statistics/code/{{ term_code }}> a <https://schema.org/DefinedTerm> ;
-    <https://schema.org/name> "{{ title }}" ;
-    <https://schema.org/description> "{{ description }}" ;
-    <https://schema.org/termCode> "{{ term_code }}" ;
-    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/{{ term_group_code }}> ;
-    <https://schema.org/isPartOf> <https://ld.stadt-zuerich.ch/statistics/code/{{ part_of }}> ;
-    <https://schema.org/position> "{{ position }}" ;
-    <https://example.org/GLOSSARID> "{{ glossarid }}" .
+<https://ld.stadt-zuerich.ch/statistics/code/{{ term_code|uri_encode }}> a <https://schema.org/DefinedTerm> ;
+    <https://schema.org/name> {{ title|literal_encode }} ;
+    <https://schema.org/termCode> {{ term_code|literal_encode }} ;
+    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/{{ term_group_code|uri_encode }}> .
