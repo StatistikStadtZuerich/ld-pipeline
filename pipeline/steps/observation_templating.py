@@ -9,5 +9,5 @@ class ObservationTemplating(Templating):
             wert = int(row.get("wert"))
         except ValueError:
             wert = math.nan
-        row["is_wert_nan"] = wert != wert
+        row["wert_is_nan"] = wert != wert
         return row
