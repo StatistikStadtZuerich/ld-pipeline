@@ -6,8 +6,8 @@ from .templating import Templating
 class ObservationTemplating(Templating):
     def _preprocess(self, row: Dict) -> Dict:
         try:
-            wert = int(row.get("wert"))
+            value = int(row.get("value"))
         except ValueError:
-            wert = math.nan
-        row["is_wert_nan"] = wert != wert
+            value = math.nan
+        row["value_is_nan"] = value != value
         return row
