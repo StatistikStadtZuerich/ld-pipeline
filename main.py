@@ -26,8 +26,25 @@ steps: Dict[str, StepDefinition] = {
     "cubeTemplating": StepDefinition(
         Templating("cube.ttl.jinja", "cube.ttl", "./sql/view_cube.sql")
     ),
+    "groupCodeTemplating": StepDefinition(
+        Templating(
+            "group_code.ttl.jinja", "group_code.ttl", "./sql/view_group_code.sql"
+        )
+    ),
     "hierarchyTemplating": StepDefinition(
         Templating("hierarchy.ttl.jinja", "hierarchy.ttl", "./sql/view_hierarchy.sql")
+    ),
+    "legalFoundationTemplating": StepDefinition(
+        Templating(
+            "legal_foundation.ttl.jinja",
+            "legal_foundation.ttl",
+            "./sql/view_legal_foundation.sql",
+        )
+    ),
+    "measureUnitTemplating": StepDefinition(
+        Templating(
+            "measure_unit.ttl.jinja", "measure_unit.ttl", "./sql/view_measure_unit.sql"
+        )
     ),
     "measureTemplating": StepDefinition(
         Templating("measure.ttl.jinja", "measure.ttl", "./sql/view_measure.sql")
@@ -41,13 +58,6 @@ steps: Dict[str, StepDefinition] = {
     ),
     "propertyTemplating": StepDefinition(
         Templating("property.ttl.jinja", "property.ttl", "./sql/view_property.sql")
-    ),
-    "room_hierarchyTemplating": StepDefinition(
-        Templating(
-            "room_hierarchy.ttl.jinja",
-            "room_hierarchy.ttl",
-            "./sql/view_room_hierarchy.sql",
-        )
     ),
     "roomTemplating": StepDefinition(
         Templating("room.ttl.jinja", "room.ttl", "./sql/view_room.sql")
@@ -64,16 +74,18 @@ steps: Dict[str, StepDefinition] = {
 @app.command(short_help="Run pipeline on given environment")
 def run(env: Env = Env.test):
     Pipeline(env).run(
-        # steps["copyStatic"].step,
+        steps["copyStatic"].step,
         steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
-        # steps["hierarchyTemplating"].step,
-        # steps["measureTemplating"].step,
-        # steps["observationTemplating"].step,
-        # steps["propertyTemplating"].step,
-        # steps["room_hierarchyTemplating"].step,
-        # steps["roomTemplating"].step,
-        # steps["timeTemplating"].step,
+        steps["groupCodeTemplating"].step,
+        steps["hierarchyTemplating"].step,
+        steps["legalFoundationTemplating"].step,
+        steps["measureUnitTemplating"].step,
+        steps["measureTemplating"].step,
+        steps["observationTemplating"].step,
+        steps["propertyTemplating"].step,
+        steps["roomTemplating"].step,
+        steps["timeTemplating"].step,
         steps["compressing"].step,
         steps["uploadToStardog"].step,
         steps["uploadToFuseki"].step,
