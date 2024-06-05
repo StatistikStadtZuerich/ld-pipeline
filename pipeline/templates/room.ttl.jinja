@@ -1,10 +1,7 @@
-<https://ld.stadt-zuerich.ch/statistics/code/{{ term_code }}> a <https://schema.org/Place> , <https://schema.org/DefinedTerm> ;
-    <https://schema.org/name> "{{ name }}"@de ;
-    <https://schema.org/position> "{{ position }}"^^<http://www.w3.org/2001/XMLSchema#integer> ;
-    {# <https://schema.org/description> "{{ Beschreibung }}" ; #}
-    <https://schema.org/disambiguatingDescription> "{{ available }}" ;
-    <https://schema.org/sameAs> "{{ same_as }}" ;
-    <https://schema.org/termCode> "{{ term_code }}" ;
-    {# <https://example.org/raumfilter> "{{ RaumFilter }}" ; #}
-    <https://ld.integ.stadt-zuerich.ch/sparql/#RaumParent> "{{ raum_parent }}" ;
-    <https://ld.integ.stadt-zuerich.ch/sparql/#RaumParentLang> "{{ raum_parent_lang }}" .
+<https://ld.stadt-zuerich.ch/statistics/code/{{ term_code|uri_encode }}> a <https://schema.org/Place> , <https://schema.org/DefinedTerm> ;
+    <https://schema.org/name> {{ title|literal_encode }}@de ; {# title instead of name #}
+    <https://schema.org/position> {{ position|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#integer> ;
+    <https://schema.org/description> {{ description|literal_encode }} ;
+    <https://schema.org/disambiguatingDescription> {{ available|literal_encode }} ;
+    <https://schema.org/sameAs> <{{ same_as|uri_encode }}> ;
+    <https://schema.org/termCode> {{ term_code|literal_encode }} .

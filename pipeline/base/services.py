@@ -74,6 +74,13 @@ class JinjaTemplateEngine(TemplateEngine):
             value = re.sub(r"\s+", " ", value)
             return Literal(value).n3()
 
+        def is_numeric(value: str) -> bool:
+            try:
+                float(value)
+                return True
+            except ValueError:
+                return False
+
         self._output_filepath = output_filepath
         self._output_file = None
         self._env = JinjaEnv(
@@ -83,6 +90,7 @@ class JinjaTemplateEngine(TemplateEngine):
         )
         self._env.filters["uri_encode"] = uri_encode_filter
         self._env.filters["literal_encode"] = literal_encode_filter
+        self._env.filters["is_numeric"] = is_numeric
         self._template = self._env.get_template(template_filename)
 
     def template(self, data):
