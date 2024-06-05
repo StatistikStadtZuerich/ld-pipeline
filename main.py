@@ -6,7 +6,6 @@ from pipeline.base import Env, StepDefinition
 from pipeline.steps import (
     Copy,
     Templating,
-    ObservationTemplating,
     Compressing,
     UploadToStardog,
     UploadToFuseki,
@@ -54,7 +53,7 @@ steps: Dict[str, StepDefinition] = {
         "Creates triples from the view_measure data with the measure.ttl template",
     ),
     "observationTemplating": StepDefinition(
-        ObservationTemplating(
+        Templating(
             "observation.ttl.jinja",
             "observation.ttl",
             "./sql/view_observation.sql",
