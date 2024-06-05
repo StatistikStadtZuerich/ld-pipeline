@@ -18,11 +18,11 @@ class MSSQLDbConnection(DbConnection):
         super().__init__()
         self._config = environment.config
 
-    def query(self, query: str):
+    def query(self, sql_query: str):
         """
-        Executes query and returns cursor.
+        Executes sql query and returns cursor.
         """
-        self._cursor.execute(query)
+        self._cursor.execute(sql_query)
         return self._cursor
 
     def __enter__(self):
@@ -32,10 +32,10 @@ class MSSQLDbConnection(DbConnection):
             user=self._config.get("mysql_user"),
             password=self._config.get("mysql_password"),
         )
-        self._cursor = self._connection.cursor(dictionary=True)
         self.logger.info(
             f"Database connection to {self._config.get("mysql_host")}/{self._config.get("mysql_database")} established..."
         )
+        self._cursor = self._connection.cursor(dictionary=True)
         return self
 
     def __exit__(self, *exc_details):
@@ -65,7 +65,7 @@ class JinjaTemplateEngine(TemplateEngine):
             return text.translate(translate_table)
 
         def uri_encode_filter(value: str) -> str:
-            value = remove_umlauts(value)
+            value = remove_umlauts(str(value))
             value = re.sub(r"[^A-Za-z0-9-]", "", value)
             return quote(value)
 
@@ -84,7 +84,9 @@ class JinjaTemplateEngine(TemplateEngine):
         self._output_filepath = output_filepath
         self._output_file = None
         self._env = JinjaEnv(
-            loader=FileSystemLoader(environment.config.get("template_path"))
+            loader=FileSystemLoader(environment.config.get("template_path")),
+            trim_blocks=True,
+            lstrip_blocks=True,
         )
         self._env.filters["uri_encode"] = uri_encode_filter
         self._env.filters["literal_encode"] = literal_encode_filter
