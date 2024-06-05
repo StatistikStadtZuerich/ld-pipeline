@@ -1,4 +1,5 @@
 import os
+from typing import Dict
 
 from ..base import Step, Environment
 
@@ -23,7 +24,10 @@ class Templating(Step):
                     ) as template_engine:
                         self.logger.info(f"Started templating to {output_filepath}...")
                         for row in cursor:
-                            template_engine.template(row)
+                            template_engine.template(self._preprocess(row))
                         self.logger.info(
                             f"Successfully completed templating to {output_filepath}"
                         )
+
+    def _preprocess(self, row: Dict) -> Dict:
+        return row
