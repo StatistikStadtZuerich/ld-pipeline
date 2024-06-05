@@ -1,8 +1,7 @@
 <https://ld.stadt-zuerich.ch/statistics/code/{{ term_code|uri_encode }}> a <https://schema.org/Place> , <https://schema.org/DefinedTerm> ;
-    <https://schema.org/name> {{ name|literal_encode }}@de ;
+    <https://schema.org/name> {{ title|literal_encode }}@de ; {# title instead of name #}
     <https://schema.org/position> {{ position|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#integer> ;
     <https://schema.org/description> {{ description|literal_encode }} ;
     <https://schema.org/disambiguatingDescription> {{ available|literal_encode }} ;
     <https://schema.org/sameAs> <{{ same_as|uri_encode }}> ;
-    <https://schema.org/termCode> {{ term_code|literal_encode }} ;
-    <https://example.org/raumfilter> {{ raum_filter|literal_encode }} .
+    <https://schema.org/termCode> {{ term_code|literal_encode }} .

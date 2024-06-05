@@ -1,4 +1,4 @@
-<https://ld.stadt-zuerich.ch/statistics/termset/{{ term_group_code|uri_encode }}> a <https://schema.org/DefinedTermSet> ;
-    <https://schema.org/name> {{ term_group_code|literal_encode }} ;
-    <https://schema.org/identifier> {{ term_group_code|literal_encode }} ;
-    <https://schema.org/hasDefinedTerm> <https://ld.stadt-zuerich.ch/statistics/code/{{ term_code|uri_encode }}> .
+<https://ld.stadt-zuerich.ch/statistics/termset/{{ term_group_code|uri_encode }}> a <https://schema.org/DefinedTermSet> ; {# term_group_code instead of term #}
+    <https://schema.org/name> {{ term_group_code|literal_encode }} ; {# term_group_code instead of name #}
+    <https://schema.org/identifier> {{ term_group_code|literal_encode }} ; {# term_group_code instead of name #}
+    <https://schema.org/hasDefinedTerm> <https://ld.stadt-zuerich.ch/statistics/code/{{ term_code|uri_encode }}> . {# term_code from code_triples.ttl #}

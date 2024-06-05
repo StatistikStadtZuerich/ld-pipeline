@@ -4,7 +4,5 @@
     <https://schema.org/termCode> {{ term_code|literal_encode }} ;
     <https://schema.org/position> {{ position|literal_encode }} ;
     <https://schema.org/isPartOf> <https://ld.stadt-zuerich.ch/statistics/code/{{ part_of|uri_encode }}> ;
-    <https://example.org/dimensionsfilter> <transform://{{ term_group_code|uri_encode }}/{{ term_filter|uri_encode }}> ;
     <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/{{ term_group_code|uri_encode }}> ;
-    <https://example.org/GLOSSARID> {{ glossarid|literal_encode }} ;
-    <https://schema.org/url> {{ url|literal_encode }} .
+    <https://schema.org/url> {{ url|literal_encode }} . {# added url #}

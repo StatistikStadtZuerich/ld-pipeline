@@ -1,7 +1,7 @@
-<https://ld.integ.stadt-zuerich.ch/statistics/observation/{{ prop1_code|uri_encode }}-{{ prop2_code|uri_encode }}-{{ prop3_code|uri_encode }}-{{ prop4_code|uri_encode }}-{{ prop5_code|uri_encode }}-{{ raum_code|uri_encode }}-{{ zeit_code|uri_encode }}> a <https://cube.link/Observation> ;
-    <https://ld.stadt-zuerich.ch/statistics/property/ZEIT> <https://ld.stadt-zuerich.ch/statistics/code/{{ zeit_code|uri_encode }}> ;
-    <https://ld.stadt-zuerich.ch/statistics/property/TIME> {{ zeit_wert|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
-    <https://ld.stadt-zuerich.ch/statistics/property/RAUM> <https://ld.stadt-zuerich.ch/statistics/code/{{ raum_code|uri_encode }}> ;
+<https://ld.integ.stadt-zuerich.ch/statistics/observation/{{ prop1_code|uri_encode }}-{{ prop2_code|uri_encode }}-{{ prop3_code|uri_encode }}-{{ prop4_code|uri_encode }}-{{ prop5_code|uri_encode }}-{{ room_code|uri_encode }}-{{ time_code|uri_encode }}> a <https://cube.link/Observation> ; {# room_code and time_code instead of raum_code and zeit_code #}
+    <https://ld.stadt-zuerich.ch/statistics/property/ZEIT> <https://ld.stadt-zuerich.ch/statistics/code/{{ time_code|uri_encode }}> ; {# time_code instead of zeit_code #}
+    <https://ld.stadt-zuerich.ch/statistics/property/TIME> {{ time|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ; {# time instead of zeit_wert #}
+    <https://ld.stadt-zuerich.ch/statistics/property/RAUM> <https://ld.stadt-zuerich.ch/statistics/code/{{ room_code|uri_encode }}> ; {# room_code instead of raum_code #}
     <https://ld.stadt-zuerich.ch/statistics/property/GRUPPENANZ> <https://ld.stadt-zuerich.ch/statistics/code/GRUPPENANZ{{ number_groups|uri_encode }}> ;
     <https://ld.stadt-zuerich.ch/statistics/property/STATUS> <https://ld.stadt-zuerich.ch/statistics/code/STATUS_{{ status|uri_encode }} ;
     {% if prop1_code_short != "XXX" %}
@@ -19,6 +19,6 @@
     {% if prop5_code_short != "XXX" %}
     <https://ld.stadt-zuerich.ch/statistics/property/{{ prop5_code_short|uri_encode }}> <https://ld.stadt-zuerich.ch/statistics/code/{{ prop5_code|uri_encode }}> ;
     {% endif %}
-    <https://ld.stadt-zuerich.ch/statistics/measure/{{ kennzahl|uri_encode }}> {% if wert_is_nan %}{{ wert|literal_encode }}^^<https://cube.link/Undefined>{% else %}{{ wert|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#decimal>{% endif %} ;
+    <https://ld.stadt-zuerich.ch/statistics/measure/{{ measure|uri_encode }}> {% if value_is_nan %}{{ value|literal_encode }}^^<https://cube.link/Undefined>{% else %}{{ value|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#decimal>{% endif %} ; {# measure and value instead of kennzahl and wwert #}
     <https://cube.link/observedBy> <https://ld.stadt-zuerich.ch/org/SSZ> .
-<https://ld.integ.stadt-zuerich.ch/statistics/{{ cube_id|uri_encode }}/observation> <https://cube.link/observation> <https://ld.integ.stadt-zuerich.ch/statistics/observation/{{ prop1_code|uri_encode }}-{{ prop2_code|uri_encode }}-{{ prop3_code|uri_encode }}-{{ prop4_code|uri_encode }}-{{ prop5_code|uri_encode }}-{{ raum_code|uri_encode }}-{{ zeit_code|uri_encode }}> .
+<https://ld.integ.stadt-zuerich.ch/statistics/{{ cube_id|uri_encode }}/observation> <https://cube.link/observation> <https://ld.integ.stadt-zuerich.ch/statistics/observation/{{ prop1_code|uri_encode }}-{{ prop2_code|uri_encode }}-{{ prop3_code|uri_encode }}-{{ prop4_code|uri_encode }}-{{ prop5_code|uri_encode }}-{{ room_code|uri_encode }}-{{ time_code|uri_encode }}> . {# room_code and time_code instead of raum_code and zeit_code #}
