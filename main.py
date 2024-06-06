@@ -14,80 +14,82 @@ from pipeline.steps import (
 
 app = typer.Typer()
 
-steps: Dict[str, StepDefinition] = {
-    "copyStatic": StepDefinition(
-        Copy("static/static.n3", "static.n3"),
-        "Copies static.n3 files from /static to defined output folder",
-    ),
-    "codeTemplating": StepDefinition(
-        Templating("code.ttl.jinja", "code.ttl", "./sql/view_code.sql"),
-        "Creates triples from the view_code data with the code.ttl template",
-    ),
-    "cubeTemplating": StepDefinition(
-        Templating("cube.ttl.jinja", "cube.ttl", "./sql/view_cube.sql"),
-        "Creates triples from the view_cube data with the cube.ttl template",
-    ),
-    "groupCodeTemplating": StepDefinition(
-        Templating(
-            "group_code.ttl.jinja", "group_code.ttl", "./sql/view_group_code.sql"
-        )
-    ),
-    "hierarchyTemplating": StepDefinition(
-        Templating("hierarchy.ttl.jinja", "hierarchy.ttl", "./sql/view_hierarchy.sql"),
-        "Creates triples from the view_hierarchy data with the hierarchy.ttl template",
-    ),
-    "legalFoundationTemplating": StepDefinition(
-        Templating(
-            "legal_foundation.ttl.jinja",
-            "legal_foundation.ttl",
-            "./sql/view_legal_foundation.sql",
-        )
-    ),
-    "measureUnitTemplating": StepDefinition(
-        Templating(
-            "measure_unit.ttl.jinja", "measure_unit.ttl", "./sql/view_measure_unit.sql"
-        )
-    ),
-    "measureTemplating": StepDefinition(
-        Templating("measure.ttl.jinja", "measure.ttl", "./sql/view_measure.sql"),
-        "Creates triples from the view_measure data with the measure.ttl template",
-    ),
-    "observationTemplating": StepDefinition(
-        Templating(
-            "observation.ttl.jinja",
-            "observation.ttl",
-            "./sql/view_observation.sql",
+def get_step_definitions(env: Env) -> Dict[str, StepDefinition]:
+    env = env.value
+    return {
+        "copyStatic": StepDefinition(
+            Copy("static/static.n3", "static.n3"),
+            "Copies static.n3 files from /static to defined output folder",
         ),
-        "Creates triples from the view_observation data with the observation.ttl template",
-    ),
-    "propertyTemplating": StepDefinition(
-        Templating("property.ttl.jinja", "property.ttl", "./sql/view_property.sql"),
-        "Creates triples from the view_property data with the property.ttl template",
-    ),
-    "roomTemplating": StepDefinition(
-        Templating("room.ttl.jinja", "room.ttl", "./sql/view_room.sql"),
-        "Creates triples from the view_room data with the room.ttl template",
-    ),
-    "timeTemplating": StepDefinition(
-        Templating("time.ttl.jinja", "time.ttl", "./sql/view_time.sql"),
-        "Creates triples from the view_time data with the time.ttl template",
-    ),
-    "compressing": StepDefinition(
-        Compressing(), "Compresses all triple files to gzip files"
-    ),
-    "uploadToStardog": StepDefinition(
-        UploadToStardog(),
-        "Uploads all compressed gzip files to a configured stardog server",
-    ),
-    "uploadToFuseki": StepDefinition(
-        UploadToFuseki(),
-        "Uploads all compressed gzip files to a configured fuseki server",
-    ),
-}
-
+        "codeTemplating": StepDefinition(
+            Templating("code.ttl.jinja", "code.ttl", f"./sql/{env}/view_code.sql"),
+            "Creates triples from the view_code data with the code.ttl template",
+        ),
+        "cubeTemplating": StepDefinition(
+            Templating("cube.ttl.jinja", "cube.ttl", f"./sql/{env}/view_cube.sql"),
+            "Creates triples from the view_cube data with the cube.ttl template",
+        ),
+        "groupCodeTemplating": StepDefinition(
+            Templating(
+                "group_code.ttl.jinja", "group_code.ttl", f"./sql/{env}/view_group_code.sql"
+            )
+        ),
+        "hierarchyTemplating": StepDefinition(
+            Templating("hierarchy.ttl.jinja", "hierarchy.ttl", f"./sql/{env}/view_hierarchy.sql"),
+            "Creates triples from the view_hierarchy data with the hierarchy.ttl template",
+        ),
+        "legalFoundationTemplating": StepDefinition(
+            Templating(
+                "legal_foundation.ttl.jinja",
+                "legal_foundation.ttl",
+                "./sql/view_legal_foundation.sql",
+            )
+        ),
+        "measureUnitTemplating": StepDefinition(
+            Templating(
+                "measure_unit.ttl.jinja", "measure_unit.ttl", f"./sql/{env}/view_measure_unit.sql"
+            )
+        ),
+        "measureTemplating": StepDefinition(
+            Templating("measure.ttl.jinja", "measure.ttl", f"./sql/{env}/view_measure.sql"),
+            "Creates triples from the view_measure data with the measure.ttl template",
+        ),
+        "observationTemplating": StepDefinition(
+            Templating(
+                "observation.ttl.jinja",
+                "observation.ttl",
+                f"./sql/{env}/view_observation.sql",
+            ),
+            "Creates triples from the view_observation data with the observation.ttl template",
+        ),
+        "propertyTemplating": StepDefinition(
+            Templating("property.ttl.jinja", "property.ttl", f"./sql/{env}/view_property.sql"),
+            "Creates triples from the view_property data with the property.ttl template",
+        ),
+        "roomTemplating": StepDefinition(
+            Templating("room.ttl.jinja", "room.ttl", f"./sql/{env}/view_room.sql"),
+            "Creates triples from the view_room data with the room.ttl template",
+        ),
+        "timeTemplating": StepDefinition(
+            Templating("time.ttl.jinja", "time.ttl", f"./sql/{env}/view_time.sql"),
+            "Creates triples from the view_time data with the time.ttl template",
+        ),
+        "compressing": StepDefinition(
+            Compressing(), "Compresses all triple files to gzip files"
+        ),
+        "uploadToStardog": StepDefinition(
+            UploadToStardog(),
+            "Uploads all compressed gzip files to a configured stardog server",
+        ),
+        "uploadToFuseki": StepDefinition(
+            UploadToFuseki(),
+            "Uploads all compressed gzip files to a configured fuseki server",
+        ),
+    }
 
 @app.command(short_help="Run pipeline on given environment")
 def run(env: Env = Env.test):
+    steps = get_step_definitions(env)
     Pipeline(env).run(
         steps["copyStatic"].step,
         steps["codeTemplating"].step,
@@ -114,11 +116,13 @@ def step(
     ),
     env: Env = Env.test,
 ):
+    steps = get_step_definitions(env)
     Pipeline(env).step(steps[name].step)
 
 
 @app.command(name="list-step-names", short_help="List names of all steps supported")
 def list_step_names():
+    steps = get_step_definitions(Env.test)
     print(
         ",\n".join('* "' + key + '": ' + val.description for key, val in steps.items())
     )

@@ -2,6 +2,8 @@ import os
 import mysql.connector
 import gzip
 import re
+import pymssql
+
 from urllib.parse import quote
 from rdflib import Literal
 from typing import TYPE_CHECKING
@@ -13,7 +15,7 @@ if TYPE_CHECKING:
     from .environment import Environment
 
 
-class MSSQLDbConnection(DbConnection):
+class MySQLDbConnection(DbConnection):
     def __init__(self, environment: "Environment"):
         super().__init__()
         self._config = environment.config
@@ -44,6 +46,36 @@ class MSSQLDbConnection(DbConnection):
             f"Database connection to {self._config.get("mysql_host")}/{self._config.get("mysql_database")} closed"
         )
 
+class MSSQLDbConnection(DbConnection):
+    def __init__(self, environment: "Environment"):
+        super().__init__()
+        self._config = environment.config
+
+    def query(self, query: str):
+        """
+        Executes query and returns cursor.
+        """
+        self._cursor.execute(query)
+        return self._cursor
+
+    def __enter__(self):
+        self._connection = pymssql.connect(
+            server=self._config.get('mssql_host'),
+            database=self._config.get('mssql_database'),
+            user=self._config.get('mssql_user'),
+            password=self._config.get('mssql_password')
+        )
+        self._cursor = self._connection.cursor(as_dict=True)
+        self.logger.info(
+            f"Database connection to {self._config.get('mssql_server')}/{self._config.get('mssql_database')} established..."
+        )
+        return self
+
+    def __exit__(self, *exc_details):
+        self._connection.close()
+        self.logger.info(
+            f"Database connection to {self._config.get('mssql_server')}/{self._config.get('mssql_database')} closed"
+        )
 
 class JinjaTemplateEngine(TemplateEngine):
     def __init__(
