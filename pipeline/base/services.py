@@ -102,6 +102,8 @@ class JinjaTemplateEngine(TemplateEngine):
             return quote(value)
 
         def literal_encode_filter(value: str) -> str:
+            if value is None:
+                value = ''
             value = value.replace("\r", " ").replace("\n", " ").strip()
             value = re.sub(r"\s+", " ", value)
             return Literal(value).n3()

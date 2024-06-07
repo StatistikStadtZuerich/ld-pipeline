@@ -22,56 +22,56 @@ def get_step_definitions(env: Env) -> Dict[str, StepDefinition]:
             "Copies static.n3 files from /static to defined output folder",
         ),
         "codeTemplating": StepDefinition(
-            Templating("code.ttl.jinja", "code.ttl", f"./sql/{env}/view_code.sql"),
+            Templating("code.ttl.jinja", "code.ttl", f"./sql/{env}/view_access/view_code.sql"),
             "Creates triples from the view_code data with the code.ttl template",
         ),
         "cubeTemplating": StepDefinition(
-            Templating("cube.ttl.jinja", "cube.ttl", f"./sql/{env}/view_cube.sql"),
+            Templating("cube.ttl.jinja", "cube.ttl", f"./sql/{env}/view_access/view_cube.sql"),
             "Creates triples from the view_cube data with the cube.ttl template",
         ),
         "groupCodeTemplating": StepDefinition(
             Templating(
-                "group_code.ttl.jinja", "group_code.ttl", f"./sql/{env}/view_group_code.sql"
+                "group_code.ttl.jinja", "group_code.ttl", f"./sql/{env}/view_access/view_group_code.sql"
             )
         ),
         "hierarchyTemplating": StepDefinition(
-            Templating("hierarchy.ttl.jinja", "hierarchy.ttl", f"./sql/{env}/view_hierarchy.sql"),
+            Templating("hierarchy.ttl.jinja", "hierarchy.ttl", f"./sql/{env}/view_access/view_hierarchy.sql"),
             "Creates triples from the view_hierarchy data with the hierarchy.ttl template",
         ),
         "legalFoundationTemplating": StepDefinition(
             Templating(
                 "legal_foundation.ttl.jinja",
                 "legal_foundation.ttl",
-                "./sql/view_legal_foundation.sql",
+                f"./sql/{env}/view_access/view_legal_foundation.sql",
             )
         ),
         "measureUnitTemplating": StepDefinition(
             Templating(
-                "measure_unit.ttl.jinja", "measure_unit.ttl", f"./sql/{env}/view_measure_unit.sql"
+                "measure_unit.ttl.jinja", "measure_unit.ttl", f"./sql/{env}/view_access/view_measure_unit.sql"
             )
         ),
         "measureTemplating": StepDefinition(
-            Templating("measure.ttl.jinja", "measure.ttl", f"./sql/{env}/view_measure.sql"),
+            Templating("measure.ttl.jinja", "measure.ttl", f"./sql/{env}/view_access/view_measure.sql"),
             "Creates triples from the view_measure data with the measure.ttl template",
         ),
         "observationTemplating": StepDefinition(
             Templating(
                 "observation.ttl.jinja",
                 "observation.ttl",
-                f"./sql/{env}/view_observation.sql",
+                f"./sql/{env}/view_access/view_observation.sql",
             ),
             "Creates triples from the view_observation data with the observation.ttl template",
         ),
         "propertyTemplating": StepDefinition(
-            Templating("property.ttl.jinja", "property.ttl", f"./sql/{env}/view_property.sql"),
+            Templating("property.ttl.jinja", "property.ttl", f"./sql/{env}/view_access/view_property.sql"),
             "Creates triples from the view_property data with the property.ttl template",
         ),
         "roomTemplating": StepDefinition(
-            Templating("room.ttl.jinja", "room.ttl", f"./sql/{env}/view_room.sql"),
+            Templating("room.ttl.jinja", "room.ttl", f"./sql/{env}/view_access/view_room.sql"),
             "Creates triples from the view_room data with the room.ttl template",
         ),
         "timeTemplating": StepDefinition(
-            Templating("time.ttl.jinja", "time.ttl", f"./sql/{env}/view_time.sql"),
+            Templating("time.ttl.jinja", "time.ttl", f"./sql/{env}/view_access/view_time.sql"),
             "Creates triples from the view_time data with the time.ttl template",
         ),
         "compressing": StepDefinition(
