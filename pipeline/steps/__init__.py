@@ -1,8 +1,8 @@
 from .copy import Copy
-from .templating import Templating
+from .templating_optimized import TemplatingOptimized as Templating
 from .compressing import Compressing
-from .upload_to_stardog import UploadToStardog
-from .upload_to_fuseki import UploadToFuseki
+from .upload_to_stardog_optimized import UploadToStardogOptimized as UploadToStardog
+from .upload_to_fuseki_optimized import UploadToFusekiOptimized as UploadToFuseki
 
 __all__ = [
     "Copy",

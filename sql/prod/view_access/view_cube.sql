@@ -1,1 +1,1 @@
-SELECT * FROM view_cube;
+SELECT * FROM view_cube

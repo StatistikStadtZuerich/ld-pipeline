@@ -1,1 +1,1 @@
-SELECT * FROM view_time;
+SELECT * FROM view_time

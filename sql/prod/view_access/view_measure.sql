@@ -1,1 +1,1 @@
-SELECT * FROM view_measure;
+SELECT * FROM view_measure

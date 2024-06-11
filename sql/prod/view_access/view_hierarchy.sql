@@ -1,1 +1,1 @@
-SELECT * FROM view_hierarchy;
+SELECT * FROM view_hierarchy

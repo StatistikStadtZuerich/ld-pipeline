@@ -1,1 +1,1 @@
-SELECT * FROM view_observation;
+select * from view_observation

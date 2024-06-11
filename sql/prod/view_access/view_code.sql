@@ -1,1 +1,1 @@
-SELECT * FROM view_code;
+SELECT * FROM view_code

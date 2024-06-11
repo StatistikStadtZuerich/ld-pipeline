@@ -1,1 +1,1 @@
-SELECT * FROM view_room;
+SELECT * FROM view_room

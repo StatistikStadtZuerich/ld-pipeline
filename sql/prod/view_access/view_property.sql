@@ -1,1 +1,1 @@
-SELECT * FROM view_property;
+SELECT * FROM view_property

@@ -4,6 +4,7 @@ import gzip
 import re
 import pymssql
 
+from datetime import datetime
 from urllib.parse import quote
 from rdflib import Literal
 from typing import TYPE_CHECKING
@@ -56,6 +57,9 @@ class MSSQLDbConnection(DbConnection):
         Executes query and returns cursor.
         """
         self._cursor.execute(query)
+        return self._cursor
+    
+    def cursor(self):
         return self._cursor
 
     def __enter__(self):
@@ -114,6 +118,13 @@ class JinjaTemplateEngine(TemplateEngine):
                 return True
             except ValueError:
                 return False
+            
+        def is_valid_date(date_string):
+            try:
+                datetime.strptime(date_string, '%Y-%m-%d')
+                return True
+            except ValueError:
+                return False
 
         self._output_filepath = output_filepath
         self._output_file = None
@@ -125,7 +136,11 @@ class JinjaTemplateEngine(TemplateEngine):
         self._env.filters["uri_encode"] = uri_encode_filter
         self._env.filters["literal_encode"] = literal_encode_filter
         self._env.filters["is_numeric"] = is_numeric
+        self._env.filters["is_valid_date"] = is_valid_date
         self._template = self._env.get_template(template_filename)
+        
+    def get_template(self):
+        return self._template
 
     def template(self, data):
         content = self._template.render(data)

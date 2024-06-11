@@ -1,1 +1,1 @@
-SELECT * FROM view_legal_foundation;
+SELECT * FROM view_legal_foundation

@@ -1,1 +1,1 @@
-SELECT * FROM view_measure_unit;
+SELECT * FROM view_measure_unit
