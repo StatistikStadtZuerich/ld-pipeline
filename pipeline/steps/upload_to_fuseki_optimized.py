@@ -4,17 +4,13 @@ import glob
 import shutil
 from datetime import datetime
 
-from ..base import Step, Environment
+from ..base import Step, Environment, Utils
 
 
 class UploadToFusekiOptimized(Step):
     def __init__(self):
         super().__init__()
-        
-    def print_formatted(self, msg):
-        now = datetime.now()
-        formatted_datetime = now.strftime("%Y-%m-%d %H:%M:%S")
-        print(f"{formatted_datetime} - {msg}")
+        self._utils = Utils()
 
     def run(self, environment: Environment):
         output_folder = environment.config.get("template_output_path")
@@ -31,7 +27,7 @@ class UploadToFusekiOptimized(Step):
                 filepath_tmp = f"{output_folder_tmp}/{filename}"
                 filepath_done = f"{output_folder_done}/{filename}"
                 shutil.move(filepath, filepath_tmp)
-                self.print_formatted(f"Uploading {filename}")
+                self._utils.print_formatted(f"Uploading {filename}")
                 with open(filepath_tmp, "rb") as file_data:
                 
                     response = requests.post(
@@ -50,10 +46,10 @@ class UploadToFusekiOptimized(Step):
                     
                     if response.status_code == 200:
                         shutil.move(filepath_tmp, filepath_done)
-                        self.print_formatted("OK")
+                        self._utils.print_formatted("OK")
                         
                     else:
-                        self.print_formatted(f"{response.status_code}: {response.text}")
+                        self._utils.print_formatted(f"{response.status_code}: {response.text}")
                         self.logger.error(f"{response.status_code}: {response.text}")
         except Exception as e:
-            self.print_formatted(f"Ein Fehler ist aufgetreten: {e}")
+            self._utils.print_formatted(f"Ein Fehler ist aufgetreten: {e}", error=True)

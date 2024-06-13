@@ -5,7 +5,7 @@ import uuid
 import gzip
 import shutil
 
-from ..base import Step, Environment
+from ..base import Step, Environment, Utils
 
 
 class TemplatingOptimized(Step):
@@ -15,11 +15,7 @@ class TemplatingOptimized(Step):
         self._output_filename = output_filename
         self._sql_filepath = sql_filepath
         self._options = options
-        
-    def print_formatted(self, msg):
-        now = datetime.now()
-        formatted_datetime = now.strftime("%Y-%m-%d %H:%M:%S")
-        print(f"{formatted_datetime} - {msg}")
+        self._utils = Utils()
         
     def process_triples(self, tablename, cursor, template, output_folder):
         
@@ -53,49 +49,49 @@ class TemplatingOptimized(Step):
                 running = False
                 break
             batch_query = f"{query} OFFSET {offset} ROWS FETCH NEXT {db_batch_size} ROWS ONLY"
-            self.print_formatted("Downloading data ...")
+            self._utils.print_formatted("Downloading data ...")
             cursor.execute(batch_query)
             rows = cursor.fetchall()
             if not rows:
-                self.print_formatted("No rows left.")
+                self._utils.print_formatted("No rows left.")
                 running = False
                 break
             number_rows = len(rows)
             number_rows_total += number_rows
-            self.print_formatted(f"{number_rows} rows downloaded in the {counter}. iteration.")
+            self._utils.print_formatted(f"{number_rows} rows downloaded in the {counter}. iteration.")
             
-            self.print_formatted("Generating triples ...")
+            self._utils.print_formatted("Generating triples ...")
             for row in rows:
                 counter_rows += 1
                 triples = template.render(row)
                 batch.append(triples)
-            self.print_formatted("done")
+            self._utils.print_formatted("done")
                 
             if len(batch) >= write_batch_size:
                 uniqid = str(uuid.uuid4())
                 filename = f'{tablename}_{timestamp}_{uniqid}.nt.gz'
                 dest_file = f'{output_folder}/{filename}'
                 dest_file_tmp = f'{output_folder_tmp}/{filename}'
-                self.print_formatted(f"Writing batch data to {os.path.basename(dest_file_tmp)} ...")
+                self._utils.print_formatted(f"Writing batch data to {os.path.basename(dest_file_tmp)} ...")
                 with gzip.open(dest_file_tmp, 'at') as f_out:
                     f_out.write("\n".join(batch) + "\n")
                 batch.clear()
                 shutil.move(dest_file_tmp, dest_file)
-                self.print_formatted("File is created.")
+                self._utils.print_formatted("File is created.")
             offset += db_batch_size
             
-            self.print_formatted(f"{counter}. iteration is finished.")
+            self._utils.print_formatted(f"{counter}. iteration is finished.")
         
         if batch:
             uniqid = str(uuid.uuid4())
             filename = f'{tablename}_{timestamp}_{uniqid}.nt.gz'
             dest_file = f'{output_folder}/{filename}'
             dest_file_tmp = f'{output_folder_tmp}/{filename}'
-            self.print_formatted(f"Writing remaining batch data to {os.path.basename(dest_file_tmp)} ...")
+            self._utils.print_formatted(f"Writing remaining batch data to {os.path.basename(dest_file_tmp)} ...")
             with gzip.open(dest_file_tmp, 'at') as f_out:
                 f_out.write("\n".join(batch) + "\n")
             shutil.move(dest_file_tmp, dest_file)
-            self.print_formatted("File is created.")
+            self._utils.print_formatted("File is created.")
 
     def run(self, environment: Environment):
         output_filepath = os.path.join(
@@ -123,11 +119,11 @@ class TemplatingOptimized(Step):
                 )
                 
                 with connection.cursor() as cursor:
-                    self.print_formatted(f"Creating temporary table #{tablename} ...")
+                    self._utils.print_formatted(f"Creating temporary table #{tablename} ...")
                     cursor.execute(query_tmp_table)
-                    self.print_formatted(f"Creating an index on the _sort_order column ...")
+                    self._utils.print_formatted(f"Creating an index on the _sort_order column ...")
                     cursor.execute(f"CREATE INDEX idx_sort_order ON #{tablename} (_sort_order)")
-                    self.print_formatted("done")
+                    self._utils.print_formatted("done")
                     
                     with environment.get_template_engine(self._template_filename,
                             output_filepath) as template_engine:

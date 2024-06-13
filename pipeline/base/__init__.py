@@ -3,6 +3,7 @@ from .config import Env, Config
 from .environment import Environment
 from .services import MSSQLDbConnection, JinjaTemplateEngine, CompressionEngine
 from .step import Step, StepDefinition
+from .utils import Utils
 
 __all__ = [
     "Base",
@@ -14,4 +15,5 @@ __all__ = [
     "CompressionEngine",
     "Step",
     "StepDefinition",
+    "Utils"
 ]
