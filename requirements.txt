@@ -7,3 +7,4 @@ jinja2
 pystardog
 rdflib
 extended_configparser
+pandas

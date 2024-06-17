@@ -41,9 +41,7 @@ class UploadToStardogOptimized(Step):
                     shutil.move(filepath, filepath_tmp)
                     self._utils.print_formatted(f"Adding {filename}")
                     connection.add(
-                        stardog.content.File(
-                            filepath_tmp, content_type="text/turtle"
-                        ),
+                        stardog.content.File(filepath_tmp, content_type="text/turtle"),
                         environment.config.get("stardog_graph_uri"),
                     )
                 self._utils.print_formatted("Commit transaction ...")
