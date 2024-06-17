@@ -4,7 +4,7 @@ from ..base import Step, Environment
 
 
 class Templating(Step):
-    def __init__(self, template_filename: str, output_filename: str, sql_filepath: str):
+    def __init__(self, template_filename: str, output_filename: str, sql_filepath: str, options={}):
         super().__init__()
         self._template_filename = template_filename
         self._output_filename = output_filename
