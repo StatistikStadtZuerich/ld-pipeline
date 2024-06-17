@@ -17,17 +17,18 @@ class TestUploadToFusekiStep(unittest.TestCase):
         env = Environment(Env.test)
         env.config.get = Mock(
             side_effect=lambda arg: {
-                "compression_output_path": TestUtils.abs_path("data/compressed"),
                 "stardog_endpoint": "http://localhost:3030",
                 "stardog_database": "test",
-                "stardog_graph_uri": "https://lindas.admin.ch/stadtzuerich",
                 "stardog_username": "testuser",
                 "stardog_password": "starkespasswort",
             }[arg]
         )
 
         try:
-            UploadToStardog().run(env)
+            UploadToStardog(
+                "https://lindas.admin.ch/stadtzuerich",
+                directory=TestUtils.abs_path("data/compressed"),
+            ).run(env)
             mock_connection.assert_any_call(
                 database="test",
                 endpoint="http://localhost:3030",
