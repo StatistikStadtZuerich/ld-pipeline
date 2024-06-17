@@ -47,6 +47,7 @@ class MySQLDbConnection(DbConnection):
             f"Database connection to {self._config.get("mysql_host")}/{self._config.get("mysql_database")} closed"
         )
 
+
 class MSSQLDbConnection(DbConnection):
     def __init__(self, environment: "Environment"):
         super().__init__()
@@ -58,16 +59,16 @@ class MSSQLDbConnection(DbConnection):
         """
         self._cursor.execute(query)
         return self._cursor
-    
+
     def cursor(self):
         return self._cursor
 
     def __enter__(self):
         self._connection = pymssql.connect(
-            server=self._config.get('mssql_host'),
-            database=self._config.get('mssql_database'),
-            user=self._config.get('mssql_user'),
-            password=self._config.get('mssql_password')
+            server=self._config.get("mssql_host"),
+            database=self._config.get("mssql_database"),
+            user=self._config.get("mssql_user"),
+            password=self._config.get("mssql_password"),
         )
         self._cursor = self._connection.cursor(as_dict=True)
         self.logger.info(
@@ -80,6 +81,7 @@ class MSSQLDbConnection(DbConnection):
         self.logger.info(
             f"Database connection to {self._config.get('mssql_server')}/{self._config.get('mssql_database')} closed"
         )
+
 
 class JinjaTemplateEngine(TemplateEngine):
     def __init__(
@@ -107,7 +109,7 @@ class JinjaTemplateEngine(TemplateEngine):
 
         def literal_encode_filter(value: str) -> str:
             if value is None:
-                value = ''
+                value = ""
             value = value.replace("\r", " ").replace("\n", " ").strip()
             value = re.sub(r"\s+", " ", value)
             return Literal(value).n3()
@@ -118,10 +120,10 @@ class JinjaTemplateEngine(TemplateEngine):
                 return True
             except ValueError:
                 return False
-            
+
         def is_valid_date(date_string):
             try:
-                datetime.strptime(date_string, '%Y-%m-%d')
+                datetime.strptime(date_string, "%Y-%m-%d")
                 return True
             except ValueError:
                 return False
@@ -138,7 +140,7 @@ class JinjaTemplateEngine(TemplateEngine):
         self._env.filters["is_numeric"] = is_numeric
         self._env.filters["is_valid_date"] = is_valid_date
         self._template = self._env.get_template(template_filename)
-        
+
     def get_template(self):
         return self._template
 
