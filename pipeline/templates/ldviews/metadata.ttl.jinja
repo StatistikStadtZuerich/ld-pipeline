@@ -1,8 +1,26 @@
-<https://ld.stadt-zuerich.ch/statistics/view/{{ view.id|uri_encode }}> a <http://rdfs.org/ns/void#Dataset>, <http://schema.org/Dataset>, <http://www.w3.org/ns/dcat#Dataset>, <https://cube.link/view/View>;
+<https://ld.stadt-zuerich.ch/statistics/view/{{ view.id|uri_encode }}> a <http://rdfs.org/ns/void#Dataset>, <https://schema.org/Dataset>, <http://www.w3.org/ns/dcat#Dataset>, <https://cube.link/view/View>;
     <https://schema.org/name> {{ view.name|literal_encode }} ;
+    <https://schema.org/author> {{ view.metadata.author|literal_encode }} ;
+    <https://ld.stadt-zuerich.ch/schema/legalFoundation> {{ view.metadata.legal_foundation|literal_encode }} ;
+    <https://purl.org/dc/elements/1.1/type> {{ view.metadata.data_type|literal_encode }} ;
+    <https://schema.org/version> {{ view.metadata.version|literal_encode }} ;
+    <https://schema.org/description> {{ view.metadata.description|literal_encode }} ;
+    <https://schema.org/alternateName> {{ view.metadata.alt_name|literal_encode }} ;
+    <https://schema.org/identifier> {{ view.metadata.identifier|literal_encode }} ;
+    <https://ld.stadt-zuerich.ch/schema/metadataCreator> {{ view.metadata.metadata_creator|literal_encode }} ;
+    <https://schema.org/startDate> {{ view.metadata.start_date|literal_encode }} ;
+    <https://schema.org/endDate> {{ view.metadata.end_date|literal_encode }} ;
+    <https://purl.org/dc/terms/accrualPeriodicity> {{ view.metadata.accrual_periodicity|literal_encode }} ;
+    <https://purl.org/dc/terms/issued> {{ view.metadata.issued|literal_encode }} ;
+    <https://purl.org/dc/terms/modified> {{ view.metadata.modified|literal_encode }} ;
+    <https://purl.org/dc/terms/publisher> {{ view.metadata.publisher|literal_encode }} ;
+    <http://www.w3.org/ns/dcat#theme> {{ view.metadata.theme|literal_encode }} ;
+    <http://www.w3.org/ns/dcat#keyword> {{ view.metadata.keyword|literal_encode }} ;
+    <https://purl.org/dc/terms/license> {{ view.metadata.license|literal_encode }} ;
+    <https://ld.stadt-zuerich.ch/schema/usageNotes> {{ view.metadata.usage_notes|literal_encode }} ;
 
-    <http://www.w3.org/ns/dcat#distribution> [ a <http://www.w3.org/ns/dcat#Distribution>;
-            <http://purl.org/dc/terms/format> "CSV";
-            <http://www.w3.org/ns/dcat#downloadURL> <https://ld.stadt-zuerich.ch/statistics/view/{{ view.id|uri_encode }}/observation?format=csv>;
+    <http://www.w3.org/ns/dcat#distribution> [ a <http://www.w3.org/ns/dcat#Distribution> ;
+            <https://purl.org/dc/terms/format> "CSV" ;
+            <http://www.w3.org/ns/dcat#downloadURL> <https://ld.stadt-zuerich.ch/statistics/view/{{ view.id|uri_encode }}/observation?format=csv> ;
             <http://www.w3.org/ns/dcat#mediaType> "text/csv"
-    ].
+    ] .

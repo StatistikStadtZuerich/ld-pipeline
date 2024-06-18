@@ -67,9 +67,7 @@ class Filter:
 
 
 class ViewMetadata(TypedDict):
-    types: list[str]
     author: str
-    spatial: str
     legal_foundation: str
     data_type: str
     version: str
