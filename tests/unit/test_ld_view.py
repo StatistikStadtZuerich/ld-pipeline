@@ -30,7 +30,7 @@ class TestLdView(unittest.TestCase):
             }[arg]
         )
 
-        view = View("VIEW123")
+        view = View(123)
 
         source = Source("Haushaltsäquivalenzeinkommen", "000610")
 
@@ -76,14 +76,35 @@ class TestLdView(unittest.TestCase):
         )
         view.filters.append(filter1)
 
+        view.metadata = {
+            "author": "Ein Autor",
+            "legal_foundation": "Rechtliche Grundlage",
+            "data_type": "Datentyp",
+            "version": "1.0",
+            "description": "Eine Beschreibung",
+            "name": "Ein Name",
+            "alt_name": "Alternativer Name",
+            "metadata_creator": "Metadaten Ersteller",
+            "start_date": "2022-02-01",
+            "end_date": "2022-02-02",
+            "accrual_periodicity": "Abgrenzungsperiodizität",
+            "issued": "2023-02-01",
+            "modified": "2024-03-02",
+            "publisher": "123",
+            "theme": "Eine Kategorie",
+            "keyword": "Schlüsselwörter",
+            "license": "Eine Lizenz",
+            "usage_notes": "Benutzungs Bemerkungen",
+        }
+
         serializer = LdViewSerializer(env)
 
         try:
             serializer.serialize(view)
             # check if file has correct length
-            content = open(os.path.join(tmp_dir, "ldviews", "view.VIEW123.ttl")).read()
+            content = open(os.path.join(tmp_dir, "ldviews", "view.123.ttl")).read()
             expected_content = open(
-                TestUtils.abs_path("data/ldviews/views.VIEW123.ttl")
+                TestUtils.abs_path("data/ldviews/views.123.ttl")
             ).read()
             self.assertEqual(content[0:200], expected_content[0:200])
         finally:

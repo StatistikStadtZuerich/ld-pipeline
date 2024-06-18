@@ -74,7 +74,6 @@ class ViewMetadata(TypedDict):
     description: str
     name: str
     alt_name: str
-    identifier: int
     metadata_creator: str
     start_date: str
     end_date: str
@@ -89,13 +88,13 @@ class ViewMetadata(TypedDict):
 
 
 class View:
-    id: str
+    id: int
     metadata: ViewMetadata
 
     dimensions: List[Dimension] = []  # https://cube.link/view/dimension
     filters: List[Filter] = []
 
-    def __init__(self, id: str):
+    def __init__(self, id: int):
         self.id = id
         self.metadata = {}
 
