@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, TypedDict
 
 
 class FilterOperation(Enum):
@@ -66,10 +66,34 @@ class Filter:
     operation: FilterOperation
 
 
+class ViewMetadata(TypedDict):
+    types: list[str]
+    author: str
+    spatial: str
+    legal_foundation: str
+    data_type: str
+    version: str
+    description: str
+    name: str
+    alt_name: str
+    identifier: str
+    metadata_creator: str
+    start_date: str
+    end_date: str
+    accrual_periodicity: str
+    issued: str
+    modified: str
+    publisher: str
+    theme: str
+    keyword: str
+    license: str
+    usage_notes: str
+
+
 class View:
     id: str
     name: str
-    # TODO list all properties
+    metadata: ViewMetadata
 
     dimensions: List[Dimension] = []  # https://cube.link/view/dimension
     filters: List[Filter] = []
@@ -77,6 +101,7 @@ class View:
     def __init__(self, id: str, name: str):
         self.id = id
         self.name = name
+        self.metadata = {}
 
     def get_sources(self):
         sources = {}
