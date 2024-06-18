@@ -20,16 +20,17 @@ from tests.unit.utils import TestUtils
 class TestLdView(unittest.TestCase):
     def test_model(self):
         tmp_dir = TestUtils.abs_path("tmp")
+        os.makedirs(tmp_dir, exist_ok=True)
 
         env = Environment(Env.test)
         env.config.get = Mock(
             side_effect=lambda arg: {
                 "template_output_path": tmp_dir,
-                "template_path": "../../pipeline/templates/",
+                "template_path": TestUtils.abs_path("../../pipeline/templates/"),
             }[arg]
         )
 
-        view = View("VIEW123", "Test View")
+        view = View("VIEW123")
 
         source = Source("Haushaltsäquivalenzeinkommen", "000610")
 

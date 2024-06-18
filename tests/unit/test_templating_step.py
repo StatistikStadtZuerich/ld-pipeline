@@ -16,7 +16,7 @@ class TestTemplatingStep(unittest.TestCase):
         env = Environment(Env.test)
         env.config.get = Mock(
             side_effect=lambda arg: {
-                "template_output_path": TestUtils.abs_path("tmp"),
+                "template_output_path": tmp_dir,
                 "template_path": TestUtils.abs_path("data"),
             }[arg]
         )
@@ -37,9 +37,7 @@ class TestTemplatingStep(unittest.TestCase):
                 open(sql_filepath).read()
             )
 
-            content = open(
-                os.path.join(TestUtils.abs_path("tmp"), output_filename)
-            ).read()
+            content = open(os.path.join(tmp_dir, output_filename)).read()
             expected_content = open(
                 TestUtils.abs_path("data/expected_content.ttl")
             ).read()

@@ -17,7 +17,7 @@ class TestCompressingStep(unittest.TestCase):
         env = Environment(Env.test)
         env.config.get = Mock(
             side_effect=lambda arg: {
-                "compression_output_path": TestUtils.abs_path("tmp"),
+                "compression_output_path": tmp_dir,
                 "template_output_path": TestUtils.abs_path("data/triples"),
             }[arg]
         )
@@ -25,23 +25,15 @@ class TestCompressingStep(unittest.TestCase):
         try:
             Compressing().run(env)
 
-            self.assertTrue(
-                os.path.isfile(
-                    os.path.join(TestUtils.abs_path("tmp"), "sample_1.ttl.gz")
-                )
-            )
-            self.assertTrue(
-                os.path.isfile(
-                    os.path.join(TestUtils.abs_path("tmp"), "sample_2.ttl.gz")
-                )
-            )
-            self.assertTrue(len(os.listdir(TestUtils.abs_path("tmp"))) == 2)
+            self.assertTrue(os.path.isfile(os.path.join(tmp_dir, "sample_1.ttl.gz")))
+            self.assertTrue(os.path.isfile(os.path.join(tmp_dir, "sample_2.ttl.gz")))
+            self.assertTrue(len(os.listdir(tmp_dir)) == 2)
 
             sample_1_content = gzip.open(
-                os.path.join(TestUtils.abs_path("tmp"), "sample_1.ttl.gz")
+                os.path.join(tmp_dir, "sample_1.ttl.gz")
             ).read()
             sample_2_content = gzip.open(
-                os.path.join(TestUtils.abs_path("tmp"), "sample_2.ttl.gz")
+                os.path.join(tmp_dir, "sample_2.ttl.gz")
             ).read()
             sample_1_expected_content = open(
                 os.path.join(TestUtils.abs_path("data/triples"), "sample_1.ttl"), "rb"
