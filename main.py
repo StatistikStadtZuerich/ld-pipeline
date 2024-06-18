@@ -10,7 +10,7 @@ from pipeline.steps import (
     UploadToStardog,
     UploadToFuseki,
 )
-
+from pipeline.steps.views import ViewsStep
 
 app = typer.Typer()
 
@@ -83,6 +83,10 @@ steps: Dict[str, StepDefinition] = {
         UploadToFuseki(),
         "Uploads all compressed gzip files to a configured fuseki server",
     ),
+    "generateViews": StepDefinition(
+        ViewsStep(),
+        "Generate all RDF files for ld views"
+    ),
 }
 
 
@@ -101,6 +105,7 @@ def run(env: Env = Env.test):
         steps["propertyTemplating"].step,
         steps["roomTemplating"].step,
         steps["timeTemplating"].step,
+        # steps["generateViews"].step,
         steps["compressing"].step,
         steps["uploadToStardog"].step,
         # steps["uploadToFuseki"].step,

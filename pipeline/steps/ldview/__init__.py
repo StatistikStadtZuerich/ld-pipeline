@@ -1,5 +1,6 @@
 from .ld_view_model import View, Filter, BasicDimension, LookupDimension, Source, Attribute, FilterOperation
-from .ld_view_serializer import  LdViewSerializer
+from .ld_view_serializer import LdViewSerializer
+from .ld_view_builder import LdViewBuilder
 
 __all__ = [
     "View",
@@ -9,5 +10,6 @@ __all__ = [
     "Source",
     "Attribute",
     "FilterOperation",
-    "LdViewSerializer"
+    "LdViewSerializer",
+    "LdViewBuilder"
 ]
