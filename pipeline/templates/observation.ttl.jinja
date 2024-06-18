@@ -1,4 +1,4 @@
-<https://ld.integ.stadt-zuerich.ch/statistics/observation/{{ prop1_code|uri_encode }}-{{ prop2_code|uri_encode }}-{{ prop3_code|uri_encode }}-{{ prop4_code|uri_encode }}-{{ prop5_code|uri_encode }}-{{ room_code|uri_encode }}-{{ time_code|uri_encode }}> a <https://cube.link/Observation> ;
+<https://ld.stadt-zuerich.ch/statistics/observation/{{ prop1_code|uri_encode }}-{{ prop2_code|uri_encode }}-{{ prop3_code|uri_encode }}-{{ prop4_code|uri_encode }}-{{ prop5_code|uri_encode }}-{{ room_code|uri_encode }}-{{ time_code|uri_encode }}> a <https://cube.link/Observation> ;
     <https://ld.stadt-zuerich.ch/statistics/property/ZEIT> <https://ld.stadt-zuerich.ch/statistics/code/{{ time_code|uri_encode }}> ;
     {% if time %}<https://ld.stadt-zuerich.ch/statistics/property/TIME> {{ time|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ; {% endif %}
     <https://ld.stadt-zuerich.ch/statistics/property/RAUM> <https://ld.stadt-zuerich.ch/statistics/code/{{ room_code|uri_encode }}> ;
@@ -22,5 +22,5 @@
     <https://ld.stadt-zuerich.ch/statistics/measure/{{ measure|uri_encode }}> {% if value|is_numeric %}{{ value|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#decimal>{% else %}{{ value|literal_encode }}^^<https://cube.link/Undefined>{% endif %} ;
     <https://cube.link/observedBy> <https://ld.stadt-zuerich.ch/org/SSZ> .
 {% for cube_id in cube_ids.split(',') %}
-<https://ld.integ.stadt-zuerich.ch/statistics/{{ cube_id|uri_encode }}/observation> <https://cube.link/observation> <https://ld.integ.stadt-zuerich.ch/statistics/observation/{{ prop1_code|uri_encode }}-{{ prop2_code|uri_encode }}-{{ prop3_code|uri_encode }}-{{ prop4_code|uri_encode }}-{{ prop5_code|uri_encode }}-{{ room_code|uri_encode }}-{{ time_code|uri_encode }}> .
+<https://ld.stadt-zuerich.ch/statistics/{{ cube_id|uri_encode }}/observation> <https://cube.link/observation> <https://ld.stadt-zuerich.ch/statistics/observation/{{ prop1_code|uri_encode }}-{{ prop2_code|uri_encode }}-{{ prop3_code|uri_encode }}-{{ prop4_code|uri_encode }}-{{ prop5_code|uri_encode }}-{{ room_code|uri_encode }}-{{ time_code|uri_encode }}> .
 {% endfor %}
