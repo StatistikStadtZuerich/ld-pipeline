@@ -76,7 +76,10 @@ steps: Dict[str, StepDefinition] = {
         Compressing(), "Compresses all triple files to gzip files"
     ),
     "uploadToStardog": StepDefinition(
-        UploadToStardog(),
+        UploadToStardog(
+            "https://lindas.admin.ch/stadtzuerich/stat",
+            directory="./output/compressed/",
+        ),
         "Uploads all compressed gzip files to a configured stardog server",
     ),
     "uploadToFuseki": StepDefinition(
