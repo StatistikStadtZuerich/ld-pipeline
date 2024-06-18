@@ -74,7 +74,7 @@ class ViewMetadata(TypedDict):
     description: str
     name: str
     alt_name: str
-    identifier: str
+    identifier: int
     metadata_creator: str
     start_date: str
     end_date: str
