@@ -83,10 +83,7 @@ steps: Dict[str, StepDefinition] = {
         UploadToFuseki(),
         "Uploads all compressed gzip files to a configured fuseki server",
     ),
-    "generateViews": StepDefinition(
-        ViewsStep(),
-        "Generate all RDF files for ld views"
-    ),
+    "generateViews": StepDefinition(ViewsStep(), "Generate all RDF files for ld views"),
 }
 
 

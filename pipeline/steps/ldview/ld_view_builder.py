@@ -6,7 +6,6 @@ from pipeline.steps.ldview import View
 
 
 class LdViewBuilder(ABC):
-
     def __init__(self, environment: Environment):
         self._environment = environment
 

@@ -4,12 +4,20 @@ import unittest
 from unittest.mock import Mock
 
 from pipeline.base import Environment, Env
-from pipeline.steps.ldview import View, Filter, BasicDimension, LookupDimension, Source, Attribute, FilterOperation, LdViewSerializer
+from pipeline.steps.ldview import (
+    View,
+    Filter,
+    BasicDimension,
+    LookupDimension,
+    Source,
+    Attribute,
+    FilterOperation,
+    LdViewSerializer,
+)
 from tests.unit.utils import TestUtils
 
 
 class TestLdView(unittest.TestCase):
-
     def test_model(self):
         tmp_dir = TestUtils.abs_path("tmp")
 
@@ -21,25 +29,50 @@ class TestLdView(unittest.TestCase):
             }[arg]
         )
 
-        view = View('VIEW123', 'Test View')
+        view = View("VIEW123", "Test View")
 
         source = Source("Haushaltsäquivalenzeinkommen", "000610")
 
-        attribute1 = Attribute("Raum (lang)", "RAUM_LANG", "Name der administrativen ...")
+        attribute1 = Attribute(
+            "Raum (lang)", "RAUM_LANG", "Name der administrativen ..."
+        )
         attribute1.position = 1
-        attribute2 = Attribute("Raum (code)", "RAUM_CODE", "Code der administrativen ...")
+        attribute2 = Attribute(
+            "Raum (code)", "RAUM_CODE", "Code der administrativen ..."
+        )
         attribute2.position = 2
 
-        dimension1 = BasicDimension("RAUM", "Key Raum", ["https://ld.stadt-zuerich.ch/statistics/property/RAUM"], None, [source])
-        dimension2 = LookupDimension("RAUM_CODE", None, ["http://schema.org/code"], attribute2, dimension1)
-        dimension3 = LookupDimension("RAUM_FILTER_1", None, ["http://schema.org/inDefinedTermSet"], None, dimension1)
-        dimension4 = LookupDimension("RAUM_LANG", None, ["http://schema.org/name"], attribute1, dimension1)
+        dimension1 = BasicDimension(
+            "RAUM",
+            "Key Raum",
+            ["https://ld.stadt-zuerich.ch/statistics/property/RAUM"],
+            None,
+            [source],
+        )
+        dimension2 = LookupDimension(
+            "RAUM_CODE", None, ["http://schema.org/code"], attribute2, dimension1
+        )
+        dimension3 = LookupDimension(
+            "RAUM_FILTER_1",
+            None,
+            ["http://schema.org/inDefinedTermSet"],
+            None,
+            dimension1,
+        )
+        dimension4 = LookupDimension(
+            "RAUM_LANG", None, ["http://schema.org/name"], attribute1, dimension1
+        )
         view.dimensions.append(dimension1)
         view.dimensions.append(dimension2)
         view.dimensions.append(dimension3)
         view.dimensions.append(dimension4)
 
-        filter1 = Filter("Raum is QuartiereZH", "https://ld.stadt-zuerich.ch/statistics/termset/QuartiereZH", dimension3, FilterOperation.EQ.value)
+        filter1 = Filter(
+            "Raum is QuartiereZH",
+            "https://ld.stadt-zuerich.ch/statistics/termset/QuartiereZH",
+            dimension3,
+            FilterOperation.EQ.value,
+        )
         view.filters.append(filter1)
 
         serializer = LdViewSerializer(env)
@@ -47,16 +80,10 @@ class TestLdView(unittest.TestCase):
         try:
             serializer.serialize(view)
             # check if file has correct length
-            content = open(
-                os.path.join(tmp_dir, 'ldviews', 'view.VIEW123.ttl')
-            ).read()
+            content = open(os.path.join(tmp_dir, "ldviews", "view.VIEW123.ttl")).read()
             expected_content = open(
                 TestUtils.abs_path("data/ldviews/views.VIEW123.ttl")
             ).read()
             self.assertEqual(content[0:200], expected_content[0:200])
         finally:
             shutil.rmtree(tmp_dir)
-
-
-
-

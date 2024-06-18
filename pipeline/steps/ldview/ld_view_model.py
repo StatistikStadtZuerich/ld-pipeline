@@ -2,8 +2,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
 
+
 class FilterOperation(Enum):
     EQ = "Eq"
+
 
 @dataclass
 class Source:
@@ -18,6 +20,7 @@ class Source:
 
     def __eq__(self, other):
         return self.cube_id == other.cube_id
+
 
 @dataclass
 class Attribute:
@@ -78,7 +81,7 @@ class View:
     def get_sources(self):
         sources = {}
         for dimension in self.dimensions:
-            if dimension.get_type() == 'BasicDimension':
-                for source in dimension.__dict__['sources']:
+            if dimension.get_type() == "BasicDimension":
+                for source in dimension.__dict__["sources"]:
                     sources[source.cube_id] = source
         return list(sources.values())
