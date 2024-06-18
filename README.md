@@ -89,4 +89,5 @@ _HINT_: be sure to use only _local_, _int_ or _prod_ as environment within docke
    - Execute pipeline: `act --container-architecture linux/amd64`
 4. Linter
    - Run `ruff check` to lint all files in the current directory
+   - Run `ruff check --fix` to fix linting issues in the current directory
    - Run `ruff format` to format all files in the current directory
