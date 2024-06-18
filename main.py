@@ -77,7 +77,8 @@ steps: Dict[str, StepDefinition] = {
     ),
     "uploadToStardog": StepDefinition(
         UploadToStardog(
-            "https://lindas.admin.ch/stadtzuerich", directory="./output/compressed/"
+            "https://lindas.admin.ch/stadtzuerich/stat",
+            directory="./output/compressed/",
         ),
         "Uploads all compressed gzip files to a configured stardog server",
     ),
