@@ -15,5 +15,5 @@ __all__ = [
     "CompressionEngine",
     "Step",
     "StepDefinition",
-    "Utils"
+    "Utils",
 ]

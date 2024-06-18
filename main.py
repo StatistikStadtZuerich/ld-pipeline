@@ -14,6 +14,7 @@ from pipeline.steps import (
 
 app = typer.Typer()
 
+
 def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
     env = env.value
     return {
@@ -26,7 +27,7 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 "code.ttl.jinja",
                 "code.ttl",
                 f"./sql/{env}/view_access/view_code.sql",
-                options=options
+                options=options,
             ),
             "Creates triples from the view_code data with the code.ttl template",
         ),
@@ -35,7 +36,7 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 "cube.ttl.jinja",
                 "cube.ttl",
                 f"./sql/{env}/view_access/view_cube.sql",
-                options=options
+                options=options,
             ),
             "Creates triples from the view_cube data with the cube.ttl template",
         ),
@@ -44,7 +45,7 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 "group_code.ttl.jinja",
                 "group_code.ttl",
                 f"./sql/{env}/view_access/view_group_code.sql",
-                options=options
+                options=options,
             )
         ),
         "hierarchyTemplating": StepDefinition(
@@ -52,7 +53,7 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 "hierarchy.ttl.jinja",
                 "hierarchy.ttl",
                 f"./sql/{env}/view_access/view_hierarchy.sql",
-                options=options
+                options=options,
             ),
             "Creates triples from the view_hierarchy data with the hierarchy.ttl template",
         ),
@@ -61,7 +62,7 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 "legal_foundation.ttl.jinja",
                 "legal_foundation.ttl",
                 f"./sql/{env}/view_access/view_legal_foundation.sql",
-                options=options
+                options=options,
             )
         ),
         "measureUnitTemplating": StepDefinition(
@@ -69,7 +70,7 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 "measure_unit.ttl.jinja",
                 "measure_unit.ttl",
                 f"./sql/{env}/view_access/view_measure_unit.sql",
-                options=options
+                options=options,
             )
         ),
         "measureTemplating": StepDefinition(
@@ -77,7 +78,7 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 "measure.ttl.jinja",
                 "measure.ttl",
                 f"./sql/{env}/view_access/view_measure.sql",
-                options=options
+                options=options,
             ),
             "Creates triples from the view_measure data with the measure.ttl template",
         ),
@@ -86,7 +87,7 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 "observation.ttl.jinja",
                 "observation.ttl",
                 f"./sql/{env}/view_access/view_observation.sql",
-                options=options
+                options=options,
             ),
             "Creates triples from the view_observation data with the observation.ttl template",
         ),
@@ -95,7 +96,7 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 "property.ttl.jinja",
                 "property.ttl",
                 f"./sql/{env}/view_access/view_property.sql",
-                options=options
+                options=options,
             ),
             "Creates triples from the view_property data with the property.ttl template",
         ),
@@ -104,7 +105,8 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 "room.ttl.jinja",
                 "room.ttl",
                 f"./sql/{env}/view_access/view_room.sql",
-                options=options),
+                options=options,
+            ),
             "Creates triples from the view_room data with the room.ttl template",
         ),
         "timeTemplating": StepDefinition(
@@ -112,7 +114,7 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 "time.ttl.jinja",
                 "time.ttl",
                 f"./sql/{env}/view_access/view_time.sql",
-                options=options
+                options=options,
             ),
             "Creates triples from the view_time data with the time.ttl template",
         ),
@@ -128,6 +130,7 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
             "Uploads all compressed gzip files to a configured fuseki server",
         ),
     }
+
 
 @app.command(short_help="Run pipeline on given environment")
 def run(env: Env = Env.test):
@@ -157,7 +160,7 @@ def step(
         help="The name of the step to be executed. Get supported names with command 'list_steps'"
     ),
     env: Env = Env.test,
-    options = []
+    options=[],
 ):
     steps = get_step_definitions(env, options)
     Pipeline(env).step(steps[name].step)
