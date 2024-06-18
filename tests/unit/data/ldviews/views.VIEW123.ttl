@@ -1,0 +1,63 @@
+<https://ld.stadt-zuerich.ch/statistics/view/VIEW123> a <http://rdfs.org/ns/void#Dataset>, <http://schema.org/Dataset>, <http://www.w3.org/ns/dcat#Dataset>, <https://cube.link/view/View>;
+    <https://schema.org/name> "Test View" ;
+
+    <http://www.w3.org/ns/dcat#distribution> [ a <http://www.w3.org/ns/dcat#Distribution>;
+            <http://purl.org/dc/terms/format> "CSV";
+            <http://www.w3.org/ns/dcat#downloadURL> <https://ld.stadt-zuerich.ch/statistics/view/VIEW123/observation?format=csv>;
+            <http://www.w3.org/ns/dcat#mediaType> "text/csv"
+    ].
+<https://ld.stadt-zuerich.ch/statistics/view/VIEW123> <https://cube.link/view/filter> [ a <https://cube.link/view/Filter>;
+      <http://www.w3.org/2000/01/rdf-schema#label> "Raum is QuartiereZH";
+      <https://cube.link/view/argument> <https://ld.stadt-zuerich.ch/statistics/termset/QuartiereZH>;
+      <https://cube.link/view/dimension> _:RAUM_FILTER_1;
+      <https://cube.link/view/operation> <https://cube.link/view/Eq>
+    ] .
+
+
+_:C000610 a <https://cube.link/view/CubeSource>;
+      <http://www.w3.org/2000/01/rdf-schema#label> "Haushaltsäquivalenzeinkommen";
+      <https://cube.link/view/cube> <https://ld.stadt-zuerich.ch/statistics/000610>.
+
+_:RAUM a <https://cube.link/view/Dimension>;
+     <http://schema.org/identifier> "RAUM";
+<http://www.w3.org/2000/01/rdf-schema#label> "Key Raum";     <https://cube.link/view/from> [
+           <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/statistics/property/RAUM>);
+           <https://cube.link/view/source> _:C000610;
+    ].
+_:RAUM_CODE
+    <http://schema.org/identifier> "RAUM_CODE";
+<https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/VIEW123#column2>;    <https://cube.link/view/from> [
+       <https://cube.link/view/join> _:RAUM;
+       <https://cube.link/view/path> (<http://schema.org/code>);
+       <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
+   ].
+_:RAUM_FILTER_1
+    <http://schema.org/identifier> "RAUM_FILTER_1";
+    <https://cube.link/view/from> [
+       <https://cube.link/view/join> _:RAUM;
+       <https://cube.link/view/path> (<http://schema.org/inDefinedTermSet>);
+       <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
+   ].
+_:RAUM_LANG
+    <http://schema.org/identifier> "RAUM_LANG";
+<https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/VIEW123#column1>;    <https://cube.link/view/from> [
+       <https://cube.link/view/join> _:RAUM;
+       <https://cube.link/view/path> (<http://schema.org/name>);
+       <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
+   ].
+
+<https://ld.stadt-zuerich.ch/statistics/view/VIEW123> <https://cube.link/view/dimension> (_:RAUM_LANG _:RAUM_CODE) .
+<https://ld.stadt-zuerich.ch/statistics/view/VIEW123> <https://ld.stadt-zuerich.ch/schema/dataAttribute> [
+       a "https://ld.stadt-zuerich.ch/schema/Attribute";
+       <http://schema.org/alternateName> "RAUM_LANG";
+       <http://schema.org/description> "Name der administrativen ...";
+       <http://schema.org/name> "Raum (lang)";
+       <http://schema.org/position> 1
+     ] .
+<https://ld.stadt-zuerich.ch/statistics/view/VIEW123> <https://ld.stadt-zuerich.ch/schema/dataAttribute> [
+       a "https://ld.stadt-zuerich.ch/schema/Attribute";
+       <http://schema.org/alternateName> "RAUM_CODE";
+       <http://schema.org/description> "Code der administrativen ...";
+       <http://schema.org/name> "Raum (code)";
+       <http://schema.org/position> 2
+     ] .
