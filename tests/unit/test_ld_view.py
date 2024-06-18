@@ -30,7 +30,7 @@ class TestLdView(unittest.TestCase):
             }[arg]
         )
 
-        view = View(123)
+        view = View("VIEW123")
 
         source = Source("Haushaltsäquivalenzeinkommen", "000610")
 
@@ -102,9 +102,9 @@ class TestLdView(unittest.TestCase):
         try:
             serializer.serialize(view)
             # check if file has correct length
-            content = open(os.path.join(tmp_dir, "ldviews", "view.123.ttl")).read()
+            content = open(os.path.join(tmp_dir, "ldviews", "view.VIEW123.ttl")).read()
             expected_content = open(
-                TestUtils.abs_path("data/ldviews/views.123.ttl")
+                TestUtils.abs_path("data/ldviews/views.VIEW123.ttl")
             ).read()
             self.assertEqual(content[0:200], expected_content[0:200])
         finally:

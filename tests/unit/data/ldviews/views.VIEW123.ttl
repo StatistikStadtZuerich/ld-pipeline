@@ -1,4 +1,4 @@
-<https://ld.stadt-zuerich.ch/statistics/view/123> a <http://rdfs.org/ns/void#Dataset>, <https://schema.org/Dataset>, <http://www.w3.org/ns/dcat#Dataset>, <https://cube.link/view/View>;
+<https://ld.stadt-zuerich.ch/statistics/view/VIEW123> a <http://rdfs.org/ns/void#Dataset> , <https://schema.org/Dataset> , <http://www.w3.org/ns/dcat#Dataset> , <https://cube.link/view/View> ;
     <https://schema.org/author> "Ein Autor" ;
     <https://ld.stadt-zuerich.ch/schema/legalFoundation> "Rechtliche Grundlage" ;
     <https://purl.org/dc/elements/1.1/type> "Datentyp" ;
@@ -6,14 +6,14 @@
     <https://schema.org/description> "Eine Beschreibung" ;
     <https://schema.org/name> "Ein Name" ;
     <https://schema.org/alternateName> "Alternativer Name" ;
-    <https://schema.org/identifier> "123"^^<http://www.w3.org/2001/XMLSchema#integer> ;
+    <https://schema.org/identifier> "VIEW123"^^<http://www.w3.org/2001/XMLSchema#integer> ;
     <https://ld.stadt-zuerich.ch/schema/metadataCreator> "Metadaten Ersteller" ;
     <https://schema.org/startDate> "2022-02-01"^^<http://www.w3.org/2001/XMLSchema#date> ;
     <https://schema.org/endDate> "2022-02-02"^^<http://www.w3.org/2001/XMLSchema#date> ;
     <https://purl.org/dc/terms/accrualPeriodicity> "Abgrenzungsperiodizität" ;
     <https://purl.org/dc/terms/issued> "2023-02-01"^^<http://www.w3.org/2001/XMLSchema#date> ;
     <https://purl.org/dc/terms/modified> "2024-03-02" ;
-    <https://purl.org/dc/terms/publisher> <https://ld.stadt-zuerich.ch/statistics/meta/org/123> ;
+    <https://purl.org/dc/terms/publisher> <https://ld.stadt-zuerich.ch/statistics/meta/org/VIEW123> ;
     <http://www.w3.org/ns/dcat#theme> "Eine Kategorie" ;
     <http://www.w3.org/ns/dcat#keyword> "Schlüsselwörter" ;
     <https://purl.org/dc/terms/license> "Eine Lizenz" ;
@@ -21,10 +21,10 @@
 
     <http://www.w3.org/ns/dcat#distribution> [ a <http://www.w3.org/ns/dcat#Distribution>;
             <http://purl.org/dc/terms/format> "CSV";
-            <http://www.w3.org/ns/dcat#downloadURL> <https://ld.stadt-zuerich.ch/statistics/view/123/observation?format=csv>;
+            <http://www.w3.org/ns/dcat#downloadURL> <https://ld.stadt-zuerich.ch/statistics/view/VIEW123/observation?format=csv>;
             <http://www.w3.org/ns/dcat#mediaType> "text/csv"
     ].
-<https://ld.stadt-zuerich.ch/statistics/view/123> <https://cube.link/view/filter> [ a <https://cube.link/view/Filter>;
+<https://ld.stadt-zuerich.ch/statistics/view/VIEW123> <https://cube.link/view/filter> [ a <https://cube.link/view/Filter>;
       <http://www.w3.org/2000/01/rdf-schema#label> "Raum is QuartiereZH";
       <https://cube.link/view/argument> <https://ld.stadt-zuerich.ch/statistics/termset/QuartiereZH>;
       <https://cube.link/view/dimension> _:RAUM_FILTER_1;
@@ -44,7 +44,7 @@ _:RAUM a <https://cube.link/view/Dimension>;
     ].
 _:RAUM_CODE
     <http://schema.org/identifier> "RAUM_CODE";
-<https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/123#column2>;    <https://cube.link/view/from> [
+<https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/VIEW123#column2>;    <https://cube.link/view/from> [
        <https://cube.link/view/join> _:RAUM;
        <https://cube.link/view/path> (<http://schema.org/code>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
@@ -58,21 +58,21 @@ _:RAUM_FILTER_1
    ].
 _:RAUM_LANG
     <http://schema.org/identifier> "RAUM_LANG";
-<https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/123#column1>;    <https://cube.link/view/from> [
+<https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/VIEW123#column1>;    <https://cube.link/view/from> [
        <https://cube.link/view/join> _:RAUM;
        <https://cube.link/view/path> (<http://schema.org/name>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
 
-<https://ld.stadt-zuerich.ch/statistics/view/123> <https://cube.link/view/dimension> (_:RAUM_LANG _:RAUM_CODE) .
-<https://ld.stadt-zuerich.ch/statistics/view/123> <https://ld.stadt-zuerich.ch/schema/dataAttribute> [
+<https://ld.stadt-zuerich.ch/statistics/view/VIEW123> <https://cube.link/view/dimension> (_:RAUM_LANG _:RAUM_CODE) .
+<https://ld.stadt-zuerich.ch/statistics/view/VIEW123> <https://ld.stadt-zuerich.ch/schema/dataAttribute> [
        a "https://ld.stadt-zuerich.ch/schema/Attribute";
        <http://schema.org/alternateName> "RAUM_LANG";
        <http://schema.org/description> "Name der administrativen ...";
        <http://schema.org/name> "Raum (lang)";
        <http://schema.org/position> 1
      ] .
-<https://ld.stadt-zuerich.ch/statistics/view/123> <https://ld.stadt-zuerich.ch/schema/dataAttribute> [
+<https://ld.stadt-zuerich.ch/statistics/view/VIEW123> <https://ld.stadt-zuerich.ch/schema/dataAttribute> [
        a "https://ld.stadt-zuerich.ch/schema/Attribute";
        <http://schema.org/alternateName> "RAUM_CODE";
        <http://schema.org/description> "Code der administrativen ...";

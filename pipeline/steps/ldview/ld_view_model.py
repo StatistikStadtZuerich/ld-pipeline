@@ -88,13 +88,13 @@ class ViewMetadata(TypedDict):
 
 
 class View:
-    id: int
+    id: str
     metadata: ViewMetadata
 
     dimensions: List[Dimension] = []  # https://cube.link/view/dimension
     filters: List[Filter] = []
 
-    def __init__(self, id: int):
+    def __init__(self, id: str):
         self.id = id
         self.metadata = {}
 
