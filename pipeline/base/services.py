@@ -64,13 +64,13 @@ class JinjaTemplateEngine(TemplateEngine):
             )
             return text.translate(translate_table)
 
-        def uri_encode_filter(value: str) -> str:
+        def uri_encode_filter(value) -> str:
             value = remove_umlauts(str(value))
             value = re.sub(r"[^A-Za-z0-9-]", "", value)
             return quote(value)
 
-        def literal_encode_filter(value: str) -> str:
-            value = value.replace("\r", " ").replace("\n", " ").strip()
+        def literal_encode_filter(value) -> str:
+            value = str(value).replace("\r", " ").replace("\n", " ").strip()
             value = re.sub(r"\s+", " ", value)
             return Literal(value).n3()
 
