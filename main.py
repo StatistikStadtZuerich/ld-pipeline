@@ -73,7 +73,8 @@ steps: Dict[str, StepDefinition] = {
         "Creates triples from the view_time data with the time.ttl template",
     ),
     "compressing": StepDefinition(
-        Compressing(), "Compresses all triple files to gzip files"
+        Compressing(directory="./output/triples/"),
+        "Compresses all triple files to gzip files",
     ),
     "uploadToStardog": StepDefinition(
         UploadToStardog(),
