@@ -1,0 +1,12 @@
+<https://ld.stadt-zuerich.ch/statistics/view/{{ id|uri_encode }}> <https://cube.link/view/dimension> ({{ projected_bnodes | join(' ') }}) .
+{% for attribute in attributes %}
+<https://ld.stadt-zuerich.ch/statistics/view/{{ id|uri_encode }}> <https://ld.stadt-zuerich.ch/schema/dataAttribute> [
+       a "https://ld.stadt-zuerich.ch/schema/Attribute";
+       <http://schema.org/alternateName> {{ attribute.alternate_name | literal_encode }};
+       <http://schema.org/description> {{ attribute.description | literal_encode }};
+       <http://schema.org/name> {{ attribute.name | literal_encode }};
+       <http://schema.org/position> {{ attribute.position }}
+     ] .
+{% endfor %}
+
+

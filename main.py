@@ -11,7 +11,7 @@ from pipeline.steps import (
     UploadToFuseki,
     CopyHDBToPipeTables
 )
-
+from pipeline.steps.views import ViewsStep
 
 app = typer.Typer()
 
@@ -138,7 +138,11 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
         "copyHDBToPipeTables": StepDefinition(
             CopyHDBToPipeTables(env),
             "Copy HDB to pipe tables",
-        )
+        ),
+        "generateViews": StepDefinition(
+            ViewsStep(env),
+            "Generate all RDF files for ld views",
+        ),
     }
 
 

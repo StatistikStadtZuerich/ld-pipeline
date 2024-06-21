@@ -25,4 +25,5 @@ FROM
     dbo.pipe_HDBDatenobjekte_TEST t
 WHERE
     t.Element_Status = 'veröffentlicht'
-    AND t.Metadaten_Publikations_Umgebung = 'INT';
+AND
+	t.Metadaten_Publikations_Umgebung = 'INT';
