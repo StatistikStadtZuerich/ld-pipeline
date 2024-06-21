@@ -62,6 +62,12 @@ class MSSQLDbConnection(DbConnection):
 
     def cursor(self):
         return self._cursor
+    
+    def commit(self):
+        self._connection.commit()
+        
+    def rollback(self):
+        self._connection.rollback()
 
     def __enter__(self):
         self._connection = pymssql.connect(

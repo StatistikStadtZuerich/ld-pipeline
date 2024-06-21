@@ -27,6 +27,8 @@ class TemplatingOptimized(Step):
         db_batch_size = 100000
         write_batch_size = 500000
         max_iteration = None
+        
+        env = self._options['env']
 
         if "db_batch_size" in self._options:
             db_batch_size = self._options["db_batch_size"]
@@ -78,7 +80,7 @@ class TemplatingOptimized(Step):
 
             if len(batch) >= write_batch_size:
                 uniqid = str(uuid.uuid4())
-                filename = f"{tablename}_{timestamp}_{uniqid}.nt.gz"
+                filename = f"{env}_{tablename}_{timestamp}_{uniqid}.nt.gz"
                 dest_file = f"{output_folder}/{filename}"
                 dest_file_tmp = f"{output_folder_tmp}/{filename}"
                 self._utils.print_formatted(
@@ -95,7 +97,7 @@ class TemplatingOptimized(Step):
 
         if batch:
             uniqid = str(uuid.uuid4())
-            filename = f"{tablename}_{timestamp}_{uniqid}.nt.gz"
+            filename = f"{env}_{tablename}_{timestamp}_{uniqid}.nt.gz"
             dest_file = f"{output_folder}/{filename}"
             dest_file_tmp = f"{output_folder_tmp}/{filename}"
             self._utils.print_formatted(

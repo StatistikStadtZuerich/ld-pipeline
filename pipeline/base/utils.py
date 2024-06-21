@@ -1,5 +1,6 @@
 import stardog
 import os
+import glob
 import pandas as pd
 from datetime import datetime
 from .environment import Env, Environment
@@ -59,3 +60,52 @@ class Utils(Base):
                 data.append(row)
             df = pd.DataFrame(data)
         return df
+        
+    def is_pipeline_running(self, env: Env):
+        environment = Environment(env)
+        start_signal_folder = environment.config.get("start_signal_folder")
+        response_file_path = f"{start_signal_folder}/pipeline_response.txt"
+        with open(response_file_path, 'r') as file:
+            content = file.read().strip()
+            if content.startswith("Running_pipeline_") or content.startswith("Finished_pipeline_"):
+                return True
+        return False
+    
+    def check_start_signal(self, env: Env):
+        environment = Environment(env)
+        start_signal_folder = environment.config.get("start_signal_folder")
+        response_file_path = f"{start_signal_folder}/pipeline_response.txt"
+        search_path = os.path.join(start_signal_folder, 'Start_pipeline_*.txt')
+        files = glob.glob(search_path)
+        
+        if len(files) == 0:
+            return False
+        
+        if self.is_pipeline_running(env):
+            return False
+            
+        for file in files:
+            filename = os.path.basename(file)
+            running_signal = filename.replace("Start_", "Running_")
+            with open(response_file_path, 'w') as file:
+                file.write(running_signal)
+            break
+        
+        return True
+        
+    def set_finish_signal(self, env: Env):
+        environment = Environment(env)
+        start_signal_folder = environment.config.get("start_signal_folder")
+        response_file_path = f"{start_signal_folder}/pipeline_response.txt"
+        try:
+            with open(response_file_path, 'r') as file:
+                content = file.read().strip()
+                if content.startswith("Running_"):
+                    finished_content = content.replace("Running_", "Finished_")
+                    with open(response_file_path, 'w') as file:
+                        file.write(finished_content)
+                    self.print_formatted("Pipeline status updated to finished.")
+                else:
+                    self.print_formatted("No running pipeline found.", error=True)
+        except Exception as e:
+            self.print_formatted(f"An error occurred while setting finish signal: {e}", error=True)

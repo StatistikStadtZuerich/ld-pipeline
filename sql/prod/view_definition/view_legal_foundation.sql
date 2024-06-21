@@ -8,4 +8,4 @@ SELECT
 	t.Title AS title,
 	t.RGLink AS url
 FROM
-	dbo.pipe_HDBRechtsgrundlagen t;
+	dbo.pipe_HDBRechtsgrundlagen_FINAL t;

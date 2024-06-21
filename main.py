@@ -9,6 +9,7 @@ from pipeline.steps import (
     Compressing,
     UploadToStardog,
     UploadToFuseki,
+    CopyHDBToPipeTables
 )
 
 
@@ -17,6 +18,7 @@ app = typer.Typer()
 
 def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
     env = env.value
+    options['env'] = env
     return {
         "copyStatic": StepDefinition(
             Copy("static/static.n3", "static.n3"),
@@ -129,6 +131,14 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
             UploadToFuseki(),
             "Uploads all compressed gzip files to a configured fuseki server",
         ),
+        "uploadToFuseki": StepDefinition(
+            UploadToFuseki(),
+            "Uploads all compressed gzip files to a configured fuseki server",
+        ),
+        "copyHDBToPipeTables": StepDefinition(
+            CopyHDBToPipeTables(env),
+            "Copy HDB to pipe tables",
+        )
     }
 
 
@@ -150,6 +160,7 @@ def run(env: Env = Env.test):
         steps["timeTemplating"].step,
         steps["compressing"].step,
         steps["uploadToStardog"].step,
+        steps["copyHDBToPipeTables"].step,
         # steps["uploadToFuseki"].step,
     )
 
@@ -160,7 +171,7 @@ def step(
         help="The name of the step to be executed. Get supported names with command 'list_steps'"
     ),
     env: Env = Env.test,
-    options=[],
+    options={},
 ):
     steps = get_step_definitions(env, options)
     Pipeline(env).step(steps[name].step)

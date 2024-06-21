@@ -1,7 +1,7 @@
-DROP VIEW IF EXISTS dbo.view_data_object;
+DROP VIEW IF EXISTS dbo.view_data_object_int;
 GO
 
-CREATE VIEW dbo.view_data_object AS
+CREATE VIEW dbo.view_data_object_int AS
 SELECT
     CAST(t.ID AS VARCHAR) AS "object_id",
     FORMAT(CAST(t.Erstmalige_Veroeffentlichung AS DATE), 'yyyy-MM-dd') AS issued,
@@ -22,7 +22,7 @@ SELECT
     t.Rechtsgrundlage AS legal_foundation,
     t.Datentyp AS type
 FROM
-    dbo.pipe_HDBDatenobjekte_FINAL t
+    dbo.pipe_HDBDatenobjekte_TEST t
 WHERE
     t.Element_Status = 'veröffentlicht'
     AND t.Metadaten_Publikations_Umgebung = 'INT';
