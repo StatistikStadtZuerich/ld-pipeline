@@ -140,6 +140,7 @@ class LdViewBuilder(ABC):
             issued=view_dict["issued"],
             modified=view_dict["modified"],
             publisher=view_dict["publisher"],
+            theme=view_dict["theme"],
             keyword=view_dict["keyword"],
             license=view_dict["license"],
             usage_notes=view_dict["usage_notes"],

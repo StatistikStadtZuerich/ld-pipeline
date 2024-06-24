@@ -21,6 +21,7 @@ SELECT
     4 AS publisher,
     t.Schlagworte AS keyword,
     t.Lizenz AS license,
-    t.Bemerkungen AS usage_notes
+    t.Bemerkungen AS usage_notes,
+    t.Kategorie AS theme
 FROM
 	dbo.pipe_HDBDatenobjekte_TEST t;
