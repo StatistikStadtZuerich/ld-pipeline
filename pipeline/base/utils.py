@@ -2,6 +2,7 @@ import stardog
 import os
 import glob
 import pandas as pd
+import shutil
 from datetime import datetime
 from .environment import Env, Environment
 
@@ -46,11 +47,11 @@ class Utils(Base):
         }
         results = None
         try:
-            # with stardog.Admin(**conn_details) as admin:
             with stardog.Connection(stardog_database, **conn_details) as conn:
                 results = conn.select(query)
         except Exception as e:
-            self.print_formatted(f"Ein unerwarteter Fehler ist aufgetreten: {e}")
+            self.print_formatted(f"An error occured: {e}", error=True)
+            return None
 
         df = None
         if results:
@@ -64,17 +65,13 @@ class Utils(Base):
     def is_pipeline_running(self, env: Env):
         environment = Environment(env)
         start_signal_folder = environment.config.get("start_signal_folder")
-        response_file_path = f"{start_signal_folder}/pipeline_response.txt"
-        with open(response_file_path, 'r') as file:
-            content = file.read().strip()
-            if content.startswith("Running_pipeline_") or content.startswith("Finished_pipeline_"):
-                return True
-        return False
+        search_path = os.path.join(start_signal_folder, 'Running_pipeline_*.txt')
+        files = glob.glob(search_path)
+        return len(files) > 0
     
     def check_start_signal(self, env: Env):
         environment = Environment(env)
         start_signal_folder = environment.config.get("start_signal_folder")
-        response_file_path = f"{start_signal_folder}/pipeline_response.txt"
         search_path = os.path.join(start_signal_folder, 'Start_pipeline_*.txt')
         files = glob.glob(search_path)
         
@@ -87,8 +84,13 @@ class Utils(Base):
         for file in files:
             filename = os.path.basename(file)
             running_signal = filename.replace("Start_", "Running_")
-            with open(response_file_path, 'w') as file:
-                file.write(running_signal)
+            running_signal_path = os.path.join(start_signal_folder, running_signal)
+            with open(running_signal_path, 'w') as f:
+                f.write('')
+            done_folder = os.path.join(start_signal_folder, 'done')
+            if not os.path.exists(done_folder):
+                os.makedirs(done_folder)
+            shutil.move(file, os.path.join(done_folder, filename))
             break
         
         return True
@@ -96,16 +98,21 @@ class Utils(Base):
     def set_finish_signal(self, env: Env):
         environment = Environment(env)
         start_signal_folder = environment.config.get("start_signal_folder")
-        response_file_path = f"{start_signal_folder}/pipeline_response.txt"
-        try:
-            with open(response_file_path, 'r') as file:
-                content = file.read().strip()
-                if content.startswith("Running_"):
-                    finished_content = content.replace("Running_", "Finished_")
-                    with open(response_file_path, 'w') as file:
-                        file.write(finished_content)
-                    self.print_formatted("Pipeline status updated to finished.")
-                else:
-                    self.print_formatted("No running pipeline found.", error=True)
-        except Exception as e:
-            self.print_formatted(f"An error occurred while setting finish signal: {e}", error=True)
+        search_path = os.path.join(start_signal_folder, 'Running_pipeline_*.txt')
+        files = glob.glob(search_path)
+        
+        if len(files) == 0:
+            return False
+            
+        for file in files:
+            filename = os.path.basename(file)
+            finished_signal = filename.replace("Running_", "Finished_")
+            finished_signal_path = os.path.join(start_signal_folder, finished_signal)
+            with open(finished_signal_path, 'w') as f:
+                f.write('')
+            done_folder = os.path.join(start_signal_folder, 'done')
+            if not os.path.exists(done_folder):
+                os.makedirs(done_folder)
+            shutil.move(file, os.path.join(done_folder, filename))
+            shutil.move(finished_signal_path, os.path.join(done_folder, finished_signal))
+            break

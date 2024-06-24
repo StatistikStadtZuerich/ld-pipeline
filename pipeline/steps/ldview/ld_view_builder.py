@@ -67,18 +67,20 @@ class LdViewBuilder(ABC):
             dimensions.append(dds)
 
         return dimensions, dz, dr
+    
+    def _get_view_data(self, viewname):
+        with self._environment.get_db_connection() as connection:
+            with connection.cursor() as cursor:
+                query = f"SELECT * FROM {viewname}"
+                cursor.execute(query)
+                return cursor.fetchall()
 
     ###### QUERIES #######
     def _list_views(self) -> List:
         # id = viewId
         # name = like all attributes from Datenobjekte table
         # return [{"id":"WIR100OD100A", "name": "Haushaltseinkommen nach ...", "include_datenstatus": True}]
-        with self._environment.get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                query = f"SELECT * FROM view_vb_view_{self._env}"
-                cursor.execute(query)
-                return cursor.fetchall()
-        return []
+        return self._get_view_data(f"view_vb_view_{self._env}")
 
     def _list_sources_by_view_id(self, view_id: str) -> List:
         '''
@@ -87,12 +89,7 @@ class LdViewBuilder(ABC):
             {"cube_id": "000609", "name": "Haushaltseinkommen 50%"}
         ]
         '''
-        with self._environment.get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                query = f"SELECT * FROM view_vb_source_{self._env}"
-                cursor.execute(query)
-                return cursor.fetchall()
-        return []
+        return self._get_view_data(f"view_vb_source_{self._env}")
 
     def _list_filters_by_view_id(self, view_id: str) -> List:
         '''
@@ -101,12 +98,7 @@ class LdViewBuilder(ABC):
             {"termset": "Jahr", "dimension": "ZEIT"}
         ]
         '''
-        with self._environment.get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                query = f"SELECT * FROM view_vb_filter_{self._env}"
-                cursor.execute(query)
-                return cursor.fetchall()
-        return []
+        return self._get_view_data(f"view_vb_filter_{self._env}")
 
     def _list_dimensions_by_view_id(self, view_id) -> List:
         '''
@@ -115,12 +107,7 @@ class LdViewBuilder(ABC):
             {"identifier": "HTY", "name": "Haushaltstyp", "description": "Haushaltstyp nach Haushaltstyp 1"}
         ]
         '''
-        with self._environment.get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                query = f"SELECT * FROM view_vb_dimension_{self._env}"
-                cursor.execute(query)
-                return cursor.fetchall()
-        return []
+        return self._get_view_data(f"view_vb_dimension_{self._env}")
 
     def _list_measurements_by_view_id(self, view_id) -> List:
         '''
@@ -129,12 +116,7 @@ class LdViewBuilder(ABC):
             {"identifier": "HAE", "identifier_full": "HAE_GGH1400_STK1050", "cube_id": "000609", "name": "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 50%-Perzentil", "description": "Haushaltsäquivalenzeinkommen: Für die Berechnung wird die Haushaltsgrösse über die Äquivalenzskala ..."}
         ]
         '''
-        with self._environment.get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                query = f"SELECT * FROM view_vb_measure_{self._env}"
-                cursor.execute(query)
-                return cursor.fetchall()
-        return []
+        return self._get_view_data(f"view_vb_measure_{self._env}")
 
     ###### LOGIC ##########
     def _create_view_from_dict(self, view_dict) -> View:

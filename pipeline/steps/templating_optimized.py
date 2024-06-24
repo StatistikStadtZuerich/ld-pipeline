@@ -123,7 +123,7 @@ class TemplatingOptimized(Step):
                 if match:
                     tablename = match.group(1)
                 if not tablename:
-                    self.logger.error(f"Invalid query in {self._sql_filepath}")
+                    self._utils.print_formatted(f"Invalid query in {self._sql_filepath}", error=True)
                     return
 
                 # Add a row number column to the temporary table

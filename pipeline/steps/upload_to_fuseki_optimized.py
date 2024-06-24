@@ -20,36 +20,32 @@ class UploadToFusekiOptimized(Step):
         url = f"{environment.config.get("fuseki_endpoint")}/{environment.config.get("fuseki_dataset")}/data?{environment.config.get("fuseki_graph")}"
 
         files = glob.glob(os.path.join(output_folder, "*.gz"))
-        try:
-            for filepath in files:
-                filename = os.path.basename(filepath)
-                filepath_tmp = f"{output_folder_tmp}/{filename}"
-                filepath_done = f"{output_folder_done}/{filename}"
-                shutil.move(filepath, filepath_tmp)
-                self._utils.print_formatted(f"Uploading {filename}")
-                with open(filepath_tmp, "rb") as file_data:
-                    response = requests.post(
-                        url=url,
-                        data=file_data.read(),
-                        auth=(
-                            environment.config.get("fuseki_username"),
-                            environment.config.get("fuseki_password"),
-                        ),
-                        headers={
-                            "Content-Type": "text/turtle",
-                            "Content-Encoding": "gzip",
-                        },
-                        proxies={"http": None, "https": None},
+        for filepath in files:
+            filename = os.path.basename(filepath)
+            filepath_tmp = f"{output_folder_tmp}/{filename}"
+            filepath_done = f"{output_folder_done}/{filename}"
+            shutil.move(filepath, filepath_tmp)
+            self._utils.print_formatted(f"Uploading {filename}")
+            with open(filepath_tmp, "rb") as file_data:
+                response = requests.post(
+                    url=url,
+                    data=file_data.read(),
+                    auth=(
+                        environment.config.get("fuseki_username"),
+                        environment.config.get("fuseki_password"),
+                    ),
+                    headers={
+                        "Content-Type": "text/turtle",
+                        "Content-Encoding": "gzip",
+                    },
+                    proxies={"http": None, "https": None},
+                )
+
+                if response.status_code == 200:
+                    shutil.move(filepath_tmp, filepath_done)
+                    self._utils.print_formatted("OK")
+                else:
+                    self._utils.print_formatted(
+                        f"{response.status_code}: {response.text}",
+                        error=True
                     )
-
-                    if response.status_code == 200:
-                        shutil.move(filepath_tmp, filepath_done)
-                        self._utils.print_formatted("OK")
-
-                    else:
-                        self._utils.print_formatted(
-                            f"{response.status_code}: {response.text}"
-                        )
-                        self.logger.error(f"{response.status_code}: {response.text}")
-        except Exception as e:
-            self._utils.print_formatted(f"Ein Fehler ist aufgetreten: {e}", error=True)

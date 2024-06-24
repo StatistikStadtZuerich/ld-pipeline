@@ -28,29 +28,25 @@ class UploadToStardogOptimized(Step):
         url = f"{environment.config.get("stardog_endpoint")}/{environment.config.get("stardog_database")}?graph={environment.config.get("stardog_graph_uri")}"
 
         files = glob.glob(os.path.join(output_folder, "*.gz"))
-        try:
-            # with stardog.Admin(**connection_details) as admin:
-            with stardog.Connection(
-                stardog_database, **connection_details
-            ) as connection:
-                self._utils.print_formatted(f"Connection to {url} established...")
-                connection.begin()
-                for filepath in files:
-                    filename = os.path.basename(filepath)
-                    filepath_tmp = f"{output_folder_tmp}/{filename}"
-                    shutil.move(filepath, filepath_tmp)
-                    self._utils.print_formatted(f"Adding {filename}")
-                    connection.add(
-                        stardog.content.File(filepath_tmp, content_type="text/turtle"),
-                        environment.config.get("stardog_graph_uri"),
-                    )
-                self._utils.print_formatted("Commit transaction ...")
-                connection.commit()
-                for filepath in files:
-                    filename = os.path.basename(filepath)
-                    filepath_tmp = f"{output_folder_tmp}/{filename}"
-                    filepath_done = f"{output_folder_done}/{filename}"
-                    shutil.move(filepath_tmp, filepath_done)
-                self._utils.print_formatted("Done")
-        except Exception as e:
-            self._utils.print_formatted(f"Ein Fehler ist aufgetreten: {e}", error=True)
+        with stardog.Connection(
+            stardog_database, **connection_details
+        ) as connection:
+            self._utils.print_formatted(f"Connection to {url} established...")
+            connection.begin()
+            for filepath in files:
+                filename = os.path.basename(filepath)
+                filepath_tmp = f"{output_folder_tmp}/{filename}"
+                shutil.move(filepath, filepath_tmp)
+                self._utils.print_formatted(f"Adding {filename}")
+                connection.add(
+                    stardog.content.File(filepath_tmp, content_type="text/turtle"),
+                    environment.config.get("stardog_graph_uri"),
+                )
+            self._utils.print_formatted("Commit transaction ...")
+            connection.commit()
+            for filepath in files:
+                filename = os.path.basename(filepath)
+                filepath_tmp = f"{output_folder_tmp}/{filename}"
+                filepath_done = f"{output_folder_done}/{filename}"
+                shutil.move(filepath_tmp, filepath_done)
+            self._utils.print_formatted("Done")

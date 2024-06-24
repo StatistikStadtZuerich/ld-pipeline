@@ -131,7 +131,7 @@ class JinjaTemplateEngine(TemplateEngine):
             try:
                 datetime.strptime(date_string, "%Y-%m-%d")
                 return True
-            except ValueError:
+            except Exception as e:
                 return False
 
         self._output_filepath = output_filepath

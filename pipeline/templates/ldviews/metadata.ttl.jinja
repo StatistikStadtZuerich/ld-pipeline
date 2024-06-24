@@ -7,10 +7,10 @@
     <https://schema.org/name> {{ view.metadata.name|literal_encode }} ;
     <https://schema.org/alternateName> {{ view.metadata.alt_name|literal_encode }} ;
     <https://ld.stadt-zuerich.ch/schema/metadataCreator> {{ view.metadata.metadata_creator|literal_encode }} ;
-    <https://schema.org/startDate> {{ view.metadata.start_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
-    <https://schema.org/endDate> {{ view.metadata.end_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
+    {% if view.metadata.start_date|is_valid_date  %}<https://schema.org/startDate> {{ view.metadata.start_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date>;{% endif %}
+    {% if view.metadata.end_date|is_valid_date  %}<https://schema.org/endDate> {{ view.metadata.end_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date>;{% endif %}
     <https://purl.org/dc/terms/accrualPeriodicity> {{ view.metadata.accrual_periodicity|literal_encode }} ;
-    <https://purl.org/dc/terms/issued> {{ view.metadata.issued|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
+    {% if view.metadata.issued|is_valid_date  %}<https://purl.org/dc/terms/issued> {{ view.metadata.issued|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date>;{% endif %}
     <https://purl.org/dc/terms/modified> {{ view.metadata.modified|literal_encode }} ;
     <https://purl.org/dc/terms/publisher> <https://ld.stadt-zuerich.ch/statistics/meta/org/{{ view.metadata.publisher|uri_encode }}> ;
     <http://www.w3.org/ns/dcat#theme> {{ view.metadata.theme|literal_encode }} ;

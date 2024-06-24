@@ -13,7 +13,6 @@ class CopyHDBToPipeTables(Step):
         suffix = 'TEST'
         if self._env == "prod":
             suffix = 'FINAL'
-
         tablenames = ['HDBCodeliste', 'HDBCubeDefinition',
                 f'HDBDatenattribute_{suffix}', f'HDBDatenattributeObjekte_{suffix}',
                 f'HDBDatenobjekte_{suffix}', 'HDBGruppenliste', 'HDBHierarchien',
@@ -21,14 +20,10 @@ class CopyHDBToPipeTables(Step):
                 'HDBZeit', f'HDB_{suffix}']
         start_time = time.time()
         self._utils.print_formatted('Copying HDB data to the "pipe" tables ...')
-        
-        try:
-            self._copy_hdb_data_to_pipe_tables(environment, tablenames)
-            end_time = time.time()
-            execution_time = end_time - start_time
-            self._utils.print_formatted(f"Execution time for copying HDB data to the pipe tables: {execution_time:.2f} seconds")
-        except Exception as e:
-            self._utils.print_formatted(f"An error occured: {e}", error=True)
+        self._copy_hdb_data_to_pipe_tables(environment, tablenames)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        self._utils.print_formatted(f"Execution time for copying HDB data to the pipe tables: {execution_time:.2f} seconds")
             
     def _copy_hdb_data_to_pipe_tables(self, environment, tablenames):
         with environment.get_db_connection() as connection:
@@ -55,4 +50,4 @@ class CopyHDBToPipeTables(Step):
                 connection.commit()
             except Exception as e:
                 connection.rollback()
-                self._utils.print_formatted(f"Ein unerwarteter Fehler ist aufgetreten: {e}")
+                raise
