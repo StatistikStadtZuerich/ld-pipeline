@@ -125,9 +125,24 @@ class LdViewBuilder(ABC):
             include_datenstatus=view_dict["include_datenstatus"]
         )
 
-        # TODO fill up
         metadata = ViewMetadata(
-            name=view_dict["name"]
+            author=view_dict["author"],
+            legal_foundation=view_dict["legal_foundation"],
+            data_type=view_dict["data_type"],
+            version=view_dict["version"],
+            description=view_dict["description"],
+            name=view_dict["name"],
+            alt_name=view_dict["alt_name"],
+            metadata_creator=view_dict["metadata_creator"],
+            start_date=view_dict["start_date"],
+            end_date=view_dict["end_date"],
+            accrual_periodicity=view_dict["accrual_periodicity"],
+            issued=view_dict["issued"],
+            modified=view_dict["modified"],
+            publisher=view_dict["publisher"],
+            keyword=view_dict["keyword"],
+            license=view_dict["license"],
+            usage_notes=view_dict["usage_notes"],
         )
 
         view.metadata = metadata
