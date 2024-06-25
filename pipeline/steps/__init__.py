@@ -17,7 +17,8 @@ else:
     from .compressing import Compressing
     from .upload_to_stardog import UploadToStardog
     from .upload_to_fuseki import UploadToFuseki
-    
+
+from .build_termset_hierarchy import BuildTermsetHierarchy
 from .copy_hdb_to_pipe_tables import CopyHDBToPipeTables
 
 __all__ = [
@@ -26,5 +27,6 @@ __all__ = [
     "Compressing",
     "UploadToStardog",
     "UploadToFuseki",
+    "BuildTermsetHierarchy",
     "CopyHDBToPipeTables"
 ]

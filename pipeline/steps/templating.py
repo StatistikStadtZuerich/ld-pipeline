@@ -10,6 +10,9 @@ class Templating(Step):
         self._output_filename = output_filename
         self._sql_filepath = sql_filepath
 
+    def pre_process(self, row):
+        return [row]
+
     def run(self, environment: Environment):
         output_filepath = os.path.join(
             environment.config.get("template_output_path"), self._output_filename
@@ -23,7 +26,8 @@ class Templating(Step):
                     ) as template_engine:
                         self.logger.info(f"Started templating to {output_filepath}...")
                         for row in cursor:
-                            template_engine.template(row)
+                            for r in self.pre_process(row):
+                                template_engine.template(r)
                         self.logger.info(
                             f"Successfully completed templating to {output_filepath}"
                         )
