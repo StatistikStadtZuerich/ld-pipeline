@@ -1,12 +1,12 @@
-from abc import ABC
 from typing import List
 
-from pipeline.base import Environment
+from pipeline.base import Environment, Base
 from pipeline.steps.ldview import View, BasicDimension, Source, LookupDimension, Attribute, ViewMetadata, Filter, FilterOperation
 
 
-class LdViewBuilder(ABC):
+class LdViewBuilder(Base):
     def __init__(self, environment: Environment, env):
+        super().__init__()
         self._environment = environment
         self._env = env
 
@@ -38,6 +38,10 @@ class LdViewBuilder(ABC):
             for measurement_dict in measurement_dict_list:
                 view.dimensions.append(self._create_measurement_from_dimension_dict(measurement_dict, sources))
 
+            hierarchy_dict_list = self._list_hierarchies_by_view_id(view.id)
+            for hierarchy_dict in hierarchy_dict_list:
+                view.dimensions.extend(self._create_dimensions_from_hierarchy_dict(hierarchy_dict, dimension_raum))
+
             views.append(view)
 
         return views
@@ -67,7 +71,7 @@ class LdViewBuilder(ABC):
             dimensions.append(dds)
 
         return dimensions, dz, dr
-    
+
     def _get_view_data(self, viewname):
         with self._environment.get_db_connection() as connection:
             with connection.cursor() as cursor:
@@ -117,6 +121,12 @@ class LdViewBuilder(ABC):
         ]
         '''
         return self._get_view_data(f"view_vb_measure_{self._env}")
+
+    def _list_hierarchies_by_view_id(self, view_id):
+        return [
+            {"termset": "KreiseZH", "dimension": "RAUM"},
+            {"termset": "QuartiereZH", "dimension": "RAUM"},
+        ]
 
     ###### LOGIC ##########
     def _create_view_from_dict(self, view_dict) -> View:
@@ -214,3 +224,25 @@ class LdViewBuilder(ABC):
         )
 
         return dimension
+
+    def _create_dimensions_from_hierarchy_dict(self, hierarchy_dict, raum_dimension):
+
+        alang = Attribute(
+            name=f"{hierarchy_dict["termset"]} (lang)",
+            alternate_name=f"{hierarchy_dict["termset"].upper()}_LANG",
+            description=f"Name der Hierarchiestufe '{hierarchy_dict["termset"]}', auf den sich der Datenpunkt bezieht."
+        )
+
+        acode = Attribute(
+            name=f"{hierarchy_dict["termset"]} (code)",
+            alternate_name=f"{hierarchy_dict["termset"].upper()}_CODE",
+            description=f"Code der Hierarchiestufe '{hierarchy_dict["termset"]}', auf den sich der Datenpunkt bezieht."
+        )
+
+        if hierarchy_dict["dimension"] != "RAUM":
+            self.logger.warn(f"View contains hierarchy type {hierarchy_dict["dimension"]}, currently only 'RAUM' supported")
+
+        dlang = LookupDimension(f"{hierarchy_dict["termset"].upper()}_LANG", None, [f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict["termset"]}", "http://schema.org/name"], alang, raum_dimension)
+        dcode = LookupDimension(f"{hierarchy_dict["termset"].upper()}_CODE", None, [f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict["termset"]}", "http://schema.org/termCode"], acode, raum_dimension)
+
+        return [dlang, dcode]
