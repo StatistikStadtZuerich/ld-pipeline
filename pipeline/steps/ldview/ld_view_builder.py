@@ -31,16 +31,18 @@ class LdViewBuilder(Base):
                 view.dimensions.append(filter_and_dimension[1])
 
             dimension_dict_list = self._list_dimensions_by_view_id(view.id)
-            for dimension_dict in dimension_dict_list:
-                view.dimensions.extend(self._create_dimensions_from_dimension_dict(dimension_dict, sources))
+            for index, dimension_dict in enumerate(dimension_dict_list):
+                view.dimensions.extend(self._create_dimensions_from_dimension_dict(index, dimension_dict, sources))
 
             measurement_dict_list = self._list_measurements_by_view_id(view.id)
-            for measurement_dict in measurement_dict_list:
-                view.dimensions.append(self._create_measurement_from_dimension_dict(measurement_dict, sources))
+            for index, measurement_dict in enumerate(measurement_dict_list):
+                view.dimensions.append(self._create_measurement_from_dimension_dict(index, measurement_dict, sources))
 
             hierarchy_dict_list = self._list_hierarchies_by_view_id(view.id)
-            for hierarchy_dict in hierarchy_dict_list:
-                view.dimensions.extend(self._create_dimensions_from_hierarchy_dict(hierarchy_dict, dimension_raum))
+            for index, hierarchy_dict in enumerate(hierarchy_dict_list):
+                view.dimensions.extend(self._create_dimensions_from_hierarchy_dict(index, hierarchy_dict, dimension_raum))
+
+            view.sort_and_numerate_dimensions()
 
             views.append(view)
 
@@ -52,9 +54,16 @@ class LdViewBuilder(Base):
         dr = BasicDimension("RAUM", "Key Raum", ["https://ld.stadt-zuerich.ch/statistics/property/RAUM"], None, sources)
 
         azl = Attribute("Zeit (lang)", "ZEIT_LANG", "Name des Zeitpunkts / der Periode, auf den sich der Datenpunkt bezieht.")
+        azl.position = 1
+
         azc = Attribute("Zeit (code)", "ZEIT_CODE", "Code des Zeitpunkts / der Periode, auf den sich der Datenpunkt bezieht.")
+        azc.position = 2
+
         arl = Attribute("Raum (lang)", "RAUM_LANG", "Name der administrativen räumlichen Einheit, auf die sich der Datenpunkt bezieht")
+        arl.position = 3
+
         arc = Attribute("Raum (code)", "RAUM_CODE", "Code der administrativen räumlichen Einheit, auf die sich der Datenpunkt bezieht")
+        arc.position = 5
 
         dzl = LookupDimension("ZEIT_LANG", None, ["http://schema.org/name"], azl, dz)
         dzc = LookupDimension("ZEIT_CODE", None, ["http://schema.org/termCode"], azc, dz)
@@ -65,6 +74,8 @@ class LdViewBuilder(Base):
 
         if view.include_datenstatus:
             ads = Attribute("Datenstatus (lang)", "DATENSTATUS", "Datenstatus des Datenpunktes")
+            ads.position = 1000
+
             dds = BasicDimension("DATENSTATUS", "Datenstatus",
                                  ["https://ld.stadt-zuerich.ch/statistics/property/STATUS",
                                   "http://schema.org/name"], ads, sources)
@@ -181,7 +192,7 @@ class LdViewBuilder(Base):
         )
         return filter, filter_dimension
 
-    def _create_dimensions_from_dimension_dict(self, dimension_dict, sources) -> List:
+    def _create_dimensions_from_dimension_dict(self, index, dimension_dict, sources) -> List:
         dimension = BasicDimension(
             identifier=dimension_dict["identifier"],
             name=dimension_dict["name"],
@@ -194,19 +205,21 @@ class LdViewBuilder(Base):
             alternate_name=f"{dimension_dict["identifier"]}_LANG",
             description=dimension_dict["description"]
         )
+        alang.position = 100+2*index
 
         acode = Attribute(
             name=f"{dimension_dict["name"]} (code)",
             alternate_name=f"{dimension_dict["identifier"]}_CODE",
             description=dimension_dict["description"]
         )
+        acode.position = 101+2*index
 
         dlang = LookupDimension(f"{dimension_dict["identifier"]}_LANG", None, ["http://schema.org/name"], alang, dimension)
         dcode = LookupDimension(f"{dimension_dict["identifier"]}_CODE", None, ["http://schema.org/termCode"], acode, dimension)
 
         return [dimension, dlang, dcode]
 
-    def _create_measurement_from_dimension_dict(self, measurement_dict, sources):
+    def _create_measurement_from_dimension_dict(self, index, measurement_dict, sources):
         source = next((s for s in sources if s.cube_id == measurement_dict["cube_id"]))
 
         attribute = Attribute(
@@ -214,6 +227,7 @@ class LdViewBuilder(Base):
             alternate_name=measurement_dict["identifier_full"],
             description=measurement_dict["description"]
         )
+        attribute.position = 200+index
 
         dimension = BasicDimension(
             identifier=measurement_dict["identifier_full"],
@@ -225,19 +239,21 @@ class LdViewBuilder(Base):
 
         return dimension
 
-    def _create_dimensions_from_hierarchy_dict(self, hierarchy_dict, raum_dimension):
+    def _create_dimensions_from_hierarchy_dict(self, index, hierarchy_dict, raum_dimension):
 
         alang = Attribute(
             name=f"{hierarchy_dict["termset"]} (lang)",
             alternate_name=f"{hierarchy_dict["termset"].upper()}_LANG",
             description=f"Name der Hierarchiestufe '{hierarchy_dict["termset"]}', auf den sich der Datenpunkt bezieht."
         )
+        alang.position = 10+2*index
 
         acode = Attribute(
             name=f"{hierarchy_dict["termset"]} (code)",
             alternate_name=f"{hierarchy_dict["termset"].upper()}_CODE",
             description=f"Code der Hierarchiestufe '{hierarchy_dict["termset"]}', auf den sich der Datenpunkt bezieht."
         )
+        acode.position = 11+2*index
 
         if hierarchy_dict["dimension"] != "RAUM":
             self.logger.warn(f"View contains hierarchy type {hierarchy_dict["dimension"]}, currently only 'RAUM' supported")
