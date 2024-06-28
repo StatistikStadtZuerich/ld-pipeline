@@ -22,10 +22,10 @@ class Config(Base):
         self._config_parser.read(path)
 
     def get(self, name, return_type=str, fallback=None):
-        if return_type == int:
+        if return_type is int:
             return self._config_parser.getint(self._env, name, fallback=fallback)
-        elif return_type == float:
+        elif return_type is float:
             return self._config_parser.getfloat(self._env, name, fallback=fallback)
-        elif return_type == bool:
+        elif return_type is bool:
             return self._config_parser.getboolean(self._env, name, fallback=fallback)
         return self._config_parser.get(self._env, name, fallback=fallback)
