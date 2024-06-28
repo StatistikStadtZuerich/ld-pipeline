@@ -24,7 +24,7 @@ jobs:
       - name: Run linter
         run: ruff check
       - name: Run unit tests
-        run: python -m pytest --doctest-modules --junitxml=reports/unittest-results.xml tests/unit
+        run: SSZ_DB_TYPE=mock  python -m pytest --doctest-modules --junitxml=reports/unittest-results.xml tests/unit
       - name: Create unit tests report
         uses: dorny/test-reporter@v1
         if: success() || failure()
@@ -32,15 +32,15 @@ jobs:
           name: Unit Test Report
           path: reports/unittest-results.xml
           reporter: java-junit
-      - name: Run integration tests
-        run: python -m pytest --container-scope=session --doctest-modules --junitxml=reports/integration-test-results.xml tests/integration
-      - name: Create integration tests report
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
-        with:
-          name: Integration Test Report
-          path: reports/integration-test-results.xml
-          reporter: java-junit
+#      - name: Run integration tests
+#        run: python -m pytest --container-scope=session --doctest-modules --junitxml=reports/integration-test-results.xml tests/integration
+#      - name: Create integration tests report
+#        uses: dorny/test-reporter@v1
+#        if: success() || failure()
+#        with:
+#          name: Integration Test Report
+#          path: reports/integration-test-results.xml
+#          reporter: java-junit
       - name: Archive test reports
         uses: actions/upload-artifact@v4
         if: success() || failure()

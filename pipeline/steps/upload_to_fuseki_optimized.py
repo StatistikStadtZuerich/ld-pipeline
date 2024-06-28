@@ -46,6 +46,5 @@ class UploadToFusekiOptimized(Step):
                     self._utils.print_formatted("OK")
                 else:
                     self._utils.print_formatted(
-                        f"{response.status_code}: {response.text}",
-                        error=True
+                        f"{response.status_code}: {response.text}", error=True
                     )

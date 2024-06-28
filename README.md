@@ -78,7 +78,7 @@ _HINT_: be sure to use only _local_, _int_ or _prod_ as environment within docke
 
 1. Unit Tests
    - Unit tests can be found under tests/unit
-   - Run: `python -m pytest tests/unit`
+   - Run: `SSZ_DB_TYPE=mock python -m pytest tests/unit`
 2. Integration Tests
    - Integration tests can be found under tests/integration
    - The tests create the environment using docker (tests/integration/compose.yaml)

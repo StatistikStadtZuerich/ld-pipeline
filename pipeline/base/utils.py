@@ -61,58 +61,60 @@ class Utils(Base):
                 data.append(row)
             df = pd.DataFrame(data)
         return df
-        
+
     def is_pipeline_running(self, env: Env):
         environment = Environment(env)
         start_signal_folder = environment.config.get("start_signal_folder")
-        search_path = os.path.join(start_signal_folder, 'Running_pipeline_*.txt')
+        search_path = os.path.join(start_signal_folder, "Running_pipeline_*.txt")
         files = glob.glob(search_path)
         return len(files) > 0
-    
+
     def check_start_signal(self, env: Env):
         environment = Environment(env)
         start_signal_folder = environment.config.get("start_signal_folder")
-        search_path = os.path.join(start_signal_folder, 'Start_pipeline_*.txt')
+        search_path = os.path.join(start_signal_folder, "Start_pipeline_*.txt")
         files = glob.glob(search_path)
-        
+
         if len(files) == 0:
             return False
-        
+
         if self.is_pipeline_running(env):
             return False
-            
+
         for file in files:
             filename = os.path.basename(file)
             running_signal = filename.replace("Start_", "Running_")
             running_signal_path = os.path.join(start_signal_folder, running_signal)
-            with open(running_signal_path, 'w') as f:
-                f.write('')
-            done_folder = os.path.join(start_signal_folder, 'done')
+            with open(running_signal_path, "w") as f:
+                f.write("")
+            done_folder = os.path.join(start_signal_folder, "done")
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
             shutil.move(file, os.path.join(done_folder, filename))
             break
-        
+
         return True
-        
+
     def set_finish_signal(self, env: Env):
         environment = Environment(env)
         start_signal_folder = environment.config.get("start_signal_folder")
-        search_path = os.path.join(start_signal_folder, 'Running_pipeline_*.txt')
+        search_path = os.path.join(start_signal_folder, "Running_pipeline_*.txt")
         files = glob.glob(search_path)
-        
+
         if len(files) == 0:
             return False
-            
+
         for file in files:
             filename = os.path.basename(file)
             finished_signal = filename.replace("Running_", "Finished_")
             finished_signal_path = os.path.join(start_signal_folder, finished_signal)
-            with open(finished_signal_path, 'w') as f:
-                f.write('')
-            done_folder = os.path.join(start_signal_folder, 'done')
+            with open(finished_signal_path, "w") as f:
+                f.write("")
+            done_folder = os.path.join(start_signal_folder, "done")
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
             shutil.move(file, os.path.join(done_folder, filename))
-            shutil.move(finished_signal_path, os.path.join(done_folder, finished_signal))
+            shutil.move(
+                finished_signal_path, os.path.join(done_folder, finished_signal)
+            )
             break

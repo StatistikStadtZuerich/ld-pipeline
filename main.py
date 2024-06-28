@@ -9,7 +9,7 @@ from pipeline.steps import (
     Compressing,
     UploadToStardog,
     UploadToFuseki,
-    CopyHDBToPipeTables
+    CopyHDBToPipeTables,
 )
 from pipeline.steps.views import ViewsStep
 
@@ -18,7 +18,7 @@ app = typer.Typer()
 
 def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
     env = env.value
-    options['env'] = env
+    options["env"] = env
     return {
         "copyStatic": StepDefinition(
             Copy("static/static.n3", "static.n3"),
@@ -126,10 +126,6 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
         "uploadToStardog": StepDefinition(
             UploadToStardog(),
             "Uploads all compressed gzip files to a configured stardog server",
-        ),
-        "uploadToFuseki": StepDefinition(
-            UploadToFuseki(),
-            "Uploads all compressed gzip files to a configured fuseki server",
         ),
         "uploadToFuseki": StepDefinition(
             UploadToFuseki(),

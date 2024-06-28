@@ -4,11 +4,20 @@ from ..base import Step, Environment
 
 
 class Templating(Step):
-    def __init__(self, template_filename: str, output_filename: str, sql_filepath: str, options={}):
+    def __init__(
+        self,
+        template_filename: str,
+        output_filename: str,
+        sql_filepath: str,
+        options={},
+    ):
         super().__init__()
         self._template_filename = template_filename
         self._output_filename = output_filename
         self._sql_filepath = sql_filepath
+
+    def pre_process(self, row):
+        return [row]
 
     def run(self, environment: Environment):
         output_filepath = os.path.join(
@@ -23,7 +32,8 @@ class Templating(Step):
                     ) as template_engine:
                         self.logger.info(f"Started templating to {output_filepath}...")
                         for row in cursor:
-                            template_engine.template(row)
+                            for r in self.pre_process(row):
+                                template_engine.template(r)
                         self.logger.info(
                             f"Successfully completed templating to {output_filepath}"
                         )
