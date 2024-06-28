@@ -28,9 +28,7 @@ class UploadToStardogOptimized(Step):
         url = f"{environment.config.get("stardog_endpoint")}/{environment.config.get("stardog_database")}?graph={environment.config.get("stardog_graph_uri")}"
 
         files = glob.glob(os.path.join(output_folder, "*.gz"))
-        with stardog.Connection(
-            stardog_database, **connection_details
-        ) as connection:
+        with stardog.Connection(stardog_database, **connection_details) as connection:
             self._utils.print_formatted(f"Connection to {url} established...")
             connection.begin()
             for filepath in files:

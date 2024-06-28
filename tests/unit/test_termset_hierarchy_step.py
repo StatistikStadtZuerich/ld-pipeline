@@ -22,8 +22,24 @@ class TestTermsetHierarchyStep(unittest.TestCase):
         )
         env.get_db_connection = MagicMock()
         env.get_db_connection().__enter__().query().__enter__.return_value = [
-            {"r0": "R30000", "f0": "KantonZH; StadtZH", "r1": "R00200", "f1": "KreiseZH; WahlkreiseZH", "r2": "R00023", "f2": "QuartiereZH", "r3": "R3Z030"},
-            {"r0": "R30000", "f0": "KantonZH; StadtZH", "r1": "R10000", "f1": "KreiseZH; WahlkreiseZH; StadtZHAlt", "r2": "R00011", "f2": "QuartiereZH", "r3": "R3Z004"}
+            {
+                "r0": "R30000",
+                "f0": "KantonZH; StadtZH",
+                "r1": "R00200",
+                "f1": "KreiseZH; WahlkreiseZH",
+                "r2": "R00023",
+                "f2": "QuartiereZH",
+                "r3": "R3Z030",
+            },
+            {
+                "r0": "R30000",
+                "f0": "KantonZH; StadtZH",
+                "r1": "R10000",
+                "f1": "KreiseZH; WahlkreiseZH; StadtZHAlt",
+                "r2": "R00011",
+                "f2": "QuartiereZH",
+                "r3": "R3Z004",
+            },
         ]
 
         sql_filepath = TestUtils.abs_path("data/sample.sql")
@@ -31,7 +47,9 @@ class TestTermsetHierarchyStep(unittest.TestCase):
         output_filename = "test_output.ttl"
 
         try:
-            BuildTermsetHierarchy(template_filename, output_filename, sql_filepath).run(env)
+            BuildTermsetHierarchy(template_filename, output_filename, sql_filepath).run(
+                env
+            )
 
             env.get_db_connection().__enter__().query.assert_called_with(
                 open(sql_filepath).read()

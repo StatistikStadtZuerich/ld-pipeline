@@ -8,13 +8,13 @@ from extended_configparser.interpolator import EnvInterpolation
 import configparser
 import os
 
-os.environ.setdefault('SSZ_DB_TYPE', 'mssql')
-config_path = os.path.join(os.path.dirname(__file__), '..', '..', 'config.ini')
+os.environ.setdefault("SSZ_DB_TYPE", "mssql")
+config_path = os.path.join(os.path.dirname(__file__), "..", "..", "config.ini")
 config = configparser.ConfigParser(interpolation=EnvInterpolation())
 config.read(os.path.join(config_path))
 
-db = config.get('DEFAULT', 'db')
-if db == 'mssql':
+db = config.get("DEFAULT", "db")
+if db == "mssql":
     from .mmsql_environment import MMSqlEnvironment as Environment
 else:
     from .environment import Environment

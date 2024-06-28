@@ -27,8 +27,8 @@ class TemplatingOptimized(Step):
         db_batch_size = 100000
         write_batch_size = 500000
         max_iteration = None
-        
-        env = self._options['env']
+
+        env = self._options["env"]
 
         if "db_batch_size" in self._options:
             db_batch_size = self._options["db_batch_size"]
@@ -123,7 +123,9 @@ class TemplatingOptimized(Step):
                 if match:
                     tablename = match.group(1)
                 if not tablename:
-                    self._utils.print_formatted(f"Invalid query in {self._sql_filepath}", error=True)
+                    self._utils.print_formatted(
+                        f"Invalid query in {self._sql_filepath}", error=True
+                    )
                     return
 
                 # Add a row number column to the temporary table
