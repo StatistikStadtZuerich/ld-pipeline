@@ -48,6 +48,6 @@ class CopyHDBToPipeTables(Step):
                             """)
                         self._utils.print_formatted("Done")
                 connection.commit()
-            except Exception as e:
+            except Exception:
                 connection.rollback()
                 raise

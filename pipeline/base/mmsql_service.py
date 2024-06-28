@@ -1,10 +1,11 @@
 import pymssql
 
+from pipeline.base import Environment
 from pipeline.interfaces.services import DbConnection
 
 
 class MSSQLDbConnection(DbConnection):
-    def __init__(self, environment: "Environment"):
+    def __init__(self, environment: Environment):
         super().__init__()
         self._config = environment.config
 

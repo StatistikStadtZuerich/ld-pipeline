@@ -25,13 +25,13 @@ class Pipeline:
             "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         }
         current_date = datetime.now()
-        formatted_date = current_date.strftime("%Y%m%d")
+        # formatted_date = current_date.strftime("%Y%m%d")
         filepath = self._environment.config.get("logger.filepath")
         filename = self._environment.config.get("logger.filename")\
             .replace('%Y', current_date.strftime('%Y'))\
             .replace('%m', current_date.strftime('%m'))\
             .replace('%d', current_date.strftime('%d'))
-        
+
         if not os.path.exists(filepath):
             os.makedirs(filepath)
         if self._environment.config.get("logger.log_to_file", bool, True):
