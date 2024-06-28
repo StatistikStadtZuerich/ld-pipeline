@@ -10,27 +10,40 @@ class CopyHDBToPipeTables(Step):
         self._utils = Utils()
 
     def run(self, environment: Environment):
-        suffix = 'TEST'
+        suffix = "TEST"
         if self._env == "prod":
-            suffix = 'FINAL'
-        tablenames = ['HDBCodeliste', 'HDBCubeDefinition',
-                f'HDBDatenattribute_{suffix}', f'HDBDatenattributeObjekte_{suffix}',
-                f'HDBDatenobjekte_{suffix}', 'HDBGruppenliste', 'HDBHierarchien',
-                'HDBKennzahlen', 'HDBRaum', f'HDBRechtsgrundlagen_{suffix}',
-                'HDBZeit', f'HDB_{suffix}']
+            suffix = "FINAL"
+        tablenames = [
+            "HDBCodeliste",
+            "HDBCubeDefinition",
+            f"HDBDatenattribute_{suffix}",
+            f"HDBDatenattributeObjekte_{suffix}",
+            f"HDBDatenobjekte_{suffix}",
+            "HDBGruppenliste",
+            "HDBHierarchien",
+            "HDBKennzahlen",
+            "HDBRaum",
+            f"HDBRechtsgrundlagen_{suffix}",
+            "HDBZeit",
+            f"HDB_{suffix}",
+        ]
         start_time = time.time()
         self._utils.print_formatted('Copying HDB data to the "pipe" tables ...')
         self._copy_hdb_data_to_pipe_tables(environment, tablenames)
         end_time = time.time()
         execution_time = end_time - start_time
-        self._utils.print_formatted(f"Execution time for copying HDB data to the pipe tables: {execution_time:.2f} seconds")
-            
+        self._utils.print_formatted(
+            f"Execution time for copying HDB data to the pipe tables: {execution_time:.2f} seconds"
+        )
+
     def _copy_hdb_data_to_pipe_tables(self, environment, tablenames):
         with environment.get_db_connection() as connection:
             try:
                 with connection.cursor() as cursor:
                     for tablename in tablenames:
-                        self._utils.print_formatted(f'Copying {tablename} to pipe_{tablename} ...')
+                        self._utils.print_formatted(
+                            f"Copying {tablename} to pipe_{tablename} ..."
+                        )
                         cursor.execute(f"""
                                 SELECT COLUMN_NAME
                                 FROM INFORMATION_SCHEMA.COLUMNS
@@ -39,7 +52,7 @@ class CopyHDBToPipeTables(Step):
                             """)
                         columns = cursor.fetchall()
                         columns = [f'"{col["COLUMN_NAME"]}"' for col in columns]
-                        columns_list = ', '.join(columns)
+                        columns_list = ", ".join(columns)
                         cursor.execute(f"""
                                 TRUNCATE TABLE pipe_{tablename};
                                 DROP TABLE IF EXISTS #pipe_{tablename};
