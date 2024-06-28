@@ -9,18 +9,67 @@ from tests.unit.utils import TestUtils
 
 
 class TestLdViews(unittest.TestCase):
-
     def _mock_database_query(self, query_name):
         if query_name == "view_vb_view_test":
-            return [{"id":"WIR100OD100A", "name": "Haushaltseinkommen nach ...", "include_datenstatus": True,"author":None,"legal_foundation":None,"data_type":None,"version":None,"description":None,"alt_name":None,"metadata_creator":None,"start_date":None,"end_date":None,"accrual_periodicity":None,"issued":None,"modified":None,"publisher":None,"theme":None,"keyword":None,"license":None,"usage_notes": None}]
+            return [
+                {
+                    "id": "WIR100OD100A",
+                    "name": "Haushaltseinkommen nach ...",
+                    "include_datenstatus": True,
+                    "author": None,
+                    "legal_foundation": None,
+                    "data_type": None,
+                    "version": None,
+                    "description": None,
+                    "alt_name": None,
+                    "metadata_creator": None,
+                    "start_date": None,
+                    "end_date": None,
+                    "accrual_periodicity": None,
+                    "issued": None,
+                    "modified": None,
+                    "publisher": None,
+                    "theme": None,
+                    "keyword": None,
+                    "license": None,
+                    "usage_notes": None,
+                }
+            ]
         elif query_name == "view_vb_source_test":
-            return [{"cube_id": "000610", "name": "Haushaltseinkommen 25%"},{"cube_id": "000609", "name": "Haushaltseinkommen 50%"}]
+            return [
+                {"cube_id": "000610", "name": "Haushaltseinkommen 25%"},
+                {"cube_id": "000609", "name": "Haushaltseinkommen 50%"},
+            ]
         elif query_name == "view_vb_filter_test":
-            return [{"termset": "KreiseZH", "dimension": "RAUM"},{"termset": "Jahr", "dimension": "ZEIT"}]
+            return [
+                {"termset": "KreiseZH", "dimension": "RAUM"},
+                {"termset": "Jahr", "dimension": "ZEIT"},
+            ]
         elif query_name == "view_vb_dimension_test":
-            return [{"identifier": "HTY", "name": "Haushaltstyp", "description": "Haushaltstyp nach Haushaltstyp 1"}]
+            return [
+                {
+                    "identifier": "HTY",
+                    "name": "Haushaltstyp",
+                    "description": "Haushaltstyp nach Haushaltstyp 1",
+                }
+            ]
         elif query_name == "view_vb_measure_test":
-            return [{"identifier": "HAE", "identifier_full": "HAE_GGH1400_STK1025", "cube_id": "000610", "name": "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 25%-Perzentil", "description": "Haushaltsäquivalenzeinkommen: Für die Berechnung wird die Haushaltsgrösse über die Äquivalenzskala ..."},{"identifier": "HAE", "identifier_full": "HAE_GGH1400_STK1050", "cube_id": "000609", "name": "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 50%-Perzentil", "description": "Haushaltsäquivalenzeinkommen: Für die Berechnung wird die Haushaltsgrösse über die Äquivalenzskala ..."}]
+            return [
+                {
+                    "identifier": "HAE",
+                    "identifier_full": "HAE_GGH1400_STK1025",
+                    "cube_id": "000610",
+                    "name": "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 25%-Perzentil",
+                    "description": "Haushaltsäquivalenzeinkommen: Für die Berechnung wird die Haushaltsgrösse über die Äquivalenzskala ...",
+                },
+                {
+                    "identifier": "HAE",
+                    "identifier_full": "HAE_GGH1400_STK1050",
+                    "cube_id": "000609",
+                    "name": "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 50%-Perzentil",
+                    "description": "Haushaltsäquivalenzeinkommen: Für die Berechnung wird die Haushaltsgrösse über die Äquivalenzskala ...",
+                },
+            ]
         else:
             raise Exception(f"query {query_name} not properly mocked for test")
 
@@ -49,7 +98,7 @@ class TestLdViews(unittest.TestCase):
             serializer.serialize(views[0])
 
             content = open(
-                os.path.join(TestUtils.abs_path("tmp"), 'ldviews/view.WIR100OD100A.ttl')
+                os.path.join(TestUtils.abs_path("tmp"), "ldviews/view.WIR100OD100A.ttl")
             ).read()
             expected_content = open(
                 TestUtils.abs_path("data/expected_view.WIR100OD100A.ttl")

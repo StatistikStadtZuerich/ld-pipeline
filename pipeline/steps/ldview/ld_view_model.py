@@ -100,10 +100,14 @@ class View:
         self.include_datenstatus = include_datenstatus
 
     def sort_and_numerate_dimensions(self):
-        self.dimensions.sort(key=lambda d: d.column.position if d.column is not None else 0)
+        self.dimensions.sort(
+            key=lambda d: d.column.position if d.column is not None else 0
+        )
 
-        for index, dimension in enumerate(filter(lambda d: d.column is not None, self.dimensions)):
-            dimension.column.position = index+1
+        for index, dimension in enumerate(
+            filter(lambda d: d.column is not None, self.dimensions)
+        ):
+            dimension.column.position = index + 1
 
     def get_sources(self):
         sources = {}
