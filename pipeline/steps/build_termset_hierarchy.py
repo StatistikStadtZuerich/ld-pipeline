@@ -1,4 +1,4 @@
-from pipeline.steps import Templating
+from .templating import Templating
 
 
 class BuildTermsetHierarchy(Templating):
