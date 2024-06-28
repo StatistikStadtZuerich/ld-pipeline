@@ -15,6 +15,7 @@ class Templating(Step):
         self._template_filename = template_filename
         self._output_filename = output_filename
         self._sql_filepath = sql_filepath
+        self._options = options
 
     def pre_process(self, row):
         return [row]
