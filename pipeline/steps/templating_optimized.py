@@ -112,6 +112,8 @@ class TemplatingOptimized(Step):
         output_filepath = os.path.join(
             environment.config.get("template_output_path"), self._output_filename
         )
+        env = self._options["env"]
+        only_vb_cubes = environment.config.get("only_vb_cubes")
 
         output_folder = os.path.dirname(output_filepath)
 
@@ -128,13 +130,29 @@ class TemplatingOptimized(Step):
                     )
                     return
 
-                # Add a row number column to the temporary table
-                query_tmp_table = (
-                    f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename} "
-                    f"FROM ({query}) AS original_query"
-                )
-
                 with connection.cursor() as cursor:
+                    
+                    like_conditions = ''
+                    
+                    if ( only_vb_cubes and tablename == f"view_observation_{env}" ):
+                            cursor.execute(f"SELECT DISTINCT t.cube_id FROM view_vb_source_{env} t")
+                            rows = cursor.fetchall()
+                            if len(rows) > 0:
+                                like_conditions = " OR ".join([f"cube_ids LIKE '%{row['cube_id']}%'" for row in rows])
+                                like_conditions = f"( {like_conditions} )"
+                                self._utils.print_formatted("Considering only cubes from the view builder.")
+    
+                    if len(like_conditions) == 0:
+                        query_tmp_table = (
+                            f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename} "
+                            f" FROM ({query}) AS original_query"
+                        )
+                    else:
+                        query_tmp_table = (
+                            f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename}"
+                            f" FROM ({query} WHERE ({like_conditions})) AS original_query"
+                        )
+                    
                     self._utils.print_formatted(
                         f"Creating temporary table #{tablename} ..."
                     )
