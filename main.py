@@ -11,6 +11,7 @@ from pipeline.steps import (
     UploadToFuseki,
     CopyHDBToPipeTables,
     BuildTermsetHierarchy,
+    WritePublicationStatiToHDB
 )
 from pipeline.steps.views import ViewsStep
 
@@ -148,6 +149,10 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
                 options=options,
             ),
             "Creates triples from the view_room_hierarchy data with the raum_hierarchy.ttl template",
+        ),
+        "writePublicationStatiToHDB": StepDefinition(
+            WritePublicationStatiToHDB(env),
+            "Write publication stati back to the HDB"
         ),
     }
 

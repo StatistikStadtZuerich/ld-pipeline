@@ -114,9 +114,6 @@ class Utils(Base):
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
             shutil.move(file, os.path.join(done_folder, filename))
-            shutil.move(
-                finished_signal_path, os.path.join(done_folder, finished_signal)
-            )
             break
 
     def delete_stardog_triples(self, limit, env: Env):

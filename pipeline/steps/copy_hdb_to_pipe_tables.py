@@ -11,7 +11,7 @@ class CopyHDBToPipeTables(Step):
 
     def run(self, environment: Environment):
         suffix = "TEST"
-        if self._env == "prod":
+        if self._env.upper() == "PROD":
             suffix = "FINAL"
         tablenames = [
             "HDBCodeliste",
@@ -49,6 +49,7 @@ class CopyHDBToPipeTables(Step):
                                 FROM INFORMATION_SCHEMA.COLUMNS
                                 WHERE TABLE_NAME = 'pipe_{tablename}'
                                 AND TABLE_SCHEMA = 'dbo'
+                                AND COLUMN_NAME NOT IN ('hash')
                             """)
                         columns = cursor.fetchall()
                         columns = [f'"{col["COLUMN_NAME"]}"' for col in columns]
