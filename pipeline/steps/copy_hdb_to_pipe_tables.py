@@ -54,11 +54,14 @@ class CopyHDBToPipeTables(Step):
                         columns = cursor.fetchall()
                         columns = [f'"{col["COLUMN_NAME"]}"' for col in columns]
                         columns_list = ", ".join(columns)
+                        stmt_insert = f"INSERT INTO pipe_{tablename} SELECT * FROM #pipe_{tablename}"
+                        if ( tablename == 'HDB_TEST' or tablename == 'HDB_FINAL' ):
+                            stmt_insert = f"INSERT INTO pipe_{tablename} SELECT *, NULL AS 'hash' FROM #pipe_{tablename}"
                         cursor.execute(f"""
                                 TRUNCATE TABLE pipe_{tablename};
                                 DROP TABLE IF EXISTS #pipe_{tablename};
                                 SELECT {columns_list} INTO #pipe_{tablename} FROM {tablename};
-                                INSERT INTO pipe_{tablename} SELECT * FROM #pipe_{tablename};
+                                {stmt_insert};
                             """)
                         self._utils.print_formatted("Done")
                 connection.commit()
