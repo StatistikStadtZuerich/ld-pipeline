@@ -43,7 +43,7 @@ class LdViewSerializer(ABC):
         projected_dimensions.sort(key=lambda x: x.column.position)
 
         attributes = [dimension.column for dimension in projected_dimensions]
-        projected_bnodes = [dimension.to_bnode() for dimension in projected_dimensions]
+        projected_bnodes = [dimension.to_bnode(view.id) for dimension in projected_dimensions]
 
         with self._templater(
             "ldviews/projection.ttl.jinja", f"view.{view.id}.ttl"

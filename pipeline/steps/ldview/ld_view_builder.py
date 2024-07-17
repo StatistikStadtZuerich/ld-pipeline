@@ -18,7 +18,6 @@ class LdViewBuilder(Base):
         super().__init__()
         self._environment = environment
         self._env = env
-        self._cache = {}
 
     def build_all(self) -> List[View]:
         views = []
@@ -141,15 +140,11 @@ class LdViewBuilder(Base):
         return dimensions, dz, dr
 
     def _get_view_data(self, viewname):
-        if viewname in self._cache:
-            return self._cache[viewname]
         with self._environment.get_db_connection() as connection:
             with connection.cursor() as cursor:
                 query = f"SELECT * FROM {viewname}"
                 cursor.execute(query)
-                result = cursor.fetchall()
-                self._cache[viewname] = result
-                return result
+                return cursor.fetchall()
 
     ###### QUERIES #######
     def _list_views(self) -> List:
@@ -165,8 +160,7 @@ class LdViewBuilder(Base):
             {"cube_id": "000609", "name": "Haushaltseinkommen 50%"}
         ]
         """
-        data = self._get_view_data(f"view_vb_source_{self._env}")
-        return [row for row in data if row['view_id'] == view_id]
+        return self._get_view_data(f"view_vb_source_{self._env}")
 
     def _list_filters_by_view_id(self, view_id: str) -> List:
         """
@@ -175,8 +169,7 @@ class LdViewBuilder(Base):
             {"termset": "Jahr", "dimension": "ZEIT"}
         ]
         """
-        data = self._get_view_data(f"view_vb_filter_{self._env}")
-        return [row for row in data if row['view_id'] == view_id]
+        return self._get_view_data(f"view_vb_filter_{self._env}")
 
     def _list_dimensions_by_view_id(self, view_id) -> List:
         """
@@ -185,8 +178,7 @@ class LdViewBuilder(Base):
             {"identifier": "HTY", "name": "Haushaltstyp", "description": "Haushaltstyp nach Haushaltstyp 1"}
         ]
         """
-        data = self._get_view_data(f"view_vb_dimension_{self._env}")
-        return [row for row in data if row['view_id'] == view_id]
+        return self._get_view_data(f"view_vb_dimension_{self._env}")
 
     def _list_measurements_by_view_id(self, view_id) -> List:
         """
@@ -195,18 +187,13 @@ class LdViewBuilder(Base):
             {"identifier": "HAE", "identifier_full": "HAE_GGH1400_STK1050", "cube_id": "000609", "name": "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 50%-Perzentil", "description": "Haushaltsäquivalenzeinkommen: Für die Berechnung wird die Haushaltsgrösse über die Äquivalenzskala ..."}
         ]
         """
-        data = self._get_view_data(f"view_vb_measure_{self._env}")
-        return [row for row in data if row['view_id'] == view_id]
+        return self._get_view_data(f"view_vb_measure_{self._env}")
 
     def _list_hierarchies_by_view_id(self, view_id):
-        """
         return [
             {"termset": "KreiseZH", "dimension": "RAUM"},
             {"termset": "QuartiereZH", "dimension": "RAUM"},
         ]
-        """
-        data = self._get_view_data(f"view_vb_room_hierarchy_{self._env}")
-        return [row for row in data if row['view_id'] == view_id]
 
     ###### LOGIC ##########
     def _create_view_from_dict(self, view_dict) -> View:

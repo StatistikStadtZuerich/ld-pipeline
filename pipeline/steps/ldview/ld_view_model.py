@@ -12,8 +12,8 @@ class Source:
     name: str
     cube_id: str
 
-    def to_bnode(self):
-        return f"_:C{self.cube_id}"
+    def to_bnode(self, view_id):
+        return f"_:C{self.cube_id}_{view_id}"
 
     def __hash__(self):
         return hash(self.cube_id)
@@ -38,8 +38,8 @@ class Dimension:
     path: List[str]
     column: Optional[Attribute]
 
-    def to_bnode(self):
-        return f"_:{self.identifier}"
+    def to_bnode(self, view_id):
+        return f"_:{self.identifier}_{view_id}"
 
     def get_type(self):
         return type(self).__name__
@@ -49,8 +49,8 @@ class Dimension:
 class BasicDimension(Dimension):
     sources: List[Source]
 
-    def list_source_bnodes(self):
-        return [source.to_bnode() for source in self.sources]
+    def list_source_bnodes(self, view_id):
+        return [source.to_bnode(view_id) for source in self.sources]
 
 
 @dataclass
@@ -98,6 +98,16 @@ class View:
     def __init__(self, id: str, include_datenstatus=False):
         self.id = id
         self.include_datenstatus = include_datenstatus
+
+    def sort_and_numerate_dimensions(self):
+        self.dimensions.sort(
+            key=lambda d: d.column.position if d.column is not None else 0
+        )
+
+        for index, dimension in enumerate(
+            filter(lambda d: d.column is not None, self.dimensions)
+        ):
+            dimension.column.position = index + 1
 
     def get_sources(self):
         sources = {}
