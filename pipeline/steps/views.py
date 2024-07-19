@@ -29,7 +29,7 @@ class ViewsStep(Step):
         uniqid = str(uuid.uuid4())
         now = datetime.now()
         timestamp = now.strftime("%Y%m%d%H%M%S")
-        filename_dest = f"{self._env}_ldview_{timestamp}_{uniqid}.nt.gz"
+        filename_dest = f"{self._env}_ldview_{timestamp}_{uniqid}.ttl.gz"
         filepath_dest = os.path.join(folderpath, filename_dest)
         with gzip.open(filepath_dest, "wb") as gz_file:
             for filename in os.listdir(folderpath_ldviews):

@@ -80,7 +80,7 @@ class TemplatingOptimized(Step):
 
             if len(batch) >= write_batch_size:
                 uniqid = str(uuid.uuid4())
-                filename = f"{env}_{tablename}_{timestamp}_{uniqid}.nt.gz"
+                filename = f"{env}_{tablename}_{timestamp}_{uniqid}.ttl.gz"
                 dest_file = f"{output_folder}/{filename}"
                 dest_file_tmp = f"{output_folder_tmp}/{filename}"
                 self._utils.print_formatted(
@@ -97,7 +97,7 @@ class TemplatingOptimized(Step):
 
         if batch:
             uniqid = str(uuid.uuid4())
-            filename = f"{env}_{tablename}_{timestamp}_{uniqid}.nt.gz"
+            filename = f"{env}_{tablename}_{timestamp}_{uniqid}.ttl.gz"
             dest_file = f"{output_folder}/{filename}"
             dest_file_tmp = f"{output_folder_tmp}/{filename}"
             self._utils.print_formatted(

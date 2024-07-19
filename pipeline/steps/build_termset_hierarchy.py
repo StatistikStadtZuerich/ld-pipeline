@@ -33,7 +33,7 @@ class BuildTermsetHierarchy(Templating):
         now = datetime.now()
         env = self._options["env"]
         timestamp = now.strftime("%Y%m%d%H%M%S")
-        filename_dest = f"{env}_termset_hierarchy_{timestamp}_{uniqid}.nt.gz"
+        filename_dest = f"{env}_termset_hierarchy_{timestamp}_{uniqid}.ttl.gz"
         folderpath = environment.config.get("template_output_path")
         filepath_dest = os.path.join(folderpath, filename_dest)
         with gzip.open(filepath_dest, "wb") as gz_file:

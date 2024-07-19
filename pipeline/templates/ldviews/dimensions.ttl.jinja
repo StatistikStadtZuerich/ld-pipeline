@@ -5,7 +5,9 @@
      {%  if dimension.name is not none %}<http://www.w3.org/2000/01/rdf-schema#label> {{ dimension.name | literal_encode}};{%  endif %}
      <https://cube.link/view/from> [
            <https://cube.link/view/path> (<{{ dimension.path | join('> <') }}>);
+           {% if dimension.list_source_bnodes(id) %}
            <https://cube.link/view/source> {{ dimension.list_source_bnodes(id) | join(', ') }};
+           {% endif %}
     ].
 {% else %}
 {{ dimension.to_bnode(id) }}
