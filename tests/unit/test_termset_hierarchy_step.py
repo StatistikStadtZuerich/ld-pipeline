@@ -47,7 +47,7 @@ class TestTermsetHierarchyStep(unittest.TestCase):
         output_filename = "test_output.ttl"
 
         try:
-            BuildTermsetHierarchy(template_filename, output_filename, sql_filepath).run(
+            BuildTermsetHierarchy(template_filename, output_filename, sql_filepath, {'env': 'test'}).run(
                 env
             )
 
