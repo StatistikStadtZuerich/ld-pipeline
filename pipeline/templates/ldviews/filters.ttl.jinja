@@ -2,7 +2,7 @@
 <https://ld.stadt-zuerich.ch/statistics/view/{{ id|uri_encode }}> <https://cube.link/view/filter> [ a <https://cube.link/view/Filter>;
       <http://www.w3.org/2000/01/rdf-schema#label> {{ filter.name |literal_encode }};
       <https://cube.link/view/argument> <{{ filter.argument }}>;
-      <https://cube.link/view/dimension> {{ filter.dimension.to_bnode() }};
+      <https://cube.link/view/dimension> {{ filter.dimension.to_bnode(id) }};
       <https://cube.link/view/operation> <https://cube.link/view/{{ filter.operation }}>
     ] .
 {% endfor %}

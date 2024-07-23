@@ -25,12 +25,15 @@ class UploadToStardogOptimized(Step):
         output_folder_done = output_folder + "/done"
         os.makedirs(output_folder_tmp, exist_ok=True)
         os.makedirs(output_folder_done, exist_ok=True)
-        url = f"{environment.config.get("stardog_endpoint")}/{environment.config.get("stardog_database")}?graph={environment.config.get("stardog_graph_uri")}"
+        url = f"{environment.config.get('stardog_endpoint')}/{environment.config.get('stardog_database')}?graph={environment.config.get('stardog_graph_uri')}"
 
         files = glob.glob(os.path.join(output_folder, "*.gz"))
         with stardog.Connection(stardog_database, **connection_details) as connection:
             self._utils.print_formatted(f"Connection to {url} established...")
             connection.begin()
+            self._utils.print_formatted(f"Clearing the graph {environment.config.get('stardog_graph_uri')} ...")
+            connection.clear(environment.config.get('stardog_graph_uri'))
+            self._utils.print_formatted("Graph cleared.")
             for filepath in files:
                 filename = os.path.basename(filepath)
                 filepath_tmp = f"{output_folder_tmp}/{filename}"

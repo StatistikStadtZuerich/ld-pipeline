@@ -11,7 +11,7 @@ class CopyHDBToPipeTables(Step):
 
     def run(self, environment: Environment):
         suffix = "TEST"
-        if self._env == "prod":
+        if self._env.upper() == "PROD":
             suffix = "FINAL"
         tablenames = [
             "HDBCodeliste",
@@ -49,15 +49,19 @@ class CopyHDBToPipeTables(Step):
                                 FROM INFORMATION_SCHEMA.COLUMNS
                                 WHERE TABLE_NAME = 'pipe_{tablename}'
                                 AND TABLE_SCHEMA = 'dbo'
+                                AND COLUMN_NAME NOT IN ('hash')
                             """)
                         columns = cursor.fetchall()
                         columns = [f'"{col["COLUMN_NAME"]}"' for col in columns]
                         columns_list = ", ".join(columns)
+                        stmt_insert = f"INSERT INTO pipe_{tablename} SELECT * FROM #pipe_{tablename}"
+                        if ( tablename == 'HDB_TEST' or tablename == 'HDB_FINAL' ):
+                            stmt_insert = f"INSERT INTO pipe_{tablename} SELECT *, NULL AS 'hash' FROM #pipe_{tablename}"
                         cursor.execute(f"""
                                 TRUNCATE TABLE pipe_{tablename};
                                 DROP TABLE IF EXISTS #pipe_{tablename};
                                 SELECT {columns_list} INTO #pipe_{tablename} FROM {tablename};
-                                INSERT INTO pipe_{tablename} SELECT * FROM #pipe_{tablename};
+                                {stmt_insert};
                             """)
                         self._utils.print_formatted("Done")
                 connection.commit()

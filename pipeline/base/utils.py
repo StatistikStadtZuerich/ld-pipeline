@@ -114,7 +114,79 @@ class Utils(Base):
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
             shutil.move(file, os.path.join(done_folder, filename))
-            shutil.move(
-                finished_signal_path, os.path.join(done_folder, finished_signal)
-            )
             break
+
+    def delete_stardog_triples(self, limit, env: Env):
+        environment = Environment(env)
+        stardog_graph_uri = self.get_stardog_graph_uri(env=env)
+        cert_path = environment.config.get("stardog_cert_path")
+        os.environ["REQUESTS_CA_BUNDLE"] = cert_path
+        df = self.execute_sparql(f"""
+            SELECT * FROM <{stardog_graph_uri}> WHERE {{
+                ?sub ?pred ?obj
+            }} LIMIT {limit}
+        """, env=env)
+        stardog_graph_uri = self.get_stardog_graph_uri(env=env)
+        stardog_database = environment.config.get("stardog_database")
+        connection_details = {
+            "endpoint": environment.config.get("stardog_endpoint"),
+            "username": environment.config.get("stardog_username"),
+            "password": environment.config.get("stardog_password"),
+        }
+        
+        with stardog.Connection(stardog_database, **connection_details) as connection:
+            connection.begin()
+            for index, row in df.iterrows():
+                sub = row['sub']
+                pred = row['pred']
+                obj = row['obj']
+                if sub.startswith('http'):
+                    sub = f"<{sub}>"
+                else:
+                    sub = f'"{sub}"'
+                if pred.startswith('http'):
+                    pred = f"<{pred}>"
+                else:
+                    pred = f'"{pred}"'
+                if obj.startswith('http'):
+                    obj = f"<{obj}>"
+                else:
+                    obj = f'"{obj}"'
+                    
+                #self.print_formatted(f"Deleting triple: {sub} {pred} {obj}")
+        
+                if sub.startswith('"'):
+                    sparql = f"""
+                        DELETE {{
+                            GRAPH <{stardog_graph_uri}> {{
+                                ?blankNode {pred} {obj}
+                            }}
+                        }}
+                        WHERE {{
+                            GRAPH <{stardog_graph_uri}> {{
+                                ?blankNode {pred} {obj} .
+                                FILTER(STR(?blankNode) = {sub})
+                            }}
+                        }}
+                    """
+                else:
+                    sparql = f"""
+                        DELETE WHERE {{
+                            GRAPH <{stardog_graph_uri}> {{
+                                {sub} {pred} {obj}
+                            }}
+                        }}
+            
+                    """
+                
+                connection.update(sparql)
+            connection.commit()
+    
+    def get_number_triples(self, env: Env):
+        stardog_graph_uri = self.get_stardog_graph_uri(env=env)
+        df = self.execute_sparql(f"""
+            SELECT (COUNT(*) AS ?triplesCount) FROM <{stardog_graph_uri}> WHERE {{
+                ?sub ?pred ?obj
+            }}
+        """, env=env)
+        return df['triplesCount'].iloc[0]
