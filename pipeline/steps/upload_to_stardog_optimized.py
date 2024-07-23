@@ -31,8 +31,10 @@ class UploadToStardogOptimized(Step):
         with stardog.Connection(stardog_database, **connection_details) as connection:
             self._utils.print_formatted(f"Connection to {url} established...")
             connection.begin()
-            self._utils.print_formatted(f"Clearing the graph {environment.config.get('stardog_graph_uri')} ...")
-            connection.clear(environment.config.get('stardog_graph_uri'))
+            self._utils.print_formatted(
+                f"Clearing the graph {environment.config.get('stardog_graph_uri')} ..."
+            )
+            connection.clear(environment.config.get("stardog_graph_uri"))
             self._utils.print_formatted("Graph cleared.")
             for filepath in files:
                 filename = os.path.basename(filepath)

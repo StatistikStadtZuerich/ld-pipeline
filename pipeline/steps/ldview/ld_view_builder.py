@@ -149,7 +149,7 @@ class LdViewBuilder(Base):
                 cursor.execute(query)
                 result = cursor.fetchall()
                 if view_id is not None:
-                    result = [row for row in result if row['view_id'] == view_id]
+                    result = [row for row in result if row["view_id"] == view_id]
                 self._cache[viewname] = result
                 return result
 

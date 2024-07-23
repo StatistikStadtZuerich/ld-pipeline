@@ -131,17 +131,25 @@ class TemplatingOptimized(Step):
                     return
 
                 with connection.cursor() as cursor:
-                    
-                    like_conditions = ''
-                    
-                    if ( only_vb_cubes == 'true' and tablename == f"view_observation_{env}" ):
-                            cursor.execute(f"SELECT DISTINCT t.cube_id FROM view_vb_source_{env} t")
-                            rows = cursor.fetchall()
-                            if len(rows) > 0:
-                                like_conditions = " OR ".join([f"cube_ids LIKE '%{row['cube_id']}%'" for row in rows])
-                                like_conditions = f"( {like_conditions} )"
-                                self._utils.print_formatted("Considering only cubes from the view builder.")
-    
+                    like_conditions = ""
+
+                    if (
+                        only_vb_cubes == "true"
+                        and tablename == f"view_observation_{env}"
+                    ):
+                        cursor.execute(
+                            f"SELECT DISTINCT t.cube_id FROM view_vb_source_{env} t"
+                        )
+                        rows = cursor.fetchall()
+                        if len(rows) > 0:
+                            like_conditions = " OR ".join(
+                                [f"cube_ids LIKE '%{row['cube_id']}%'" for row in rows]
+                            )
+                            like_conditions = f"( {like_conditions} )"
+                            self._utils.print_formatted(
+                                "Considering only cubes from the view builder."
+                            )
+
                     if len(like_conditions) == 0:
                         query_tmp_table = (
                             f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename} "
@@ -152,7 +160,7 @@ class TemplatingOptimized(Step):
                             f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename}"
                             f" FROM ({query} WHERE ({like_conditions})) AS original_query"
                         )
-                    
+
                     self._utils.print_formatted(
                         f"Creating temporary table #{tablename} ..."
                     )
