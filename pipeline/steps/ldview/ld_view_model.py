@@ -88,16 +88,13 @@ class ViewMetadata(TypedDict):
 
 
 class View:
-    id: str
-    metadata: ViewMetadata
-    include_datenstatus: bool
-
-    dimensions: List[Dimension] = []  # https://cube.link/view/dimension
-    filters: List[Filter] = []
 
     def __init__(self, id: str, include_datenstatus=False):
         self.id = id
         self.include_datenstatus = include_datenstatus
+        self.dimensions: List[Dimension] = []  # https://cube.link/view/dimension
+        self.filters: List[Filter] = []
+        metadata: ViewMetadata
 
     def sort_and_numerate_dimensions(self):
         self.dimensions.sort(
