@@ -2,53 +2,96 @@ DROP VIEW IF EXISTS dbo.view_vb_measure_int;
 GO
 
 CREATE VIEW dbo.view_vb_measure_int AS
-WITH split_cube_ids AS (
+WITH split_kennzahl AS (
     SELECT
+        value AS kennzahl,
+        ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rownum
+    FROM 
+        dbo.pipe_HDBDatenobjekte_TEST
+    CROSS APPLY 
+        STRING_SPLIT(Kennzahl_GGH_STK_BEB, ';')
+),
+split_cube_id AS (
+    SELECT
+        value AS cube_id,
+        ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rownum
+    FROM 
+        dbo.pipe_HDBDatenobjekte_TEST
+    CROSS APPLY 
+        STRING_SPLIT(CubeIDS, ' ')
+),
+initial_trim AS (
+    SELECT 
+        split_cube_id.cube_id,
+        split_kennzahl.kennzahl,
+        REPLACE(split_kennzahl.kennzahl, '|', '_') AS identifier,
+        REPLACE(split_kennzahl.kennzahl, '|', '_') AS original_identifier,
+        ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rownum
+    FROM 
+        split_kennzahl
+    JOIN 
+        split_cube_id ON split_kennzahl.rownum = split_cube_id.rownum
+),
+recursive_trim AS (
+    SELECT 
+        cube_id,
+        original_identifier,
+        identifier,
+        ROW_NUMBER() OVER (PARTITION BY original_identifier ORDER BY rownum) AS iter
+    FROM 
+        initial_trim
+    UNION ALL
+    SELECT 
+        cube_id,
+        original_identifier,
+        CASE 
+            WHEN RIGHT(identifier, 1) = '_' 
+            THEN LEFT(identifier, LEN(identifier) - 1)
+            ELSE identifier
+        END AS identifier,
+        iter + 1
+    FROM 
+        recursive_trim
+    WHERE 
+        RIGHT(identifier, 1) = '_'
+),
+cube_identifier AS (
+	SELECT 
+		cube_id,
+		SUBSTRING(identifier, 1, 3) as identifier,
+		identifier as identifier_full
+	FROM 
+		recursive_trim
+	WHERE 
+		iter = (SELECT MAX(iter) FROM recursive_trim RT WHERE RT.original_identifier = recursive_trim.original_identifier)
+),
+view_cube AS (
+	SELECT
         t.sasa_job_output_id AS view_id,
         value AS cube_id
     FROM
-        pipe_HDBDatenobjekte_TEST t
-        CROSS APPLY STRING_SPLIT(t.cubeids, ' ') 
-),
-split_kennzahlen AS (
-    SELECT
-        t.sasa_job_output_id AS view_id,
-        value AS kennzahl
-    FROM
-        pipe_HDBDatenobjekte_TEST t
-        CROSS APPLY STRING_SPLIT(t.kennzahl_ggh_stk_beb, ';')
+        dbo.pipe_HDBDatenobjekte_TEST t
+        CROSS APPLY STRING_SPLIT(t.cubeids, ' ')
 )
 SELECT
-	t.view_id,
+	vc.view_id,
 	t.identifier,
-	CASE
-		WHEN RIGHT(t.identifier_full, 2) = '__' THEN LEFT(t.identifier_full, LEN(t.identifier_full) - 2)
-		WHEN RIGHT(t.identifier_full, 1) = '_' THEN LEFT(t.identifier_full, LEN(t.identifier_full) - 1)
-		ELSE t.identifier_full
-	END as identifier_full,
-	t.cube_id,
-	t.name,
-	t.description
-FROM
-(SELECT
-    s1.view_id,
-    LEFT(s2.kennzahl, CHARINDEX('|', s2.kennzahl) - 1) AS identifier,
-    LEFT(REPLACE(s2.kennzahl, '|', '_'), LEN(REPLACE(s2.kennzahl, '|', '_')) - 1) AS identifier_full,
-	REPLACE(s1.cube_id, 'CID_', '') as cube_id,
+	t.identifier_full,
+	REPLACE(t.cube_id, 'CID_', '') AS cube_id,
 	c.Titel as name,
 	k.Beschreibung as description
 FROM
-    split_cube_ids s1
-JOIN
-	split_kennzahlen s2
-ON
-	s1.view_id = s2.view_id
+	cube_identifier t
 JOIN
 	dbo.pipe_HDBCubeDefinition c
 ON
-	c.CID = s1.cube_id
+	c.CID = t.cube_id
 JOIN
 	dbo.pipe_HDBKennzahlen k
 ON
-	k.KennzahlCode = LEFT(s2.kennzahl, CHARINDEX('|', s2.kennzahl) - 1)) t;
+	k.KennzahlCode = t.identifier
+JOIN
+	view_cube vc
+ON
+	vc.cube_id = t.cube_id;
 

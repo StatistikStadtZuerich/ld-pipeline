@@ -141,8 +141,9 @@ class LdViewBuilder(Base):
         return dimensions, dz, dr
 
     def _get_view_data(self, viewname, view_id=None):
+        cache_ident = viewname + '_' + str(view_id)
         if viewname in self._cache:
-            return self._cache[viewname]
+            return self._cache[cache_ident]
         with self._environment.get_db_connection() as connection:
             with connection.cursor() as cursor:
                 query = f"SELECT * FROM {viewname}"
@@ -150,7 +151,7 @@ class LdViewBuilder(Base):
                 result = cursor.fetchall()
                 if view_id is not None:
                     result = [row for row in result if row['view_id'] == view_id]
-                self._cache[viewname] = result
+                self._cache[cache_ident] = result
                 return result
 
     ###### QUERIES #######
