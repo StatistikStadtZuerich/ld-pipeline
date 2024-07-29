@@ -4,6 +4,7 @@ from datetime import datetime
 import uuid
 import gzip
 import shutil
+import time
 
 from ..base import Step, Environment, Utils
 
@@ -27,6 +28,7 @@ class TemplatingOptimized(Step):
         db_batch_size = 100000
         write_batch_size = 500000
         max_iteration = None
+        max_delay = 120
 
         env = self._options["env"]
 
@@ -50,11 +52,14 @@ class TemplatingOptimized(Step):
         counter_rows = 0
         running = True
         number_rows_total = 0
+        delay = 0
+        iteration_durations = []
         while running:
             counter += 1
             if max_iteration is not None and counter > max_iteration:
                 running = False
                 break
+            start_time = time.time()
             batch_query = (
                 f"{query} OFFSET {offset} ROWS FETCH NEXT {db_batch_size} ROWS ONLY"
             )
@@ -77,6 +82,10 @@ class TemplatingOptimized(Step):
                 triples = template.render(row)
                 batch.append(triples)
             self._utils.print_formatted("done")
+            
+            end_time = time.time()
+            iteration_time = end_time - start_time
+            iteration_durations.append(iteration_time)
 
             if len(batch) >= write_batch_size:
                 uniqid = str(uuid.uuid4())
@@ -93,6 +102,19 @@ class TemplatingOptimized(Step):
                 self._utils.print_formatted("File is created.")
             offset += db_batch_size
 
+            if len(iteration_durations) > 10:
+                iteration_durations.pop(0)
+            adaptive_threshold = sum(iteration_durations) / len(iteration_durations)
+            self._utils.print_formatted(f"{counter}. iteration took {iteration_time:.2f} seconds.")
+            if iteration_time > adaptive_threshold:
+                delay_increase = (iteration_time - adaptive_threshold) * 0.5
+                delay = min(max_delay, delay + delay_increase)
+            else:
+                delay_decrease = (adaptive_threshold - iteration_time) * 0.5
+                delay = max(0, delay - delay_decrease)
+            if delay > 0:
+                self._utils.print_formatted(f"Delaying next iteration by {delay:.2f} seconds to reduce load.")
+                time.sleep(delay)
             self._utils.print_formatted(f"{counter}. iteration is finished.")
 
         if batch:
