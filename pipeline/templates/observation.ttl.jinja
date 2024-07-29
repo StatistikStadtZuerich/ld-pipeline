@@ -1,3 +1,4 @@
+<https://ld.stadt-zuerich.ch/catalog/SSZ/cube> <http://schema.org/dataset> <https://ld.stadt-zuerich.ch/statistics/observation/{{ prop1_code|uri_encode }}-{{ prop2_code|uri_encode }}-{{ prop3_code|uri_encode }}-{{ prop4_code|uri_encode }}-{{ prop5_code|uri_encode }}-{{ room_code|uri_encode }}-{{ time_code|uri_encode }}> .
 <https://ld.stadt-zuerich.ch/statistics/observation/{{ prop1_code|uri_encode }}-{{ prop2_code|uri_encode }}-{{ prop3_code|uri_encode }}-{{ prop4_code|uri_encode }}-{{ prop5_code|uri_encode }}-{{ room_code|uri_encode }}-{{ time_code|uri_encode }}> a <https://cube.link/Observation> ;
     <https://ld.stadt-zuerich.ch/statistics/property/ZEIT> <https://ld.stadt-zuerich.ch/statistics/code/{{ time_code|uri_encode }}> ;
     {% if time %}<https://ld.stadt-zuerich.ch/statistics/property/TIME> {{ time|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ; {% endif %}

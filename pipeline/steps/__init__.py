@@ -27,5 +27,5 @@ __all__ = [
     "UploadToFuseki",
     "BuildTermsetHierarchy",
     "CopyHDBToPipeTables",
-    "WritePublicationStatiToHDB"
+    "WritePublicationStatiToHDB",
 ]

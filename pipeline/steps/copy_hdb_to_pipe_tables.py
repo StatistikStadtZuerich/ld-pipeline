@@ -55,7 +55,7 @@ class CopyHDBToPipeTables(Step):
                         columns = [f'"{col["COLUMN_NAME"]}"' for col in columns]
                         columns_list = ", ".join(columns)
                         stmt_insert = f"INSERT INTO pipe_{tablename} SELECT * FROM #pipe_{tablename}"
-                        if ( tablename == 'HDB_TEST' or tablename == 'HDB_FINAL' ):
+                        if tablename == "HDB_TEST" or tablename == "HDB_FINAL":
                             stmt_insert = f"INSERT INTO pipe_{tablename} SELECT *, NULL AS 'hash' FROM #pipe_{tablename}"
                         cursor.execute(f"""
                                 TRUNCATE TABLE pipe_{tablename};
