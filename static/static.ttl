@@ -1,0 +1,152 @@
+BASE <https://ld.stadt-zuerich.ch/>
+PREFIX qudt:    <http://qudt.org/schema/qudt#>
+PREFIX void: <http://rdfs.org/ns/void#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX wv: <http://vocab.org/waiver/terms/norms>
+PREFIX sd: <http://www.w3.org/ns/sparql-service-description#>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX schema: <http://schema.org/>
+PREFIX time: <http://www.w3.org/2006/time#>
+PREFIX doap: <http://usefulinc.com/ns/doap#>
+PREFIX duv: <http://www.w3.org/ns/duv#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX cube: <https://cube.link/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ssz-dimension: <https://ld.stadt-zuerich.ch/statistics/property/>
+PREFIX ssz-schema: <https://ld.stadt-zuerich.ch/schema/>
+PREFIX ssz-code: <https://ld.stadt-zuerich.ch/statistics/code/>
+
+<.well-known/void> a void:DatasetDescription;
+                   schema:name "Datasets of City of Zurich"@en ;
+                   schema:name "Datensätze der Stadt Zürich"@de ;
+                   dcterms:creator <org/SSZ> ;
+                   schema:hasPart <catalog/SSZ/cube>, <catalog/SSZ/view> .
+
+# TO_CHECK still in use?
+<org/SSZ> a foaf:Organization, schema:GovernmentOrganization;
+          schema:name "Statistik Stadt Zürich"@de;
+          rdfs:seeAlso wd:Q53630447 ;
+          foaf:homepage <https://www.stadt-zuerich.ch/prd/de/index/statistik.html>
+.
+
+##
+## Catalog
+##
+
+<catalog/SSZ/cube> a dcat:Catalog, schema:DataCatalog  ;
+                   schema:name "Statistische Daten der Stadt Zürich"@de;
+                   schema:description "Dieser Datensatz enthält statistische Daten der Stadt Zürich als OLAP Cubes im RDF Cube Vokabular"@de;
+                   dcterms:publisher <org/SSZ> ;
+                   #schema:dataset <ssz/cube/GES-SEX-TOU> ; # das wären Links zu allen raw cubes, range ist cube:Cube
+                   doap:repository [
+                         a doap:GitRepository ;
+                         doap:browse <https://github.com/statistikstadtzuerich/ld-data> ;
+                         doap:location "git@github.com:statistikstadtzuerich/ld-data.git"
+                     ] ;
+                   void:sparqlEndpoint <https://stat.stadt-zuerich.ch/query>;
+.
+
+<catalog/SSZ/view> a dcat:Catalog, schema:DataCatalog  ;
+                   schema:name "Statistische Daten der Stadt Zürich"@de;
+                   schema:description "Dieser Datensatz enthält statistische Daten der Stadt Zürich als aufbereitete Datensätze in CSV und RDF Format"@de;
+                   dcterms:publisher <org/SSZ> ;
+#  schema:dataset <views/V000001>, <views/V000002>, <views/V000003> ;
+                   void:sparqlEndpoint <https://stat.stadt-zuerich.ch/query>;
+.
+
+# TO_CHECK still in use?
+<ssz/rights1> a dcterms:RightsStatement ;
+              schema:name "Statistikgesetz (StatG)"@de ;
+              schema:description "Zur Auskunft oder Mitwirkung verpflichtete öffentliche Organe oder Private erteilen wahrheitsgetreue Informationen."@de ;
+              skos:scopeNote "431.1 § 13." .
+
+<ssz/rights2> a dcterms:RightsStatement ;
+              schema:name "Stadtratsbeschluss über die Departementsgliederung und -aufgaben (StRB DGA)"@de ;
+              schema:description "Art. 7 Statistik Stadt Zürich erfüllt insbesondere folgende Aufgaben: a Vorbereitung, Durchführung und Analyse der von Stadt, Kanton und Bund angeordneten Erhebungen ..."@de ;
+              skos:scopeNote "172.110 § 7." .
+
+## Static dimensions
+
+ssz-dimension:ZEIT a rdf:Property ;
+                   schema:identifier "ZEIT" ;
+                   schema:name "Zeit" ;
+                   schema:description "Repräsentation der Zeit als Konzept, repräsentiert die vollständige Komplexität." .
+
+ssz-dimension:TIME a rdf:Property ;
+                   schema:identifier "TIME" ;
+                   schema:name "Zeit" ;
+                   schema:description "Repräsentation der Zeit als ISO 8601 Datum (vereinfacht)." .
+
+ssz-dimension:RAUM a rdf:Property ;
+                   schema:identifier "RAUM" ;
+                   schema:name "Raum" .
+
+## schema
+
+ssz-schema:referenceTime a rdf:Property ;
+                         schema:name "Referenzzeit" .
+
+ssz-schema:hasEnd a rdf:Property ;
+                  schema:name "Ende der Periode"@de ;
+                  schema:description "Ende einer zeitlichen Einheit"@de ;
+                  schema:description "End of a temporal entity."@en ;
+                  schema:identifier "hasEnd" .
+
+## Static dimensions
+
+ssz-dimension:ZEIT a rdf:Property, cube:KeyDimension ;
+                   schema:identifier "ZEIT" ;
+                   schema:name "Zeit" .
+
+ssz-dimension:TIME a rdf:Property ; # NOT a KeyDimension!
+                   schema:identifier "TIME" ;
+                   schema:name "Zeit (ISO)" ;
+                   schema:disambiguatingDescription "Zeit in einer vereinfachten, ISO-repräsentation. In dieser Dimension ist immer nur das Enddatum verfügbar, für Perioden sollte es folglich nicht verwendet werden." .
+
+ssz-dimension:RAUM a rdf:Property, cube:KeyDimension ;
+                   schema:identifier "RAUM" ;
+                   schema:name "Raum" .
+
+ssz-code:STATUS_DEFINITIV a rdfs:Class ;
+                          schema:name "Definitiv" .
+
+ssz-code:STATUS_VEROEFFENTLICHT a rdfs:Class ;
+                                schema:name "Veröffentlicht" .
+
+ssz-code:STATUS_PROVISORISCH a rdfs:Class ;
+                             schema:name "Provisorisch" .
+
+ssz-dimension:STATUS a rdf:Property ;
+                     schema:name "Beobachtungsstatus" ;
+                     rdfs:range ssz-code:STATUS_DEFINITIV, ssz-code:STATUS_VEROEFFENTLICHT, ssz-code:STATUS_PROVISORISCH ;
+                     rdfs:domain cube:Observation .
+
+
+
+ssz-code:GRUPPENANZ0 a rdfs:Class ;
+                     schema:name "Beobachtung ist mit 0 Dimensionen vollständig beschrieben." .
+
+ssz-code:GRUPPENANZ1 a rdfs:Class ;
+                     schema:name "Beobachtung ist mit 1 Dimension vollständig beschrieben." .
+
+ssz-code:GRUPPENANZ2 a rdfs:Class ;
+                     schema:name "Beobachtung ist mit 2 Dimensionen vollständig beschrieben." .
+
+ssz-code:GRUPPENANZ3 a rdfs:Class ;
+                     schema:name "Beobachtung ist mit 3 Dimensionen vollständig beschrieben." .
+
+ssz-code:GRUPPENANZ4 a rdfs:Class ;
+                     schema:name "Beobachtung ist mit 4 Dimensionen vollständig beschrieben." .
+
+ssz-code:GRUPPENANZ5 a rdfs:Class ;
+                     schema:name "Beobachtung ist mit 5 Dimensionen vollständig beschrieben." .
+
+ssz-dimension:GRUPPENANZ a rdf:Property ;
+                         schema:name "Anzahl Dimensionen, um die Beobachtung vollständig zu beschreiben" ;
+                         rdfs:range ssz-code:GRUPPENANZ0, ssz-code:GRUPPENANZ1, ssz-code:GRUPPENANZ2,ssz-code:GRUPPENANZ3, ssz-code:GRUPPENANZ4, ssz-code:GRUPPENANZ5 ;
+                         rdfs:domain cube:Observation .

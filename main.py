@@ -23,8 +23,8 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
     options["env"] = env
     return {
         "copyStatic": StepDefinition(
-            Copy("static/static.n3", "static.n3"),
-            "Copies static.n3 files from /static to defined output folder",
+            Copy("static/static.ttl", "static.ttl"),
+            "Copies static.ttl files from /static to defined output folder",
         ),
         "codeTemplating": StepDefinition(
             Templating(
