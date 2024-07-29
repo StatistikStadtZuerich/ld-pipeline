@@ -7,6 +7,7 @@ from datetime import datetime
 from .templating import Templating
 from ..base import Environment, Utils
 
+
 class BuildTermsetHierarchy(Templating):
     def pre_process(self, row):
         rows = []

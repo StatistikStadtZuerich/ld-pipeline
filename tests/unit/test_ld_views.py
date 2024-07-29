@@ -41,8 +41,16 @@ class TestLdViews(unittest.TestCase):
             ]
         elif query_name == "view_vb_source_test":
             return [
-                {"cube_id": "000610", "name": "Haushaltseinkommen 25%", "view_id": view_id},
-                {"cube_id": "000609", "name": "Haushaltseinkommen 50%", "view_id": view_id},
+                {
+                    "cube_id": "000610",
+                    "name": "Haushaltseinkommen 25%",
+                    "view_id": view_id,
+                },
+                {
+                    "cube_id": "000609",
+                    "name": "Haushaltseinkommen 50%",
+                    "view_id": view_id,
+                },
             ]
         elif query_name == "view_vb_filter_test":
             return [
@@ -55,7 +63,7 @@ class TestLdViews(unittest.TestCase):
                     "identifier": "HTY",
                     "name": "Haushaltstyp",
                     "description": "Haushaltstyp nach Haushaltstyp 1",
-                    "view_id": view_id
+                    "view_id": view_id,
                 }
             ]
         elif query_name == "view_vb_measure_test":
@@ -66,7 +74,7 @@ class TestLdViews(unittest.TestCase):
                     "cube_id": "000610",
                     "name": "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 25%-Perzentil",
                     "description": "Haushaltsäquivalenzeinkommen: Für die Berechnung wird die Haushaltsgrösse über die Äquivalenzskala ...",
-                    "view_id": view_id
+                    "view_id": view_id,
                 },
                 {
                     "identifier": "HAE",
@@ -74,13 +82,13 @@ class TestLdViews(unittest.TestCase):
                     "cube_id": "000609",
                     "name": "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 50%-Perzentil",
                     "description": "Haushaltsäquivalenzeinkommen: Für die Berechnung wird die Haushaltsgrösse über die Äquivalenzskala ...",
-                    "view_id": view_id
+                    "view_id": view_id,
                 },
             ]
         elif query_name == "view_vb_room_hierarchy_test":
             return [
-                {"termset": "KreiseZH", "dimension": "RAUM","view_id": view_id},
-                {"termset": "QuartiereZH", "dimension": "RAUM","view_id": view_id},
+                {"termset": "KreiseZH", "dimension": "RAUM", "view_id": view_id},
+                {"termset": "QuartiereZH", "dimension": "RAUM", "view_id": view_id},
             ]
         else:
             raise Exception(f"query {query_name} not properly mocked for test")
@@ -126,7 +134,7 @@ class TestLdViews(unittest.TestCase):
             self.assertTrue(content2 == expected_content2)
 
         finally:
-            pass#shutil.rmtree(tmp_dir)
+            pass  # shutil.rmtree(tmp_dir)
 
 
 if __name__ == "__main__":

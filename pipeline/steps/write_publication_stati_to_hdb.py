@@ -14,7 +14,7 @@ class WritePublicationStatiToHDB(Step):
         self._utils.print_formatted("Calculating observation hashes ...")
         self._calculate_observation_hashes(environment, suffix)
         self._utils.print_formatted("Done")
-        
+
         with environment.get_db_connection() as connection:
             with connection.cursor() as cursor:
                 cursor.execute(f"""
@@ -25,11 +25,17 @@ class WritePublicationStatiToHDB(Step):
                     AND COLUMN_NAME NOT IN ('hash')
                 """)
                 columns = cursor.fetchall()
-                column_names = [column['COLUMN_NAME'] for column in columns]
-                concat_expression = " + ".join([f"CONVERT(VARCHAR(MAX),ISNULL({column}, ''))"
-                                                for column in column_names])
-    
-                self._utils.print_formatted(f"Creating temporary table #hash_HDB_{suffix} ...")
+                column_names = [column["COLUMN_NAME"] for column in columns]
+                concat_expression = " + ".join(
+                    [
+                        f"CONVERT(VARCHAR(MAX),ISNULL({column}, ''))"
+                        for column in column_names
+                    ]
+                )
+
+                self._utils.print_formatted(
+                    f"Creating temporary table #hash_HDB_{suffix} ..."
+                )
                 query = f"""
                     DROP TABLE IF EXISTS #hash_HDB_{suffix};
                     CREATE TABLE #hash_HDB_{suffix} (
@@ -52,8 +58,10 @@ class WritePublicationStatiToHDB(Step):
                 """
                 cursor.execute(query)
                 self._utils.print_formatted("done")
-    
-                self._utils.print_formatted(f"Updating publication stati to HDB_{suffix} ...")
+
+                self._utils.print_formatted(
+                    f"Updating publication stati to HDB_{suffix} ..."
+                )
                 query = f"""
                     UPDATE c
                         SET 
@@ -78,10 +86,9 @@ class WritePublicationStatiToHDB(Step):
                 """
                 cursor.execute(query)
                 self._utils.print_formatted("done")
-                
+
                 connection.commit()
-        
-        
+
     def _calculate_observation_hashes(self, environment: Environment, suffix):
         with environment.get_db_connection() as connection:
             with connection.cursor() as cursor:
@@ -93,9 +100,13 @@ class WritePublicationStatiToHDB(Step):
                     AND COLUMN_NAME NOT IN ('hash')
                 """)
                 columns = cursor.fetchall()
-                column_names = [column['COLUMN_NAME'] for column in columns]
-                concat_expression = " + ".join([f"CONVERT(VARCHAR(MAX),ISNULL({column}, ''))"
-                                                for column in column_names])
+                column_names = [column["COLUMN_NAME"] for column in columns]
+                concat_expression = " + ".join(
+                    [
+                        f"CONVERT(VARCHAR(MAX),ISNULL({column}, ''))"
+                        for column in column_names
+                    ]
+                )
                 query = f"""
                 UPDATE
                     pipe_HDB_{suffix}

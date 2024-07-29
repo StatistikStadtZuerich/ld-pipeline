@@ -47,9 +47,9 @@ class TestTermsetHierarchyStep(unittest.TestCase):
         output_filename = "test_output.ttl"
 
         try:
-            BuildTermsetHierarchy(template_filename, output_filename, sql_filepath, {'env': 'test'}).run(
-                env
-            )
+            BuildTermsetHierarchy(
+                template_filename, output_filename, sql_filepath, {"env": "test"}
+            ).run(env)
 
             env.get_db_connection().__enter__().query.assert_called_with(
                 open(sql_filepath).read()

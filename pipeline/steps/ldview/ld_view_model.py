@@ -88,7 +88,6 @@ class ViewMetadata(TypedDict):
 
 
 class View:
-
     def __init__(self, id: str, include_datenstatus=False):
         self.id = id
         self.include_datenstatus = include_datenstatus
