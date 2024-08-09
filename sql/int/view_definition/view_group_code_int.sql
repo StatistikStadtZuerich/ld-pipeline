@@ -10,10 +10,7 @@ SELECT
 	t.GRUPPE AS term_group_code,
 	t.GRUPPENCODESORT AS position,
 	t.GLOSSARID AS glossarid,
-	t.PARENTCODE AS part_of
+	t.PARENTCODE AS part_of,
+	REPLACE(t.HIERARCHIE, ' ', '') AS term_sets
 FROM
-	dbo.pipe_HDBGruppenliste t
-WHERE
-	t.GLOSSARID IS NOT NULL
-AND
-	t.GLOSSARID <> '';
+	dbo.pipe_HDBGruppenliste t;

@@ -11,6 +11,7 @@ SELECT
     t.WikidataURI AS same_as,
     t.Beschreibung AS description,
     t.GueltigkeitsbereicheID AS available,
-    t.RaumSort AS position
+    t.RaumSort AS position,
+    REPLACE(t.RaumHierarchie, ' ', '') AS term_sets
 FROM
 	dbo.pipe_HDBRaum t;
