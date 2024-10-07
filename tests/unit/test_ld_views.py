@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 from unittest.mock import Mock, MagicMock
 
@@ -133,7 +134,7 @@ class TestLdViews(unittest.TestCase):
             self.assertTrue(content2 == expected_content2)
 
         finally:
-            pass  # shutil.rmtree(tmp_dir)
+            shutil.rmtree(tmp_dir)
 
 
 if __name__ == "__main__":

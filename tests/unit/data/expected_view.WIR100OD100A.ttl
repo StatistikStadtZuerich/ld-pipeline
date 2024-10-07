@@ -25,13 +25,13 @@
       <http://www.w3.org/2000/01/rdf-schema#label> "KreiseZH is RAUM";
       <https://cube.link/view/argument> <https://ld.stadt-zuerich.ch/statistics/termset/KreiseZH>;
       <https://cube.link/view/dimension> _:FILTER_KREISEZH_WIR100OD100A;
-      <https://cube.link/view/operation> <https://cube.link/view/FilterOperation.EQ>
+      <https://cube.link/view/operation> <https://cube.link/view/Eq>
     ] .
 <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/filter> [ a <https://cube.link/view/Filter>;
       <http://www.w3.org/2000/01/rdf-schema#label> "Jahr is ZEIT";
       <https://cube.link/view/argument> <https://ld.stadt-zuerich.ch/statistics/termset/Jahr>;
       <https://cube.link/view/dimension> _:FILTER_JAHR_WIR100OD100A;
-      <https://cube.link/view/operation> <https://cube.link/view/FilterOperation.EQ>
+      <https://cube.link/view/operation> <https://cube.link/view/Eq>
     ] .
 
 
@@ -43,18 +43,21 @@ _:C000609_WIR100OD100A a <https://cube.link/view/CubeSource>;
       <http://www.w3.org/2000/01/rdf-schema#label> "Haushaltseinkommen 50%";
       <https://cube.link/view/cube> <https://ld.stadt-zuerich.ch/statistics/000609>.
 
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:ZEIT_WIR100OD100A .
 _:ZEIT_WIR100OD100A a <https://cube.link/view/Dimension>;
      <http://schema.org/identifier> "ZEIT";
 <http://www.w3.org/2000/01/rdf-schema#label> "Zeit Raum";     <https://cube.link/view/from> [
            <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/statistics/property/ZEIT>);
            <https://cube.link/view/source> _:C000610_WIR100OD100A, _:C000609_WIR100OD100A;
     ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:RAUM_WIR100OD100A .
 _:RAUM_WIR100OD100A a <https://cube.link/view/Dimension>;
      <http://schema.org/identifier> "RAUM";
 <http://www.w3.org/2000/01/rdf-schema#label> "Key Raum";     <https://cube.link/view/from> [
            <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/statistics/property/RAUM>);
            <https://cube.link/view/source> _:C000610_WIR100OD100A, _:C000609_WIR100OD100A;
     ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:ZEIT_LANG_WIR100OD100A .
 _:ZEIT_LANG_WIR100OD100A
     <http://schema.org/identifier> "ZEIT_LANG";
 <https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A#column0>;    <https://cube.link/view/from> [
@@ -62,6 +65,7 @@ _:ZEIT_LANG_WIR100OD100A
        <https://cube.link/view/path> (<http://schema.org/name>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:ZEIT_CODE_WIR100OD100A .
 _:ZEIT_CODE_WIR100OD100A
     <http://schema.org/identifier> "ZEIT_CODE";
 <https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A#column0>;    <https://cube.link/view/from> [
@@ -69,6 +73,7 @@ _:ZEIT_CODE_WIR100OD100A
        <https://cube.link/view/path> (<http://schema.org/termCode>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:RAUM_LANG_WIR100OD100A .
 _:RAUM_LANG_WIR100OD100A
     <http://schema.org/identifier> "RAUM_LANG";
 <https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A#column0>;    <https://cube.link/view/from> [
@@ -76,6 +81,7 @@ _:RAUM_LANG_WIR100OD100A
        <https://cube.link/view/path> (<http://schema.org/name>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:RAUM_CODE_WIR100OD100A .
 _:RAUM_CODE_WIR100OD100A
     <http://schema.org/identifier> "RAUM_CODE";
 <https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A#column0>;    <https://cube.link/view/from> [
@@ -83,12 +89,14 @@ _:RAUM_CODE_WIR100OD100A
        <https://cube.link/view/path> (<http://schema.org/termCode>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:DATENSTATUS_WIR100OD100A .
 _:DATENSTATUS_WIR100OD100A a <https://cube.link/view/Dimension>;
      <http://schema.org/identifier> "DATENSTATUS";
 <http://www.w3.org/2000/01/rdf-schema#label> "Datenstatus";     <https://cube.link/view/from> [
            <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/statistics/property/STATUS> <http://schema.org/name>);
            <https://cube.link/view/source> _:C000610_WIR100OD100A, _:C000609_WIR100OD100A;
     ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:FILTER_KREISEZH_WIR100OD100A .
 _:FILTER_KREISEZH_WIR100OD100A
     <http://schema.org/identifier> "FILTER_KREISEZH";
     <https://cube.link/view/from> [
@@ -96,6 +104,7 @@ _:FILTER_KREISEZH_WIR100OD100A
        <https://cube.link/view/path> (<http://schema.org/inDefinedTermSet>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:FILTER_JAHR_WIR100OD100A .
 _:FILTER_JAHR_WIR100OD100A
     <http://schema.org/identifier> "FILTER_JAHR";
     <https://cube.link/view/from> [
@@ -103,12 +112,14 @@ _:FILTER_JAHR_WIR100OD100A
        <https://cube.link/view/path> (<http://schema.org/inDefinedTermSet>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:HTY_WIR100OD100A .
 _:HTY_WIR100OD100A a <https://cube.link/view/Dimension>;
      <http://schema.org/identifier> "HTY";
 <http://www.w3.org/2000/01/rdf-schema#label> "Haushaltstyp";     <https://cube.link/view/from> [
            <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/statistics/property/HTY>);
            <https://cube.link/view/source> _:C000610_WIR100OD100A, _:C000609_WIR100OD100A;
     ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:HTY_LANG_WIR100OD100A .
 _:HTY_LANG_WIR100OD100A
     <http://schema.org/identifier> "HTY_LANG";
 <https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A#column0>;    <https://cube.link/view/from> [
@@ -116,6 +127,7 @@ _:HTY_LANG_WIR100OD100A
        <https://cube.link/view/path> (<http://schema.org/name>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:HTY_CODE_WIR100OD100A .
 _:HTY_CODE_WIR100OD100A
     <http://schema.org/identifier> "HTY_CODE";
 <https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A#column0>;    <https://cube.link/view/from> [
@@ -123,18 +135,21 @@ _:HTY_CODE_WIR100OD100A
        <https://cube.link/view/path> (<http://schema.org/termCode>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:HAE_GGH1400_STK1025_WIR100OD100A .
 _:HAE_GGH1400_STK1025_WIR100OD100A a <https://cube.link/view/Dimension>;
      <http://schema.org/identifier> "HAE_GGH1400_STK1025";
 <http://www.w3.org/2000/01/rdf-schema#label> "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 25%-Perzentil";     <https://cube.link/view/from> [
            <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/statistics/measure/HAE>);
            <https://cube.link/view/source> _:C000610_WIR100OD100A;
     ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:HAE_GGH1400_STK1050_WIR100OD100A .
 _:HAE_GGH1400_STK1050_WIR100OD100A a <https://cube.link/view/Dimension>;
      <http://schema.org/identifier> "HAE_GGH1400_STK1050";
 <http://www.w3.org/2000/01/rdf-schema#label> "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 50%-Perzentil";     <https://cube.link/view/from> [
            <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/statistics/measure/HAE>);
            <https://cube.link/view/source> _:C000609_WIR100OD100A;
     ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:KREISEZH_LANG_WIR100OD100A .
 _:KREISEZH_LANG_WIR100OD100A
     <http://schema.org/identifier> "KREISEZH_LANG";
 <https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A#column0>;    <https://cube.link/view/from> [
@@ -142,6 +157,7 @@ _:KREISEZH_LANG_WIR100OD100A
        <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/schema/hierarchy/hasKreiseZH> <http://schema.org/name>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:KREISEZH_CODE_WIR100OD100A .
 _:KREISEZH_CODE_WIR100OD100A
     <http://schema.org/identifier> "KREISEZH_CODE";
 <https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A#column0>;    <https://cube.link/view/from> [
@@ -149,6 +165,7 @@ _:KREISEZH_CODE_WIR100OD100A
        <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/schema/hierarchy/hasKreiseZH> <http://schema.org/termCode>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:QUARTIEREZH_LANG_WIR100OD100A .
 _:QUARTIEREZH_LANG_WIR100OD100A
     <http://schema.org/identifier> "QUARTIEREZH_LANG";
 <https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A#column0>;    <https://cube.link/view/from> [
@@ -156,6 +173,7 @@ _:QUARTIEREZH_LANG_WIR100OD100A
        <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/schema/hierarchy/hasQuartiereZH> <http://schema.org/name>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:QUARTIEREZH_CODE_WIR100OD100A .
 _:QUARTIEREZH_CODE_WIR100OD100A
     <http://schema.org/identifier> "QUARTIEREZH_CODE";
 <https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A#column0>;    <https://cube.link/view/from> [
@@ -164,7 +182,9 @@ _:QUARTIEREZH_CODE_WIR100OD100A
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
 
-<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> (_:ZEIT_LANG_WIR100OD100A _:ZEIT_CODE_WIR100OD100A _:RAUM_LANG_WIR100OD100A _:RAUM_CODE_WIR100OD100A _:DATENSTATUS_WIR100OD100A _:HTY_LANG_WIR100OD100A _:HTY_CODE_WIR100OD100A _:HAE_GGH1400_STK1025_WIR100OD100A _:HAE_GGH1400_STK1050_WIR100OD100A _:KREISEZH_LANG_WIR100OD100A _:KREISEZH_CODE_WIR100OD100A _:QUARTIEREZH_LANG_WIR100OD100A _:QUARTIEREZH_CODE_WIR100OD100A) .
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/projection> [
+        <https://cube.link/view/columns> (_:ZEIT_LANG_WIR100OD100A _:ZEIT_CODE_WIR100OD100A _:RAUM_LANG_WIR100OD100A _:RAUM_CODE_WIR100OD100A _:DATENSTATUS_WIR100OD100A _:HTY_LANG_WIR100OD100A _:HTY_CODE_WIR100OD100A _:HAE_GGH1400_STK1025_WIR100OD100A _:HAE_GGH1400_STK1050_WIR100OD100A _:KREISEZH_LANG_WIR100OD100A _:KREISEZH_CODE_WIR100OD100A _:QUARTIEREZH_LANG_WIR100OD100A _:QUARTIEREZH_CODE_WIR100OD100A)
+    ] .
 <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://ld.stadt-zuerich.ch/schema/dataAttribute> [
        a "https://ld.stadt-zuerich.ch/schema/Attribute";
        <http://schema.org/alternateName> "ZEIT_LANG";

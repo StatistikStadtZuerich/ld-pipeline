@@ -1,4 +1,5 @@
 {% for dimension in dimensions %}
+<https://ld.stadt-zuerich.ch/statistics/view/{{ id|uri_encode }}> <https://cube.link/view/dimension> {{ dimension.to_bnode(id) }} .
 {% if dimension.get_type() == "BasicDimension" %}
 {{ dimension.to_bnode(id) }} a <https://cube.link/view/Dimension>;
      <http://schema.org/identifier> {{ dimension.identifier | literal_encode}};
