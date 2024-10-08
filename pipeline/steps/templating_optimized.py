@@ -82,7 +82,7 @@ class TemplatingOptimized(Step):
                 triples = template.render(row)
                 batch.append(triples)
             self._utils.print_formatted("done")
-            
+
             end_time = time.time()
             iteration_time = end_time - start_time
             iteration_durations.append(iteration_time)
@@ -105,7 +105,9 @@ class TemplatingOptimized(Step):
             if len(iteration_durations) > 10:
                 iteration_durations.pop(0)
             adaptive_threshold = sum(iteration_durations) / len(iteration_durations)
-            self._utils.print_formatted(f"{counter}. iteration took {iteration_time:.2f} seconds.")
+            self._utils.print_formatted(
+                f"{counter}. iteration took {iteration_time:.2f} seconds."
+            )
             if iteration_time > adaptive_threshold:
                 delay_increase = (iteration_time - adaptive_threshold) * 0.5
                 delay = min(max_delay, delay + delay_increase)
@@ -113,7 +115,9 @@ class TemplatingOptimized(Step):
                 delay_decrease = (adaptive_threshold - iteration_time) * 0.5
                 delay = max(0, delay - delay_decrease)
             if delay > 0:
-                self._utils.print_formatted(f"Delaying next iteration by {delay:.2f} seconds to reduce load.")
+                self._utils.print_formatted(
+                    f"Delaying next iteration by {delay:.2f} seconds to reduce load."
+                )
                 time.sleep(delay)
             self._utils.print_formatted(f"{counter}. iteration is finished.")
 

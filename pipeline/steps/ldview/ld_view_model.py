@@ -93,7 +93,7 @@ class View:
         self.include_datenstatus = include_datenstatus
         self.dimensions: List[Dimension] = []  # https://cube.link/view/dimension
         self.filters: List[Filter] = []
-        metadata: ViewMetadata
+        metadata: ViewMetadata  # noqa: F842
 
     def sort_and_numerate_dimensions(self):
         self.dimensions.sort(
