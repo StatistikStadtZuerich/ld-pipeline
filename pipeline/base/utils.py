@@ -115,6 +115,16 @@ class Utils(Base):
                 os.makedirs(done_folder)
             shutil.move(file, os.path.join(done_folder, filename))
             break
+            
+    def set_start_signal_fuseki_index(self, env: Env):
+        environment = Environment(env)
+        output_path = environment.config.get("output_path")
+        current_datetime = datetime.now().strftime("%Y%m%d%H%M")
+        file_name = f"start_fuseki_index_{current_datetime}.txt"
+        file_path = os.path.join(output_path, file_name)
+        with open(file_path, "w") as file:
+            file.write("")
+        self.print_formatted(f"Start signal '{file_name}' has been created.")
 
     def delete_stardog_triples(self, limit, env: Env):
         environment = Environment(env)

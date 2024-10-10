@@ -111,13 +111,13 @@ class LdViewBuilder(Base):
             "Code der administrativen räumlichen Einheit, auf die sich der Datenpunkt bezieht",
         )
 
-        dzl = LookupDimension("ZEIT_LANG", None, ["http://schema.org/name"], azl, dz)
+        dzl = LookupDimension("ZEIT_LANG", None, ["https://schema.org/name"], azl, dz)
         dzc = LookupDimension(
-            "ZEIT_CODE", None, ["http://schema.org/termCode"], azc, dz
+            "ZEIT_CODE", None, ["https://schema.org/termCode"], azc, dz
         )
-        drl = LookupDimension("RAUM_LANG", None, ["http://schema.org/name"], arl, dr)
+        drl = LookupDimension("RAUM_LANG", None, ["https://schema.org/name"], arl, dr)
         drc = LookupDimension(
-            "RAUM_CODE", None, ["http://schema.org/termCode"], arc, dr
+            "RAUM_CODE", None, ["https://schema.org/termCode"], arc, dr
         )
 
         dimensions = [dz, dr, dzl, dzc, drl, drc]
@@ -131,7 +131,7 @@ class LdViewBuilder(Base):
                 "Datenstatus",
                 [
                     "https://ld.stadt-zuerich.ch/statistics/property/STATUS",
-                    "http://schema.org/name",
+                    "https://schema.org/name",
                 ],
                 ads,
                 sources,
@@ -245,7 +245,7 @@ class LdViewBuilder(Base):
         filter_dimension = LookupDimension(
             identifier=f"FILTER_{filter_dict["termset"].upper()}",
             name=None,
-            path=["http://schema.org/inDefinedTermSet"],
+            path=["https://schema.org/inDefinedTermSet"],
             column=None,
             join=zeit_dim if filter_dict["dimension"] == "ZEIT" else raum_dim,
         )
@@ -283,14 +283,14 @@ class LdViewBuilder(Base):
         dlang = LookupDimension(
             f"{dimension_dict["identifier"]}_LANG",
             None,
-            ["http://schema.org/name"],
+            ["https://schema.org/name"],
             alang,
             dimension,
         )
         dcode = LookupDimension(
             f"{dimension_dict["identifier"]}_CODE",
             None,
-            ["http://schema.org/termCode"],
+            ["https://schema.org/termCode"],
             acode,
             dimension,
         )
@@ -341,7 +341,7 @@ class LdViewBuilder(Base):
             None,
             [
                 f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict["termset"]}",
-                "http://schema.org/name",
+                "https://schema.org/name",
             ],
             alang,
             raum_dimension,
@@ -351,7 +351,7 @@ class LdViewBuilder(Base):
             None,
             [
                 f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict["termset"]}",
-                "http://schema.org/termCode",
+                "https://schema.org/termCode",
             ],
             acode,
             raum_dimension,

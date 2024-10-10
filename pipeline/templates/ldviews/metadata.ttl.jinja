@@ -1,4 +1,4 @@
-<https://ld.stadt-zuerich.ch/catalog/SSZ/view> <http://schema.org/dataset> <https://ld.stadt-zuerich.ch/statistics/view/{{ view.id|uri_encode }}> .
+<https://ld.stadt-zuerich.ch/catalog/SSZ/view> <https://schema.org/dataset> <https://ld.stadt-zuerich.ch/statistics/view/{{ view.id|uri_encode }}> .
 <https://ld.stadt-zuerich.ch/statistics/view/{{ view.id|uri_encode }}> a <http://rdfs.org/ns/void#Dataset> , <https://schema.org/Dataset> , <http://www.w3.org/ns/dcat#Dataset> , <https://cube.link/view/View> ;
     <https://schema.org/author> {{ view.metadata.author|literal_encode }} ;
     <https://ld.stadt-zuerich.ch/schema/legalFoundation> {{ view.metadata.legal_foundation|literal_encode }} ;

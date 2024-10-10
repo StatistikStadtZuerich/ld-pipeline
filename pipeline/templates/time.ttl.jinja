@@ -2,7 +2,19 @@
     <https://schema.org/name> {{ date|literal_encode }} ;
     <https://schema.org/name> {{ end_date|literal_encode }} ;
     <https://schema.org/termCode> {{ term_code|literal_encode }} ;
-    {% if date|is_valid_date  %}<https://ld.stadt-zuerich.ch/schema/hasEnd> {{ date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;{% endif %}
-    {% if end_date|is_valid_date %}<https://ld.stadt-zuerich.ch/schema/hasEnd> {{ end_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;{% endif %}
-    {% if start_date|is_valid_date %}<https://ld.stadt-zuerich.ch/schema/hasBeginning> {{ start_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;{% endif %}
-    <https://ld.stadt-zuerich.ch/schema/referenceTime> {{ reference_time|literal_encode }} .
+    {% if date|is_valid_date  %}
+        <https://ld.stadt-zuerich.ch/schema/hasEnd> {{ date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
+    {% endif %}
+    {% if end_date|is_valid_date %}
+        <https://ld.stadt-zuerich.ch/schema/hasEnd> {{ end_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
+    {% endif %}
+    {% if start_date|is_valid_date %}
+        <https://ld.stadt-zuerich.ch/schema/hasBeginning> {{ start_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
+    {% endif %}
+    <https://ld.stadt-zuerich.ch/schema/referenceTime> {{ reference_time|literal_encode }} ;
+    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Tag> ;
+    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Monat> ;
+    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Trimester> ;
+    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Quartal> ;
+    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Semester> ;
+    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Jahr> .
