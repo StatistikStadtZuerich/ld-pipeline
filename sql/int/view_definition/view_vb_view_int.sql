@@ -24,4 +24,6 @@ SELECT
     t.Bemerkungen AS usage_notes,
     t.Kategorie AS theme
 FROM
-	dbo.pipe_HDBDatenobjekte_TEST t;
+	dbo.pipe_HDBDatenobjekte_TEST t
+WHERE
+	t.CubeIDs IS NOT NULL;
