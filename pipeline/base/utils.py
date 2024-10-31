@@ -115,7 +115,7 @@ class Utils(Base):
                 os.makedirs(done_folder)
             shutil.move(file, os.path.join(done_folder, filename))
             break
-            
+
     def set_start_signal_fuseki_index(self, env: Env):
         environment = Environment(env)
         output_path = environment.config.get("output_path")
