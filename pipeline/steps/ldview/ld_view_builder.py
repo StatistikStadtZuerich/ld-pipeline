@@ -68,6 +68,7 @@ class LdViewBuilder(Base):
                         hierarchy_dict, dimension_raum
                     )
                 )
+            view.sort_and_numerate_dimensions()
 
             views.append(view)
 
