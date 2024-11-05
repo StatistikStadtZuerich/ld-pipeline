@@ -17,7 +17,7 @@ SELECT
 	FORMAT(CAST(t.Zeitraum_Anfang AS DATE), 'yyyy-MM-dd') AS start_date,
     FORMAT(CAST(t.Zeitraum_ENDE AS DATE), 'yyyy-MM-dd') AS end_date,
     FORMAT(CAST(t.Aktualisierungsdatum AS DATE), 'yyyy-MM-dd') AS modified,
-    t.Aktualisierungsdatum AS accrual_periodicity,
+    t.Aktualisierungsintervall AS accrual_periodicity,
     4 AS publisher,
     t.Schlagworte AS keyword,
     t.Lizenz AS license,

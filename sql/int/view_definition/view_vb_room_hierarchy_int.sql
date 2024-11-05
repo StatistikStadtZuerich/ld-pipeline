@@ -8,16 +8,16 @@ WITH RankedTermsets AS (
         value AS termset,
         'Raum' AS dimension,
         CASE
-            WHEN value = 'StadtZH' THEN 1
+            WHEN value = 'StadtZH' THEN 3
             WHEN value = 'KreiseZH' THEN 2
-            WHEN value = 'QuartiereZH' THEN 3
+            WHEN value = 'QuartiereZH' THEN 1
             ELSE 4
         END AS termset_rank,
         ROW_NUMBER() OVER (PARTITION BY t.SASA_Job_Output_Id ORDER BY 
         CASE
-            WHEN value = 'StadtZH' THEN 1
+            WHEN value = 'StadtZH' THEN 3
             WHEN value = 'KreiseZH' THEN 2
-            WHEN value = 'QuartiereZH' THEN 3
+            WHEN value = 'QuartiereZH' THEN 1
             ELSE 4
         END) AS rn
     FROM
