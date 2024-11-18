@@ -1,6 +1,10 @@
 <https://ld.stadt-zuerich.ch/statistics/code/{{ term_code|uri_encode }}> a <http://www.w3.org/2006/time#TemporalEntity> , <https://schema.org/DefinedTerm> ;
-    <https://schema.org/name> {{ date|literal_encode }} ;
-    <https://schema.org/name> {{ end_date|literal_encode }} ;
+    {% if date %}
+    	<https://schema.org/name> {{ date|literal_encode }} ;
+    {% endif %}
+    {% if end_date %}
+    	<https://schema.org/name> {{ end_date|literal_encode }} ;
+    {% endif %}
     <https://schema.org/termCode> {{ term_code|literal_encode }} ;
     {% if date|is_valid_date  %}
         <https://ld.stadt-zuerich.ch/schema/hasEnd> {{ date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
