@@ -248,7 +248,7 @@ class LdViewBuilder(Base):
             name=None,
             path=["https://schema.org/inDefinedTermSet"],
             column=None,
-            join=zeit_dim if filter_dict["dimension"] == "ZEIT" else raum_dim,
+            join=zeit_dim if filter_dict["dimension"].upper() == "ZEIT" else raum_dim,
         )
         filter = Filter(
             name=f"{filter_dict["termset"]} is {filter_dict["dimension"]}",
