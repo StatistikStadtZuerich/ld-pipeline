@@ -68,6 +68,7 @@ class LdViewBuilder(Base):
                         hierarchy_dict, dimension_raum
                     )
                 )
+            view.sort_and_numerate_dimensions()
 
             view.sort_and_numerate_dimensions()
             views.append(view)
@@ -244,15 +245,15 @@ class LdViewBuilder(Base):
         self, filter_dict, zeit_dim, raum_dim
     ) -> (Filter, LookupDimension):
         filter_dimension = LookupDimension(
-            identifier=f"FILTER_{filter_dict["termset"].upper()}",
+            identifier=f"FILTER_{filter_dict['termset'].upper()}",
             name=None,
             path=["https://schema.org/inDefinedTermSet"],
             column=None,
             join=zeit_dim if filter_dict["dimension"].upper() == "ZEIT" else raum_dim,
         )
         filter = Filter(
-            name=f"{filter_dict["termset"]} is {filter_dict["dimension"]}",
-            argument=f"https://ld.stadt-zuerich.ch/statistics/termset/{filter_dict["termset"]}",
+            name=f"{filter_dict['termset']} is {filter_dict['dimension']}",
+            argument=f"https://ld.stadt-zuerich.ch/statistics/termset/{filter_dict['termset']}",
             dimension=filter_dimension,
             operation=FilterOperation.EQ,
         )
@@ -263,33 +264,33 @@ class LdViewBuilder(Base):
             identifier=dimension_dict["identifier"],
             name=dimension_dict["name"],
             path=[
-                f"https://ld.stadt-zuerich.ch/statistics/property/{dimension_dict["identifier"]}"
+                f"https://ld.stadt-zuerich.ch/statistics/property/{dimension_dict['identifier']}"
             ],
             column=None,
             sources=sources,
         )
 
         alang = Attribute(
-            name=f"{dimension_dict["name"]} (lang)",
-            alternate_name=f"{dimension_dict["identifier"]}_LANG",
+            name=f"{dimension_dict['name']} (lang)",
+            alternate_name=f"{dimension_dict['identifier']}_LANG",
             description=dimension_dict["description"],
         )
 
         acode = Attribute(
-            name=f"{dimension_dict["name"]} (code)",
-            alternate_name=f"{dimension_dict["identifier"]}_CODE",
+            name=f"{dimension_dict['name']} (code)",
+            alternate_name=f"{dimension_dict['identifier']}_CODE",
             description=dimension_dict["description"],
         )
 
         dlang = LookupDimension(
-            f"{dimension_dict["identifier"]}_LANG",
+            f"{dimension_dict['identifier']}_LANG",
             None,
             ["https://schema.org/name"],
             alang,
             dimension,
         )
         dcode = LookupDimension(
-            f"{dimension_dict["identifier"]}_CODE",
+            f"{dimension_dict['identifier']}_CODE",
             None,
             ["https://schema.org/termCode"],
             acode,
@@ -311,7 +312,7 @@ class LdViewBuilder(Base):
             identifier=measurement_dict["identifier_full"],
             name=measurement_dict["name"],
             path=[
-                f"https://ld.stadt-zuerich.ch/statistics/measure/{measurement_dict["identifier"]}"
+                f"https://ld.stadt-zuerich.ch/statistics/measure/{measurement_dict['identifier']}"
             ],
             column=attribute,
             sources=[source],
@@ -321,37 +322,37 @@ class LdViewBuilder(Base):
 
     def _create_dimensions_from_hierarchy_dict(self, hierarchy_dict, raum_dimension):
         alang = Attribute(
-            name=f"{hierarchy_dict["termset"]} (lang)",
-            alternate_name=f"{hierarchy_dict["termset"].upper()}_LANG",
-            description=f"Name der Hierarchiestufe '{hierarchy_dict["termset"]}', auf den sich der Datenpunkt bezieht.",
+            name=f"{hierarchy_dict['termset']} (lang)",
+            alternate_name=f"{hierarchy_dict['termset'].upper()}_LANG",
+            description=f"Name der Hierarchiestufe '{hierarchy_dict['termset']}', auf den sich der Datenpunkt bezieht.",
         )
 
         acode = Attribute(
-            name=f"{hierarchy_dict["termset"]} (code)",
-            alternate_name=f"{hierarchy_dict["termset"].upper()}_CODE",
-            description=f"Code der Hierarchiestufe '{hierarchy_dict["termset"]}', auf den sich der Datenpunkt bezieht.",
+            name=f"{hierarchy_dict['termset']} (code)",
+            alternate_name=f"{hierarchy_dict['termset'].upper()}_CODE",
+            description=f"Code der Hierarchiestufe '{hierarchy_dict['termset']}', auf den sich der Datenpunkt bezieht.",
         )
 
         if hierarchy_dict["dimension"] != "RAUM":
             self.logger.warn(
-                f"View contains hierarchy type {hierarchy_dict["dimension"]}, currently only 'RAUM' supported"
+                f"View contains hierarchy type {hierarchy_dict['dimension']}, currently only 'RAUM' supported"
             )
 
         dlang = LookupDimension(
-            f"{hierarchy_dict["termset"].upper()}_LANG",
+            f"{hierarchy_dict['termset'].upper()}_LANG",
             None,
             [
-                f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict["termset"]}",
+                f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}",
                 "https://schema.org/name",
             ],
             alang,
             raum_dimension,
         )
         dcode = LookupDimension(
-            f"{hierarchy_dict["termset"].upper()}_CODE",
+            f"{hierarchy_dict['termset'].upper()}_CODE",
             None,
             [
-                f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict["termset"]}",
+                f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}",
                 "https://schema.org/termCode",
             ],
             acode,

@@ -35,7 +35,7 @@ class MySQLDbConnection(DbConnection):
             password=self._config.get("mysql_password"),
         )
         self.logger.info(
-            f"Database connection to {self._config.get("mysql_host")}/{self._config.get("mysql_database")} established..."
+            f"Database connection to {self._config.get('mysql_host')}/{self._config.get('mysql_database')} established..."
         )
         self._cursor = self._connection.cursor(dictionary=True)
         return self
@@ -43,7 +43,7 @@ class MySQLDbConnection(DbConnection):
     def __exit__(self, *exc_details):
         self._connection.close()
         self.logger.info(
-            f"Database connection to {self._config.get("mysql_host")}/{self._config.get("mysql_database")} closed"
+            f"Database connection to {self._config.get('mysql_host')}/{self._config.get('mysql_database')} closed"
         )
 
 
