@@ -2,7 +2,7 @@
 <https://ld.stadt-zuerich.ch/statistics/view/{{ id|uri_encode }}> <https://cube.link/view/dimension> {{ dimension.to_bnode(id) }} .
 {% if dimension.get_type() == "BasicDimension" %}
 {{ dimension.to_bnode(id) }} a <https://cube.link/view/Dimension>;
-     <http://schema.org/identifier> {{ dimension.identifier | literal_encode}};
+     <https://schema.org/identifier> {{ dimension.identifier | literal_encode}};
      {%  if dimension.name is not none %}<http://www.w3.org/2000/01/rdf-schema#label> {{ dimension.name | literal_encode}};{%  endif %}
      {%  if dimension.column is not none %}<https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/{{id}}#column{{dimension.column.position}}>;{%  endif %}
      <https://cube.link/view/from> [
@@ -13,7 +13,7 @@
     ].
 {% else %}
 {{ dimension.to_bnode(id) }}
-    <http://schema.org/identifier> {{ dimension.identifier | literal_encode}};
+    <https://schema.org/identifier> {{ dimension.identifier | literal_encode}};
     {%  if dimension.column is not none %}<https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/{{id}}#column{{dimension.column.position}}>;{%  endif %}
     <https://cube.link/view/from> [
        <https://cube.link/view/join> {{ dimension.join.to_bnode(id) }};
