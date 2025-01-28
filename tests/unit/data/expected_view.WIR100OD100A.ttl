@@ -2,22 +2,22 @@
 <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> a <http://rdfs.org/ns/void#Dataset> , <https://schema.org/Dataset> , <http://www.w3.org/ns/dcat#Dataset> , <https://cube.link/view/View> ;
     <https://schema.org/author> "None" ;
     <https://ld.stadt-zuerich.ch/schema/legalFoundation> "None" ;
-    <https://purl.org/dc/elements/1.1/type> "None" ;
+    <http://purl.org/dc/elements/1.1/type> "None" ;
     <https://schema.org/version> "None" ;
     <https://schema.org/description> "None" ;
     <https://schema.org/name> "Haushaltseinkommen nach ..." ;
     <https://schema.org/alternateName> "None" ;
     <https://ld.stadt-zuerich.ch/schema/metadataCreator> "None" ;
-    <https://purl.org/dc/terms/accrualPeriodicity> "None" ;
-    <https://purl.org/dc/terms/modified> "None" ;
-    <https://purl.org/dc/terms/publisher> <https://ld.stadt-zuerich.ch/statistics/meta/org/None> ;
+    <http://purl.org/dc/terms/accrualPeriodicity> "None" ;
+    <http://purl.org/dc/terms/modified> "None" ;
+    <http://purl.org/dc/terms/publisher> <https://ld.stadt-zuerich.ch/statistics/meta/org/None> ;
     <http://www.w3.org/ns/dcat#theme> "None" ;
     <http://www.w3.org/ns/dcat#keyword> "None" ;
-    <https://purl.org/dc/terms/license> "None" ;
+    <http://purl.org/dc/terms/license> "None" ;
     <https://ld.stadt-zuerich.ch/schema/usageNotes> "None" ;
 
     <http://www.w3.org/ns/dcat#distribution> [ a <http://www.w3.org/ns/dcat#Distribution> ;
-            <https://purl.org/dc/terms/format> "CSV" ;
+            <http://purl.org/dc/terms/format> "CSV" ;
             <http://www.w3.org/ns/dcat#downloadURL> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A/observation?format=csv> ;
             <http://www.w3.org/ns/dcat#mediaType> "text/csv"
     ] .

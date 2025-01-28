@@ -151,10 +151,10 @@ ssz-dimension:GRUPPENANZ a rdf:Property ;
                          rdfs:range ssz-code:GRUPPENANZ0, ssz-code:GRUPPENANZ1, ssz-code:GRUPPENANZ2,ssz-code:GRUPPENANZ3, ssz-code:GRUPPENANZ4, ssz-code:GRUPPENANZ5 ;
                          rdfs:domain cube:Observation .
 
-<https://ld.stadt-zuerich.ch/statistics/meta/org/4> a <http://schema.org/Organization> ;
-    <http://schema.org/identifier> "4" ;
-    <http://schema.org/name> "Statistik Stadt Zürich, Präsidialdepartement" ;
-    <http://schema.org/title> "Statistik Stadt Zürich, Präsidialdepartement" ;
+<https://ld.stadt-zuerich.ch/statistics/meta/org/4> a <https://schema.org/Organization> ;
+    <https://schema.org/identifier> "4" ;
+    <https://schema.org/name> "Statistik Stadt Zürich, Präsidialdepartement" ;
+    <https://schema.org/title> "Statistik Stadt Zürich, Präsidialdepartement" ;
     <#Raum_Hierarchie> "StadtZH", "KreiseZH", "QuartiereZH", "ZoneZH;QuartiereZH;KreiseZH", "QuartiereZH;KreiseZH", "KreiseZH;QuartiereZH" ;
     <#Zeit_Hierarchie> "JAHR;STICHTAG", "QUARTAL;STICHTAG" ;
     <#Datentyp> "Datenaggregat" ;

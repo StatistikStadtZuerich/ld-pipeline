@@ -1,6 +1,6 @@
 <https://ld.stadt-zuerich.ch/statistics/measure/{{ measure_code|uri_encode }}> a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> , <https://cube.link/MeasureDimension> ;
     <https://schema.org/name> {{ title|literal_encode }} ;
     <https://schema.org/identifier> {{ measure_code|literal_encode }} ;
-    <https://qudt.org/schema/qudt/unit> <https://ld.stadt-zuerich.ch/statistics/unit/{{ unit|uri_encode }}> ;
+    <http://qudt.org/schema/qudt/unit> <https://ld.stadt-zuerich.ch/statistics/unit/{{ unit|uri_encode }}> ;
     <https://schema.org/description> {{ description|literal_encode }} ; {# description instead of title #}
     <https://schema.org/disambiguatingDescription> {{ method|literal_encode }} . {# method instead of description #}

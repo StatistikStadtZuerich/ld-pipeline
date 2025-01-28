@@ -1,3 +1,3 @@
-<https://ld.stadt-zuerich.ch/statistics/unit/{{ unit|uri_encode }}> a <https://qudt.org/schema/qudt/Unit> ;
+<https://ld.stadt-zuerich.ch/statistics/unit/{{ unit|uri_encode }}> a <http://qudt.org/schema/qudt/Unit> ;
     <https://schema.org/name> {{ title|literal_encode }} ; {# title instead of name #}
     <https://schema.org/identifier> {{ unit_code|literal_encode }} . {# unit_code instead of identifier #}
