@@ -17,7 +17,7 @@ class UploadToFusekiOptimized(Step):
         output_folder_done = output_folder + "/done"
         os.makedirs(output_folder_tmp, exist_ok=True)
         os.makedirs(output_folder_done, exist_ok=True)
-        url = f"{environment.config.get("fuseki_endpoint")}/{environment.config.get("fuseki_dataset")}/data?{environment.config.get("fuseki_graph")}"
+        url = f"{environment.config.get('fuseki_endpoint')}/{environment.config.get('fuseki_dataset')}/data?{environment.config.get('fuseki_graph')}"
 
         files = glob.glob(os.path.join(output_folder, "*.gz"))
         for filepath in files:
