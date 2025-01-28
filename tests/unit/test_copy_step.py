@@ -22,7 +22,7 @@ class TestCopy(unittest.TestCase):
             input_file = TestUtils.abs_path("data/copy-text.txt")
             output_file = "copy-target.txt"
 
-            copy = Copy(input_file, output_file)
+            copy = Copy(input_file, output_file, {"env": "test"})
             copy.run(env)
 
             with open(os.path.join(TestUtils.abs_path("tmp"), output_file)) as f:

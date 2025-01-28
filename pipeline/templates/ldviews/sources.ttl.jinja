@@ -1,0 +1,6 @@
+{% for source in sources %}
+
+{{ source.to_bnode(id) }} a <https://cube.link/view/CubeSource>;
+      <http://www.w3.org/2000/01/rdf-schema#label> {{ source.name | literal_encode}};
+      <https://cube.link/view/cube> <https://ld.stadt-zuerich.ch/statistics/{{ source.cube_id }}>.
+{% endfor %}

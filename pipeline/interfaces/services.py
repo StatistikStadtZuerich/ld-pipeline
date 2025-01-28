@@ -1,4 +1,4 @@
-from typing import Dict, Self
+from typing import Dict, Self, Any
 from abc import abstractmethod
 
 from ..base import Base
@@ -22,7 +22,7 @@ class DbConnection(ContextManager):
 
 class TemplateEngine(ContextManager):
     @abstractmethod
-    def template(self, data: Dict) -> None:
+    def template(self, data: Any) -> None:
         """This method renders the template with the specified data.
 
         Args:
