@@ -16,9 +16,21 @@
         <https://ld.stadt-zuerich.ch/schema/hasBeginning> {{ start_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
     {% endif %}
     <https://ld.stadt-zuerich.ch/schema/referenceTime> {{ reference_time|literal_encode }} ;
-    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Tag> ;
-    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Monat> ;
-    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Trimester> ;
-    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Quartal> ;
-    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Semester> ;
-    <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Jahr> .
+    {% if filter_day|int == 1 %}
+    	<https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Tag> ;
+    {% endif %}
+    {% if filter_month|int == 1 %}
+    	<https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Monat> ;
+    {% endif %}
+    {% if filter_trimester|int == 1 %}
+    	<https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Trimester> ;
+    {% endif %}
+    {% if filter_quarter|int == 1 %}
+    	<https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Quartal> ;
+    {% endif %}
+    {% if filter_semester|int == 1 %}
+    	<https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Semester> ;
+    {% endif %}
+    {% if filter_year|int == 1 %}
+    	<https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Jahr> .
+	{% endif %}
