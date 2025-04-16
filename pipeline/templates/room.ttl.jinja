@@ -3,7 +3,7 @@
     <https://schema.org/position> {{ position|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#integer> ;
     <https://schema.org/description> {{ description|literal_encode }} ;
     <https://schema.org/disambiguatingDescription> {{ available|literal_encode }} ;
-    <https://schema.org/sameAs> <{{ same_as|uri_encode }}> ;
+    <https://schema.org/sameAs> <{{ same_as }}> ;
     {% if term_sets %}
 	    {% for term_set in term_sets.split(';') %}
 			<https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/{{ term_set|uri_encode }}> ;
