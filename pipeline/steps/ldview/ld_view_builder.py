@@ -287,7 +287,13 @@ class LdViewBuilder(Base):
         acode = Attribute(
             name=f"{dimension_dict['name']} (code)",
             alternate_name=f"{dimension_dict['identifier']}_CODE",
-            description=dimension_dict["description"],
+            description=dimension_dict["description"],  # TODO add maybe more descriptive information
+        )
+
+        asort = Attribute(
+            name=f"{dimension_dict['name']} (sort)",
+            alternate_name=f"{dimension_dict['identifier']}_SORT",
+            description=dimension_dict["description"],  # TODO add maybe more descriptive information
         )
 
         dlang = LookupDimension(
@@ -304,8 +310,15 @@ class LdViewBuilder(Base):
             acode,
             dimension,
         )
+        dsort = LookupDimension(
+            f"{dimension_dict['identifier']}_SORT",
+            None,
+            ["https://schema.org/position"],
+            asort,
+            dimension,
+        )
 
-        return [dimension, dlang, dcode]
+        return [dimension, dlang, dcode, dsort]
 
     def _create_measurement_from_dimension_dict(self, measurement_dict, sources):
         source = next((s for s in sources if s.cube_id == measurement_dict["cube_id"]))
