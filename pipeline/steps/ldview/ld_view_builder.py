@@ -287,13 +287,17 @@ class LdViewBuilder(Base):
         acode = Attribute(
             name=f"{dimension_dict['name']} (code)",
             alternate_name=f"{dimension_dict['identifier']}_CODE",
-            description=dimension_dict["description"],  # TODO add maybe more descriptive information
+            description=dimension_dict[
+                "description"
+            ],  # TODO add maybe more descriptive information
         )
 
         asort = Attribute(
             name=f"{dimension_dict['name']} (sort)",
             alternate_name=f"{dimension_dict['identifier']}_SORT",
-            description=dimension_dict["description"],  # TODO add maybe more descriptive information
+            description=dimension_dict[
+                "description"
+            ],  # TODO add maybe more descriptive information
         )
 
         dlang = LookupDimension(
