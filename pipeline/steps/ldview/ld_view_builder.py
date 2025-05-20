@@ -112,6 +112,11 @@ class LdViewBuilder(Base):
             "RAUM_CODE",
             "Code der administrativen räumlichen Einheit, auf die sich der Datenpunkt bezieht",
         )
+        ars = Attribute(
+            "Raum (sort)",
+            "RAUM_SORT",
+            "Hilfswert zur Sortierung nach der administrativen räumlichen Einheit, auf die sich der Datenpunkt bezieht",
+        )
 
         dzl = LookupDimension("ZEIT_LANG", None, ["https://schema.org/name"], azl, dz)
         dzc = LookupDimension(
@@ -121,8 +126,11 @@ class LdViewBuilder(Base):
         drc = LookupDimension(
             "RAUM_CODE", None, ["https://schema.org/termCode"], arc, dr
         )
+        drs = LookupDimension(
+            "RAUM_SORT", None, ["https://schema.org/position"], ars, dr
+        )
 
-        dimensions = [dz, dr, dzl, dzc, drl, drc]
+        dimensions = [dz, dr, dzl, dzc, drl, drc, drs]
 
         if view.include_datenstatus:
             ads = Attribute(
