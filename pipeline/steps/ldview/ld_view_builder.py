@@ -354,6 +354,12 @@ class LdViewBuilder(Base):
             description=f"Code der Hierarchiestufe '{hierarchy_dict['termset']}', auf den sich der Datenpunkt bezieht.",
         )
 
+        asort = Attribute(
+            name=f"{hierarchy_dict['termset']} (sort)",
+            alternate_name=f"{hierarchy_dict['termset'].upper()}_SORT",
+            description=f"Sortierungshilfe der Hierarchiestufe '{hierarchy_dict['termset']}', auf den sich der Datenpunkt bezieht.",
+        )
+
         if hierarchy_dict["dimension"] != "RAUM":
             self.logger.warn(
                 f"View contains hierarchy type {hierarchy_dict['dimension']}, currently only 'RAUM' supported"
@@ -379,5 +385,15 @@ class LdViewBuilder(Base):
             acode,
             raum_dimension,
         )
+        dsort = LookupDimension(
+            f"{hierarchy_dict['termset'].upper()}_SORT",
+            None,
+            [
+                f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}",
+                "https://schema.org/position",
+            ],
+            asort,
+            raum_dimension,
+        )
 
-        return [dlang, dcode]
+        return [dlang, dcode, dsort]
