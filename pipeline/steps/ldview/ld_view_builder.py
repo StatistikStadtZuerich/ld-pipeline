@@ -112,6 +112,11 @@ class LdViewBuilder(Base):
             "RAUM_CODE",
             "Code der administrativen räumlichen Einheit, auf die sich der Datenpunkt bezieht",
         )
+        ars = Attribute(
+            "Raum (sort)",
+            "RAUM_SORT",
+            "Hilfswert zur Sortierung nach der administrativen räumlichen Einheit, auf die sich der Datenpunkt bezieht",
+        )
 
         dzl = LookupDimension("ZEIT_LANG", None, ["https://schema.org/name"], azl, dz)
         dzc = LookupDimension(
@@ -121,8 +126,11 @@ class LdViewBuilder(Base):
         drc = LookupDimension(
             "RAUM_CODE", None, ["https://schema.org/termCode"], arc, dr
         )
+        drs = LookupDimension(
+            "RAUM_SORT", None, ["https://schema.org/position"], ars, dr
+        )
 
-        dimensions = [dz, dr, dzl, dzc, drl, drc]
+        dimensions = [dz, dr, dzl, dzc, drl, drc, drs]
 
         if view.include_datenstatus:
             ads = Attribute(
@@ -279,7 +287,17 @@ class LdViewBuilder(Base):
         acode = Attribute(
             name=f"{dimension_dict['name']} (code)",
             alternate_name=f"{dimension_dict['identifier']}_CODE",
-            description=dimension_dict["description"],
+            description=dimension_dict[
+                "description"
+            ],  # TODO add maybe more descriptive information
+        )
+
+        asort = Attribute(
+            name=f"{dimension_dict['name']} (sort)",
+            alternate_name=f"{dimension_dict['identifier']}_SORT",
+            description=dimension_dict[
+                "description"
+            ],  # TODO add maybe more descriptive information
         )
 
         dlang = LookupDimension(
@@ -296,8 +314,15 @@ class LdViewBuilder(Base):
             acode,
             dimension,
         )
+        dsort = LookupDimension(
+            f"{dimension_dict['identifier']}_SORT",
+            None,
+            ["https://schema.org/position"],
+            asort,
+            dimension,
+        )
 
-        return [dimension, dlang, dcode]
+        return [dimension, dlang, dcode, dsort]
 
     def _create_measurement_from_dimension_dict(self, measurement_dict, sources):
         source = next((s for s in sources if s.cube_id == measurement_dict["cube_id"]))
@@ -333,6 +358,12 @@ class LdViewBuilder(Base):
             description=f"Code der Hierarchiestufe '{hierarchy_dict['termset']}', auf den sich der Datenpunkt bezieht.",
         )
 
+        asort = Attribute(
+            name=f"{hierarchy_dict['termset']} (sort)",
+            alternate_name=f"{hierarchy_dict['termset'].upper()}_SORT",
+            description=f"Sortierungshilfe der Hierarchiestufe '{hierarchy_dict['termset']}', auf den sich der Datenpunkt bezieht.",
+        )
+
         if hierarchy_dict["dimension"] != "RAUM":
             self.logger.warn(
                 f"View contains hierarchy type {hierarchy_dict['dimension']}, currently only 'RAUM' supported"
@@ -358,5 +389,15 @@ class LdViewBuilder(Base):
             acode,
             raum_dimension,
         )
+        dsort = LookupDimension(
+            f"{hierarchy_dict['termset'].upper()}_SORT",
+            None,
+            [
+                f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}",
+                "https://schema.org/position",
+            ],
+            asort,
+            raum_dimension,
+        )
 
-        return [dlang, dcode]
+        return [dlang, dcode, dsort]
