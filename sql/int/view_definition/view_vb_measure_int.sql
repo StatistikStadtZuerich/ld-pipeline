@@ -78,7 +78,7 @@ SELECT
 	t.identifier,
 	t.identifier_full,
 	REPLACE(t.cube_id, 'CID_', '') AS cube_id,
-	c.Titel as name,
+	k.Kennzahlname as name,
 	k.Beschreibung as description
 FROM
 	cube_identifier t
