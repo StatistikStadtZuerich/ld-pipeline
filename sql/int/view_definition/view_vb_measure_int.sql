@@ -2,96 +2,62 @@ DROP VIEW IF EXISTS dbo.view_vb_measure_int;
 GO
 
 CREATE VIEW dbo.view_vb_measure_int AS
-WITH split_kennzahl AS (
+WITH exploded AS (
     SELECT
-        value AS kennzahl,
-        ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rownum
-    FROM 
-        dbo.pipe_HDBDatenobjekte_TEST
-    CROSS APPLY 
-        STRING_SPLIT(Kennzahl_GGH_STK_BEB, ';')
+        t.SASA_Job_Output_Id,
+        t.CubeIDS,
+        t.Kennzahl_GGH_STK_BEB,
+        k.value AS kennzahl,
+        c.value AS cube_id,
+        ROW_NUMBER() OVER (PARTITION BY t.SASA_Job_Output_Id ORDER BY (SELECT NULL)) AS rn_k,
+        ROW_NUMBER() OVER (PARTITION BY t.SASA_Job_Output_Id ORDER BY (SELECT NULL)) AS rn_c
+    FROM dbo.pipe_HDBDatenobjekte_TEST t
+    CROSS APPLY STRING_SPLIT(t.Kennzahl_GGH_STK_BEB, ';') k
+    CROSS APPLY STRING_SPLIT(t.CubeIDS, ' ') c
 ),
-split_cube_id AS (
+paired AS (
     SELECT
-        value AS cube_id,
-        ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rownum
-    FROM 
-        dbo.pipe_HDBDatenobjekte_TEST
-    CROSS APPLY 
-        STRING_SPLIT(CubeIDS, ' ')
-),
-initial_trim AS (
-    SELECT 
-        split_cube_id.cube_id,
-        split_kennzahl.kennzahl,
-        REPLACE(split_kennzahl.kennzahl, '|', '_') AS identifier,
-        REPLACE(split_kennzahl.kennzahl, '|', '_') AS original_identifier,
-        ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rownum
-    FROM 
-        split_kennzahl
-    JOIN 
-        split_cube_id ON split_kennzahl.rownum = split_cube_id.rownum
-),
-recursive_trim AS (
-    SELECT 
+        SASA_Job_Output_Id,
         cube_id,
-        original_identifier,
-        identifier,
-        ROW_NUMBER() OVER (PARTITION BY original_identifier ORDER BY rownum) AS iter
-    FROM 
-        initial_trim
-    UNION ALL
-    SELECT 
-        cube_id,
-        original_identifier,
-        CASE 
-            WHEN RIGHT(identifier, 1) = '_' 
-            THEN LEFT(identifier, LEN(identifier) - 1)
-            ELSE identifier
-        END AS identifier,
-        iter + 1
-    FROM 
-        recursive_trim
-    WHERE 
-        RIGHT(identifier, 1) = '_'
+        REPLACE(kennzahl, '|', '_') AS identifier_full_raw,
+        ROW_NUMBER() OVER (PARTITION BY SASA_Job_Output_Id ORDER BY (SELECT NULL)) AS rn
+    FROM exploded
+    WHERE rn_k = rn_c
 ),
-cube_identifier AS (
-	SELECT 
-		cube_id,
-		SUBSTRING(identifier, 1, 3) as identifier,
-		identifier as identifier_full
-	FROM 
-		recursive_trim
-	WHERE 
-		iter = (SELECT MAX(iter) FROM recursive_trim RT WHERE RT.original_identifier = recursive_trim.original_identifier)
+trimmed AS (
+    SELECT
+        SASA_Job_Output_Id AS view_id,
+        cube_id,
+        identifier_full_raw,
+        LEFT(identifier_full_raw, LEN(identifier_full_raw) - 
+            PATINDEX('%[^_]%', REVERSE(identifier_full_raw)) + 1) AS identifier_full,
+        SUBSTRING(
+            LEFT(identifier_full_raw, LEN(identifier_full_raw) - 
+                PATINDEX('%[^_]%', REVERSE(identifier_full_raw)) + 1),
+            1, 3
+        ) AS identifier
+    FROM paired
 ),
 view_cube AS (
 	SELECT
-        t.sasa_job_output_id AS view_id,
+        t.SASA_Job_Output_Id AS view_id,
         value AS cube_id
-    FROM
-        dbo.pipe_HDBDatenobjekte_TEST t
-        CROSS APPLY STRING_SPLIT(t.cubeids, ' ')
+    FROM dbo.pipe_HDBDatenobjekte_TEST t
+    CROSS APPLY STRING_SPLIT(t.CubeIDS, ' ')
 )
 SELECT
-	vc.view_id,
-	t.identifier,
-	t.identifier_full,
-	REPLACE(t.cube_id, 'CID_', '') AS cube_id,
-	k.Kennzahlname as name,
-	k.Beschreibung as description
-FROM
-	cube_identifier t
-JOIN
-	dbo.pipe_HDBCubeDefinition c
-ON
-	c.CID = t.cube_id
-JOIN
-	dbo.pipe_HDBKennzahlen k
-ON
-	k.KennzahlCode = t.identifier
-JOIN
-	view_cube vc
-ON
-	vc.cube_id = t.cube_id;
+    t.view_id,
+    t.identifier,
+    t.identifier_full,
+    REPLACE(t.cube_id, 'CID_', '') AS cube_id,
+    k.Kennzahlname AS name,
+    k.Beschreibung AS description
+FROM trimmed t
+JOIN dbo.pipe_HDBKennzahlen k
+    ON k.KennzahlCode = t.identifier
+JOIN dbo.pipe_HDBCubeDefinition c
+    ON c.CID = t.cube_id
+JOIN view_cube vc
+    ON vc.cube_id = t.cube_id AND vc.view_id = t.view_id;
+
 
