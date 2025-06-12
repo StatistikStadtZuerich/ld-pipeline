@@ -46,18 +46,18 @@ view_cube AS (
     CROSS APPLY STRING_SPLIT(t.CubeIDS, ' ')
 )
 SELECT
-    t.view_id,
-    t.identifier,
-    t.identifier_full,
-    REPLACE(t.cube_id, 'CID_', '') AS cube_id,
-    k.Kennzahlname AS name,
-    k.Beschreibung AS description
+    MAX(t.view_id) AS view_id,
+    MAX(t.identifier) AS identifier,
+    MAX(t.identifier_full) AS identifier_full,
+    MAX(REPLACE(t.cube_id, 'CID_', '')) AS cube_id,
+    MAX(k.Kennzahlname) AS name,
+    MAX(k.Beschreibung) AS description
 FROM trimmed t
 JOIN dbo.pipe_HDBKennzahlen k
     ON k.KennzahlCode = t.identifier
 JOIN dbo.pipe_HDBCubeDefinition c
     ON c.CID = t.cube_id
 JOIN view_cube vc
-    ON vc.cube_id = t.cube_id AND vc.view_id = t.view_id;
-
-
+    ON vc.cube_id = t.cube_id AND vc.view_id = t.view_id
+GROUP BY
+	t.view_id, t.identifier;
