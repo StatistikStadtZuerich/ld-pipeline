@@ -28,7 +28,8 @@ SELECT
 		WHEN h.DATENSTATUS LIKE '%definitiv%' THEN 'DEFINITIV'
 		ELSE 'PROVISORISCH'
 	END as status,
-	h.REFERENZNUMMER AS reference_number
+	h.REFERENZNUMMER AS reference_number,
+	h.DATENSTAND as modified
 FROM
 	dbo.pipe_HDB_TEST h
 WHERE
