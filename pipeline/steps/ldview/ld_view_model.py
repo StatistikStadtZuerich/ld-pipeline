@@ -78,6 +78,7 @@ class ViewMetadata(TypedDict):
     start_date: str
     end_date: str
     accrual_periodicity: str
+    spatial: str
     issued: str
     modified: str
     publisher: str
