@@ -45,7 +45,7 @@ view_cube AS (
     FROM dbo.pipe_HDBDatenobjekte_TEST t
     CROSS APPLY STRING_SPLIT(t.CubeIDS, ' ')
 )
-SELECT
+SELECT DISTINCT
     MAX(t.view_id) AS view_id,
     MAX(t.identifier) AS identifier,
     MAX(t.identifier_full) AS identifier_full,
@@ -60,4 +60,4 @@ JOIN dbo.pipe_HDBCubeDefinition c
 JOIN view_cube vc
     ON vc.cube_id = t.cube_id AND vc.view_id = t.view_id
 GROUP BY
-	t.view_id, t.identifier;
+	t.view_id, t.identifier, t.identifier_full;
