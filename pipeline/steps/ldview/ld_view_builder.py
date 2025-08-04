@@ -79,7 +79,7 @@ class LdViewBuilder(Base):
     def _get_static_dimensions(self, view, sources):
         dz = BasicDimension(
             "ZEIT",
-            "Zeit Raum",
+            "Key Zeit",
             ["https://ld.stadt-zuerich.ch/statistics/property/ZEIT"],
             None,
             sources,
