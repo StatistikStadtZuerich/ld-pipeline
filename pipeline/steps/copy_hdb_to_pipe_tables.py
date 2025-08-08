@@ -50,10 +50,17 @@ class CopyHDBToPipeTables(Step):
                                 WHERE TABLE_NAME = 'pipe_{tablename}'
                                 AND TABLE_SCHEMA = 'dbo'
                                 AND COLUMN_NAME NOT IN ('hash')
+                                AND NOT (TABLE_NAME IN ('pipe_HDB_TEST', 'pipe_HDB_FINAL') AND COLUMN_NAME IN ('TAG','MONAT'))
                             """)
                         columns = cursor.fetchall()
                         columns = [f'"{col["COLUMN_NAME"]}"' for col in columns]
                         columns_list = ", ".join(columns)
+                        #cursor.execute(f"""
+                        #        SELECT TOP 10 * FROM #pipe_{tablename}
+                        #    """)
+                        #rows=cursor.fetchall()
+                        #for row in rows:
+                        #    print(row)
                         if tablename in ("HDB_TEST", "HDB_FINAL"):
                             stmt_insert = f"""
                                 INSERT INTO pipe_{tablename} ({columns_list}, hash)
@@ -64,6 +71,7 @@ class CopyHDBToPipeTables(Step):
                                 INSERT INTO pipe_{tablename}
                                 SELECT {columns_list} FROM #pipe_{tablename}
                             """
+                        print(stmt_insert)
                         cursor.execute(f"""
                                 TRUNCATE TABLE pipe_{tablename};
                                 DROP TABLE IF EXISTS #pipe_{tablename};
