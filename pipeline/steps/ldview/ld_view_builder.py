@@ -36,7 +36,7 @@ class LdViewBuilder(Base):
             )
             view.dimensions.extend(basic_dimension_plus_dzeit_and_draum[0])
 
-            dimension_zeit = basic_dimension_plus_dzeit_and_draum[1]
+            basic_dimension_plus_dzeit_and_draum[1]
             dimension_raum = basic_dimension_plus_dzeit_and_draum[2]
 
             dimension_dict_list = self._list_dimensions_by_view_id(view.id)
@@ -47,7 +47,9 @@ class LdViewBuilder(Base):
 
             filter_dict_list = self._list_filters_by_view_id(view.id)
             for filter_dict in filter_dict_list:
-                _filter, dimension = self._create_filter_from_dict(filter_dict, view.dimensions)
+                _filter, dimension = self._create_filter_from_dict(
+                    filter_dict, view.dimensions
+                )
 
                 if _filter is not None:
                     view.filters.append(_filter)
@@ -256,10 +258,15 @@ class LdViewBuilder(Base):
     def _create_filter_from_dict(
         self, filter_dict, dim_list
     ) -> (Filter, LookupDimension):
-        basic_dimension = next((d for d in dim_list if d.identifier == filter_dict["dimension"].upper()), None)
+        basic_dimension = next(
+            (d for d in dim_list if d.identifier == filter_dict["dimension"].upper()),
+            None,
+        )
 
         if basic_dimension is None:
-            self.logger.warn(f"View contains filter dimension {filter_dict['dimension']}, which is not in the list of dimensions")
+            self.logger.warn(
+                f"View contains filter dimension {filter_dict['dimension']}, which is not in the list of dimensions"
+            )
             return None, None
 
         filter_dimension = LookupDimension(
