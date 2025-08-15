@@ -4,6 +4,45 @@ GO
 
 CREATE VIEW dbo.view_observation_int
 AS
+
+SELECT
+	h_filter.GESAMTCODE AS gesamtcode,
+	REPLACE(REPLACE(TRIM(h_filter.CUBEID), 'CID_', ''), ' ', ',') as cube_ids,
+	h_filter.KENNZAHL AS measure,
+	h_filter.WERT AS value,
+	SUBSTRING(h_filter.GESAMTCODE, 1, 9) AS time_code,
+	FORMAT(DATEFROMPARTS(h_filter.JAHR, h_filter.MONAT, h_filter.TAG), 'yyyy-MM-dd') AS "time",
+	SUBSTRING(h_filter.GESAMTCODE, 10, 6) AS room_code,
+	SUBSTRING(h_filter.GESAMTCODE, 19, 3) AS prop1_code_short,
+	SUBSTRING(h_filter.GESAMTCODE, 19, 7) AS prop1_code,
+	SUBSTRING(h_filter.GESAMTCODE, 26, 3) AS prop2_code_short,
+	SUBSTRING(h_filter.GESAMTCODE, 26, 7) AS prop2_code,
+	SUBSTRING(h_filter.GESAMTCODE, 33, 3) AS prop3_code_short,
+	SUBSTRING(h_filter.GESAMTCODE, 33, 7) AS prop3_code,
+	SUBSTRING(h_filter.GESAMTCODE, 40, 3) AS prop4_code_short,
+	SUBSTRING(h_filter.GESAMTCODE, 40, 7) AS prop4_code,
+	SUBSTRING(h_filter.GESAMTCODE, 47, 3) AS prop5_code_short,
+	SUBSTRING(h_filter.GESAMTCODE, 47, 7) AS prop5_code,
+	h_filter.ANZ_GRUPPEN AS number_groups,
+	CASE
+		WHEN h_filter.DATENSTATUS LIKE '%veröffentlicht%' THEN 'VEROEFFENTLICHT'
+		WHEN h_filter.DATENSTATUS LIKE '%definitiv%' THEN 'DEFINITIV'
+		ELSE 'PROVISORISCH'
+	END as status,
+	h_filter.REFERENZNUMMER AS reference_number,
+	h_filter.DATENSTAND as modified
+FROM
+	(SELECT * FROM dbo.pipe_HDB_TEST WHERE Publikationsstatus <> 'veröffentlicht') AS h_filter   
+LEFT JOIN
+	dbo.Diffusionsereignisse d
+ON h_filter.DiffusionsID = d.id
+WHERE
+	h_filter.RECORDSTATUS = '0'
+	AND
+	coalesce(d.StartDate, '') <= GETDATE() 
+	AND
+	h_filter.CUBEID <> ''
+UNION ALL
 SELECT
 	h.GESAMTCODE AS gesamtcode,
 	REPLACE(REPLACE(TRIM(h.CUBEID), 'CID_', ''), ' ', ',') as cube_ids,
@@ -34,6 +73,8 @@ FROM
 	dbo.pipe_HDB_TEST h
 WHERE
 	h.RECORDSTATUS = '0'
-AND
+	AND
+	h.PUBLIKATIONSSTATUS = 'veröffentlicht'
+	AND
 	h.CUBEID <> '';
 GO
