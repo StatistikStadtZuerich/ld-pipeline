@@ -36,22 +36,26 @@ class LdViewBuilder(Base):
             )
             view.dimensions.extend(basic_dimension_plus_dzeit_and_draum[0])
 
-            dimension_zeit = basic_dimension_plus_dzeit_and_draum[1]
+            basic_dimension_plus_dzeit_and_draum[1]
             dimension_raum = basic_dimension_plus_dzeit_and_draum[2]
-
-            filter_dict_list = self._list_filters_by_view_id(view.id)
-            for filter_dict in filter_dict_list:
-                filter_and_dimension = self._create_filter_from_dict(
-                    filter_dict, dimension_zeit, dimension_raum
-                )
-                view.filters.append(filter_and_dimension[0])
-                view.dimensions.append(filter_and_dimension[1])
 
             dimension_dict_list = self._list_dimensions_by_view_id(view.id)
             for dimension_dict in dimension_dict_list:
                 view.dimensions.extend(
                     self._create_dimensions_from_dimension_dict(dimension_dict, sources)
                 )
+
+            filter_dict_list = self._list_filters_by_view_id(view.id)
+            for filter_dict in filter_dict_list:
+                _filter, dimension = self._create_filter_from_dict(
+                    filter_dict, view.dimensions
+                )
+
+                if _filter is not None:
+                    view.filters.append(_filter)
+
+                if dimension is not None:
+                    view.dimensions.append(dimension)
 
             measurement_dict_list = self._list_measurements_by_view_id(view.id)
             for measurement_dict in measurement_dict_list:
@@ -184,7 +188,8 @@ class LdViewBuilder(Base):
         """
         return [
             {"termset": "KreiseZH", "dimension": "RAUM"},
-            {"termset": "Jahr", "dimension": "ZEIT"}
+            {"termset": "Jahr", "dimension": "ZEIT"},
+            {"termset": "HYTLevel1", "dimension": "HTY", "view_id": view_id},
         ]
         """
         return self._get_view_data(f"view_vb_filter_{self._env}", view_id)
@@ -251,14 +256,25 @@ class LdViewBuilder(Base):
         return Source(name=source_dict["name"], cube_id=source_dict["cube_id"])
 
     def _create_filter_from_dict(
-        self, filter_dict, zeit_dim, raum_dim
+        self, filter_dict, dim_list
     ) -> (Filter, LookupDimension):
+        basic_dimension = next(
+            (d for d in dim_list if d.identifier == filter_dict["dimension"].upper()),
+            None,
+        )
+
+        if basic_dimension is None:
+            self.logger.warn(
+                f"View contains filter dimension {filter_dict['dimension']}, which is not in the list of dimensions"
+            )
+            return None, None
+
         filter_dimension = LookupDimension(
             identifier=f"FILTER_{filter_dict['termset'].upper()}",
             name=None,
             path=["https://schema.org/inDefinedTermSet"],
             column=None,
-            join=zeit_dim if filter_dict["dimension"].upper() == "ZEIT" else raum_dim,
+            join=basic_dimension,
         )
         filter = Filter(
             name=f"{filter_dict['termset']} is {filter_dict['dimension']}",
