@@ -10,7 +10,7 @@ SELECT
     h.KENNZAHL AS measure,
     h.WERT AS value,
     SUBSTRING(h.GESAMTCODE, 1, 9)  AS time_code,
-	FORMAT(DATEFROMPARTS(CAST(SUBSTRING(h.ZEIT, 6, 4) AS INT), CAST(SUBSTRING(h.ZEIT, 4, 2) AS INT), CAST(SUBSTRING(h.ZEIT, 2, 2) AS INT)), 'yyyy-MM-dd') AS "time",
+    FORMAT(DATEFROMPARTS(z.JAHR, z.MONAT, z.TAG), 'dd-MM-yyyy') AS [time],
     SUBSTRING(h.GESAMTCODE, 10, 6) AS room_code,
 
     -- Property 1
@@ -60,17 +60,17 @@ SELECT
         WHEN h.DATENSTATUS LIKE '%definitiv%'     THEN 'DEFINITIV'
         ELSE 'PROVISORISCH'
     END AS status,
-	h.REFERENZNUMMER AS reference_number,
-	h.DATENSTAND as modified
+    h.REFERENZNUMMER AS reference_number,
+    h.DATENSTAND as modified
 
 FROM dbo.pipe_HDB_TEST h
-	LEFT JOIN HDBAbgeleiteteGruppen g1 ON g1.Gruppe = SUBSTRING(h.GESAMTCODE, 19, 3)
-	LEFT JOIN HDBAbgeleiteteGruppen g2 ON g2.Gruppe = SUBSTRING(h.GESAMTCODE, 26, 3)
-	LEFT JOIN HDBAbgeleiteteGruppen g3 ON g3.Gruppe = SUBSTRING(h.GESAMTCODE, 33, 3)
-	LEFT JOIN HDBAbgeleiteteGruppen g4 ON g4.Gruppe = SUBSTRING(h.GESAMTCODE, 40, 3)
-	LEFT JOIN HDBAbgeleiteteGruppen g5 ON g5.Gruppe = SUBSTRING(h.GESAMTCODE, 47, 3)
+    LEFT JOIN HDBAbgeleiteteGruppen g1 ON g1.Gruppe = SUBSTRING(h.GESAMTCODE, 19, 3)
+    LEFT JOIN HDBAbgeleiteteGruppen g2 ON g2.Gruppe = SUBSTRING(h.GESAMTCODE, 26, 3)
+    LEFT JOIN HDBAbgeleiteteGruppen g3 ON g3.Gruppe = SUBSTRING(h.GESAMTCODE, 33, 3)
+    LEFT JOIN HDBAbgeleiteteGruppen g4 ON g4.Gruppe = SUBSTRING(h.GESAMTCODE, 40, 3)
+    LEFT JOIN HDBAbgeleiteteGruppen g5 ON g5.Gruppe = SUBSTRING(h.GESAMTCODE, 47, 3)
+    LEFT JOIN HDBZeit z ON z.ZEIT = h.ZEIT
 WHERE
-    h.RECORDSTATUS = '0'
-AND
-	h.CUBEID <> '';
+    h.RECORDSTATUS = '0';
+
 GO
