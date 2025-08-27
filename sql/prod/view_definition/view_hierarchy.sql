@@ -2,7 +2,7 @@ DROP VIEW IF EXISTS dbo.view_hierarchy;
 
 GO
 
-CREATE VIEW dbo.view_hierarchy_int AS
+CREATE VIEW dbo.view_hierarchy AS
 SELECT DISTINCT
     CASE 
         WHEN ag.gruppe IS NOT NULL THEN REPLACE(t.GRUPPE, ag.gruppe, ag.origin)
