@@ -64,6 +64,7 @@ class CopyHDBToPipeTables(Step):
                                 INSERT INTO pipe_{tablename}
                                 SELECT {columns_list} FROM #pipe_{tablename}
                             """
+                        print(stmt_insert)
                         cursor.execute(f"""
                                 TRUNCATE TABLE pipe_{tablename};
                                 DROP TABLE IF EXISTS #pipe_{tablename};
