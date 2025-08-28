@@ -23,7 +23,8 @@ SELECT
     t.Schlagworte AS keyword,
     t.Lizenz AS license,
     t.Bemerkungen AS usage_notes,
-    t.Kategorie AS theme
+    t.Kategorie AS theme,
+	t.Datenqualitaet as dataquality
 FROM
 	dbo.pipe_HDBDatenobjekte_TEST t
 WHERE
