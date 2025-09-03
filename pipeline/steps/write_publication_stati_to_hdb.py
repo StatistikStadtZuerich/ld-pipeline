@@ -66,6 +66,7 @@ class WritePublicationStatiToHDB(Step):
                     UPDATE c
                         SET 
                             c.PUBLIKATIONSSTATUS = 'veröffentlicht',
+                            c.PUBLIKATIONSDATUM = GETDATE(),
                             c.GESAMTCODE_EXPORTIERT = 'Ja'
                         FROM 
                             pipe_hdb_{suffix} a
