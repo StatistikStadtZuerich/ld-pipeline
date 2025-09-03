@@ -247,6 +247,7 @@ class LdViewBuilder(Base):
             keyword=view_dict["keyword"],
             license=view_dict["license"],
             usage_notes=view_dict["usage_notes"],
+            dataquality=view_dict["dataquality"]
         )
 
         view.metadata = metadata

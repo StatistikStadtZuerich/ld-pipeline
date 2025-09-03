@@ -27,7 +27,7 @@ def run_pipeline():
         main.step(name="generateViews", env=env)
 
         # Upload triple files to Stardog
-        main.step(name="uploadToStardog", env=env)
+        #main.step(name="uploadToStardog", env=env)
 
         # Set finish signal
         utils.set_finish_signal(env)

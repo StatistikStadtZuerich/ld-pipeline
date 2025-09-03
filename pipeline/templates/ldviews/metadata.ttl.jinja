@@ -19,7 +19,7 @@
     <http://www.w3.org/ns/dcat#keyword> {{ view.metadata.keyword|literal_encode }} ;
     <http://purl.org/dc/terms/license> {{ view.metadata.license|literal_encode }} ;
     <https://ld.stadt-zuerich.ch/schema/usageNotes> {{ view.metadata.usage_notes|literal_encode }} ;
-
+    {% if view.metadata.dataquality is defined and view.metadata.dataquality %}<http://www.w3.org/2000/01/rdf-schema#comment>{{ view.metadata.dataquality | literal_encode }}@de;{% endif %}
     <http://www.w3.org/ns/dcat#distribution> [ a <http://www.w3.org/ns/dcat#Distribution> ;
             <http://purl.org/dc/terms/format> "CSV" ;
             <http://www.w3.org/ns/dcat#downloadURL> <https://ld.stadt-zuerich.ch/statistics/view/{{ view.id|uri_encode }}/observation?format=csv> ;
