@@ -154,14 +154,3 @@ ssz-dimension:GRUPPENANZ a rdf:Property ;
 <https://ld.stadt-zuerich.ch/statistics/meta/org/4> a <https://schema.org/Organization> ;
     <https://schema.org/identifier> "4" ;
     <https://schema.org/name> "Statistik Stadt Zürich, Präsidialdepartement" ;
-    <https://schema.org/title> "Statistik Stadt Zürich, Präsidialdepartement" ;
-    <#Raum_Hierarchie> "StadtZH", "KreiseZH", "QuartiereZH", "ZoneZH;QuartiereZH;KreiseZH", "QuartiereZH;KreiseZH", "KreiseZH;QuartiereZH" ;
-    <#Zeit_Hierarchie> "JAHR;STICHTAG", "QUARTAL;STICHTAG" ;
-    <#Datentyp> "Datenaggregat" ;
-    <#Aktualisierungsintervall> "jaehrlich" ;
-    <#AktuelleVersion> "1", "1.0" ;
-    <#Filter> "QuartiereZH Jahr", "ZoneZH Jahr", "KreiseZH Jahr", "StadtZH Jahr", "StadtZH Quartal" ;
-    <#Datenowner> "Statistik Stadt Zürich, Präsidialdepartement", 
-                  "Bevölkerungsamt, Präsidialdepartement", 
-                  "Steueramt, Finanzdepartement", 
-                  "Beschäftigtenstatistik, Bundesamt für Statistik" .
