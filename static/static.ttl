@@ -153,4 +153,4 @@ ssz-dimension:GRUPPENANZ a rdf:Property ;
 
 <https://ld.stadt-zuerich.ch/statistics/meta/org/4> a <https://schema.org/Organization> ;
     <https://schema.org/identifier> "4" ;
-    <https://schema.org/name> "Statistik Stadt Zürich, Präsidialdepartement" ;
+    <https://schema.org/name> "Statistik Stadt Zürich, Präsidialdepartement" .
