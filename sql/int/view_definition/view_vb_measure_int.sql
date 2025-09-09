@@ -2,52 +2,31 @@ DROP VIEW IF EXISTS dbo.view_vb_measure_int;
 GO
 
 CREATE VIEW dbo.view_vb_measure_int AS
-WITH exploded_k AS (
+WITH exploded_k_raw AS (
     SELECT
-        t.SASA_Job_Output_Id,
-        j.[key] + 1 AS rn_k,
-        j.value AS kennzahl
+        t.SASA_Job_Output_Id AS view_id,
+        j.value AS raw_value
     FROM dbo.pipe_HDBDatenobjekte_TEST t
     CROSS APPLY OPENJSON(
         '["' + REPLACE(REPLACE(t.Kennzahl_GGH_STK_BEB, '"', '\"'), ';', '","') + '"]'
     ) j
 ),
+exploded_k AS (
+    SELECT
+        r.view_id,
+        tr.identifier_full_raw
+    FROM exploded_k_raw r
+    CROSS APPLY ( SELECT REPLACE(r.raw_value, '|', '_') AS replaced ) rr
+    CROSS APPLY ( SELECT PATINDEX('%[^_]%', REVERSE(rr.replaced)) AS pos ) p
+    CROSS APPLY (
+        SELECT
+            CASE
+                WHEN p.pos = 0 THEN rr.replaced
+                ELSE LEFT(rr.replaced, LEN(rr.replaced) - p.pos + 1)
+            END AS identifier_full_raw
+    ) tr
+),
 exploded_c AS (
-    SELECT
-        t.SASA_Job_Output_Id,
-        j.[key] + 1 AS rn_c,
-        j.value AS cube_id
-    FROM dbo.pipe_HDBDatenobjekte_TEST t
-    CROSS APPLY OPENJSON(
-        '["' + REPLACE(REPLACE(t.CubeIDS, '"', '\"'), ' ', '","') + '"]'
-    ) j
-),
-paired AS (
-    SELECT
-        k.SASA_Job_Output_Id,
-        c.cube_id,
-        REPLACE(k.kennzahl, '|', '_') AS identifier_full_raw,
-        k.rn_k
-    FROM exploded_k k
-    JOIN exploded_c c
-      ON c.SASA_Job_Output_Id = k.SASA_Job_Output_Id
-     AND c.rn_c = k.rn_k
-),
-trimmed AS (
-    SELECT
-        SASA_Job_Output_Id AS view_id,
-        cube_id,
-        identifier_full_raw,
-        LEFT(identifier_full_raw,
-             LEN(identifier_full_raw) - PATINDEX('%[^_]%', REVERSE(identifier_full_raw)) + 1) AS identifier_full,
-        SUBSTRING(
-            LEFT(identifier_full_raw,
-                 LEN(identifier_full_raw) - PATINDEX('%[^_]%', REVERSE(identifier_full_raw)) + 1),
-            1, 3
-        ) AS identifier
-    FROM paired
-),
-view_cube AS (
     SELECT
         t.SASA_Job_Output_Id AS view_id,
         j.value AS cube_id
@@ -55,19 +34,38 @@ view_cube AS (
     CROSS APPLY OPENJSON(
         '["' + REPLACE(REPLACE(t.CubeIDS, '"', '\"'), ' ', '","') + '"]'
     ) j
+),
+mapped AS (
+    SELECT
+        k.view_id,
+        LEFT(k.identifier_full_raw, 3) AS identifier,
+        k.identifier_full_raw AS identifier_full,
+        c.CID AS cube_id,
+        c.Titel AS name,
+        h.Beschreibung AS description
+    FROM exploded_k k
+    JOIN exploded_c ec
+      ON ec.view_id = k.view_id
+    JOIN dbo.pipe_HDBCubeDefinition c
+      ON c.Kennzahl = LEFT(k.identifier_full_raw, 3)
+     AND c.CID = ec.cube_id
+    JOIN dbo.pipe_HDBKennzahlen h
+      ON h.KennzahlCode = LEFT(k.identifier_full_raw, 3)
+),
+deduped AS (
+    SELECT *,
+           ROW_NUMBER() OVER (
+               PARTITION BY view_id, identifier_full
+               ORDER BY cube_id
+           ) AS rn
+    FROM mapped
 )
-SELECT DISTINCT
-    t.view_id,
-    t.identifier,
-    t.identifier_full,
-    REPLACE(t.cube_id, 'CID_', '') AS cube_id,
-    k.Kennzahlname AS name,
-    k.Beschreibung AS description
-FROM trimmed t
-JOIN dbo.pipe_HDBKennzahlen k
-    ON k.KennzahlCode = t.identifier
-JOIN dbo.pipe_HDBCubeDefinition c
-    ON c.CID = t.cube_id
-JOIN view_cube vc
-    ON vc.cube_id = t.cube_id
-   AND vc.view_id = t.view_id;
+SELECT
+    view_id,
+    identifier,
+    identifier_full,
+    REPLACE(cube_id,'CID_','') AS cube_id,
+    name,
+    description
+FROM deduped
+WHERE rn = 1;
