@@ -32,7 +32,7 @@ class TestLdViews(unittest.TestCase):
             "keyword": None,
             "license": None,
             "usage_notes": None,
-            "dataquality": "Bemerkung",
+            "dataquality": None
         }
 
     def _mock_database_query(self, query_name, view_id):
