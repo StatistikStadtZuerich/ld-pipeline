@@ -7,7 +7,6 @@ from pipeline.steps import (
     Copy,
     Templating,
     Compressing,
-    UploadToStardog,
     UploadToFuseki,
     CopyHDBToPipeTables,
     BuildTermsetHierarchy,
@@ -125,10 +124,10 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
         "compressing": StepDefinition(
             Compressing(), "Compresses all triple files to gzip files"
         ),
-        #"uploadToStardog": StepDefinition(
-         #   UploadToStardog(),
-          #  "Uploads all compressed gzip files to a configured stardog server",
-        #),
+        # "uploadToStardog": StepDefinition(
+        #   UploadToStardog(),
+        #  "Uploads all compressed gzip files to a configured stardog server",
+        # ),
         "uploadToFuseki": StepDefinition(
             UploadToFuseki(),
             "Uploads all compressed gzip files to a configured fuseki server",
@@ -173,7 +172,7 @@ def run(env: Env = Env.test):
         steps["roomTemplating"].step,
         steps["timeTemplating"].step,
         steps["compressing"].step,
-        #steps["uploadToStardog"].step,
+        # steps["uploadToStardog"].step,
         steps["copyHDBToPipeTables"].step,
         # steps["uploadToFuseki"].step,
     )
