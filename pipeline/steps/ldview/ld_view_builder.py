@@ -74,7 +74,7 @@ class LdViewBuilder(Base):
                 )
             view.sort_and_numerate_dimensions()
 
-            #view.sort_and_numerate_dimensions()
+            # view.sort_and_numerate_dimensions()
             views.append(view)
 
         return views
