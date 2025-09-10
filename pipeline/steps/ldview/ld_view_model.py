@@ -86,6 +86,7 @@ class ViewMetadata(TypedDict):
     keyword: str
     license: str
     usage_notes: str
+    dataquality: str
 
 
 class View:
