@@ -7,7 +7,6 @@ from pipeline.steps import (
     Copy,
     Templating,
     Compressing,
-    UploadToStardog,
     UploadToFuseki,
     CopyHDBToPipeTables,
     BuildTermsetHierarchy,
