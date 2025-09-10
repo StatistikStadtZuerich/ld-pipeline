@@ -70,7 +70,7 @@ class LdViewBuilder(Base):
                 )
             view.sort_and_numerate_dimensions()
 
-            view.sort_and_numerate_dimensions()
+            # view.sort_and_numerate_dimensions()
             views.append(view)
 
         return views
@@ -152,7 +152,7 @@ class LdViewBuilder(Base):
 
     def _get_view_data(self, viewname, view_id=None):
         cache_ident = viewname + "_" + str(view_id)
-        if viewname in self._cache:
+        if viewname in self._cache:  # if cache_ident in self._cache ?
             return self._cache[cache_ident]
         with self._environment.get_db_connection() as connection:
             with connection.cursor() as cursor:
@@ -242,6 +242,7 @@ class LdViewBuilder(Base):
             keyword=view_dict["keyword"],
             license=view_dict["license"],
             usage_notes=view_dict["usage_notes"],
+            dataquality=view_dict["dataquality"],
         )
 
         view.metadata = metadata
