@@ -8,8 +8,6 @@ SELECT
 	CASE
 		WHEN value = 'Jahr' THEN 'Zeit'
 		WHEN value = 'Quartal' THEN 'Zeit'
-		WHEN value = 'Monat' THEN 'Zeit'
-		WHEN value = 'Tag' THEN 'Zeit'
 		ELSE 'Raum'
 	END as dimension
 FROM

@@ -57,7 +57,6 @@ class TestLdViews(unittest.TestCase):
             return [
                 {"termset": "KreiseZH", "dimension": "RAUM", "view_id": view_id},
                 {"termset": "Jahr", "dimension": "ZEIT", "view_id": view_id},
-                {"termset": "HYTLevel1", "dimension": "HTY", "view_id": view_id},
             ]
         elif query_name == "view_vb_dimension_test":
             return [

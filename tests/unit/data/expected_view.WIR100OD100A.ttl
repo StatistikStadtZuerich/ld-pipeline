@@ -34,12 +34,6 @@
       <https://cube.link/view/dimension> _:FILTER_JAHR_WIR100OD100A;
       <https://cube.link/view/operation> <https://cube.link/view/Eq>
     ] .
-<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/filter> [ a <https://cube.link/view/Filter>;
-      <http://www.w3.org/2000/01/rdf-schema#label> "HYTLevel1 is HTY";
-      <https://cube.link/view/argument> <https://ld.stadt-zuerich.ch/statistics/termset/HYTLevel1>;
-      <https://cube.link/view/dimension> _:FILTER_HYTLEVEL1_WIR100OD100A;
-      <https://cube.link/view/operation> <https://cube.link/view/Eq>
-    ] .
 
 
 _:C000610_WIR100OD100A a <https://cube.link/view/CubeSource>;
@@ -64,13 +58,6 @@ _:RAUM_WIR100OD100A a <https://cube.link/view/Dimension>;
            <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/statistics/property/RAUM>);
            <https://cube.link/view/source> _:C000610_WIR100OD100A, _:C000609_WIR100OD100A;
     ].
-<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:HTY_WIR100OD100A .
-_:HTY_WIR100OD100A a <https://cube.link/view/Dimension>;
-     <https://schema.org/identifier> "HTY";
-<http://www.w3.org/2000/01/rdf-schema#label> "Haushaltstyp";     <https://cube.link/view/from> [
-           <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/statistics/property/HTY>);
-           <https://cube.link/view/source> _:C000610_WIR100OD100A, _:C000609_WIR100OD100A;
-    ].
 <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:FILTER_KREISEZH_WIR100OD100A .
 _:FILTER_KREISEZH_WIR100OD100A
     <https://schema.org/identifier> "FILTER_KREISEZH";
@@ -87,14 +74,13 @@ _:FILTER_JAHR_WIR100OD100A
        <https://cube.link/view/path> (<https://schema.org/inDefinedTermSet>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
-<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:FILTER_HYTLEVEL1_WIR100OD100A .
-_:FILTER_HYTLEVEL1_WIR100OD100A
-    <https://schema.org/identifier> "FILTER_HYTLEVEL1";
-    <https://cube.link/view/from> [
-       <https://cube.link/view/join> _:HTY_WIR100OD100A;
-       <https://cube.link/view/path> (<https://schema.org/inDefinedTermSet>);
-       <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
-   ].
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:HTY_WIR100OD100A .
+_:HTY_WIR100OD100A a <https://cube.link/view/Dimension>;
+     <https://schema.org/identifier> "HTY";
+<http://www.w3.org/2000/01/rdf-schema#label> "Haushaltstyp";     <https://cube.link/view/from> [
+           <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/statistics/property/HTY>);
+           <https://cube.link/view/source> _:C000610_WIR100OD100A, _:C000609_WIR100OD100A;
+    ].
 <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:ZEIT_LANG_WIR100OD100A .
 _:ZEIT_LANG_WIR100OD100A
     <https://schema.org/identifier> "ZEIT_LANG";
