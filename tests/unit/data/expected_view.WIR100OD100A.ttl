@@ -105,7 +105,7 @@ _:DATENSTATUS_WIR100OD100A a <https://cube.link/view/Dimension>;
            <https://cube.link/view/path> (<https://ld.stadt-zuerich.ch/statistics/property/STATUS> <https://schema.org/name>);
            <https://cube.link/view/source> _:C000610_WIR100OD100A, _:C000609_WIR100OD100A;
     ].
-	<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:FILTER_KREISEZH_WIR100OD100A .
+<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:FILTER_KREISEZH_WIR100OD100A .
 _:FILTER_KREISEZH_WIR100OD100A
     <https://schema.org/identifier> "FILTER_KREISEZH";
     <https://cube.link/view/from> [
@@ -120,7 +120,7 @@ _:FILTER_JAHR_WIR100OD100A
        <https://cube.link/view/join> _:ZEIT_WIR100OD100A;
        <https://cube.link/view/path> (<https://schema.org/inDefinedTermSet>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
-   ].																														  
+   ].
 <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:HTY_WIR100OD100A .
 _:HTY_WIR100OD100A a <https://cube.link/view/Dimension>;
      <https://schema.org/identifier> "HTY";
