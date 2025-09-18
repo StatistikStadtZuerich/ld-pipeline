@@ -2,70 +2,61 @@ DROP VIEW IF EXISTS dbo.view_vb_measure_int;
 GO
 
 CREATE VIEW dbo.view_vb_measure_int AS
-WITH exploded_k_raw AS (
-    SELECT
+WITH cleaned_source AS (
+    SELECT DISTINCT
         t.SASA_Job_Output_Id AS view_id,
-        j.value AS raw_value
+        TRIM(j.[value]) + '|' AS raw_value,
+        COALESCE(
+            (
+                SELECT STRING_AGG(val, '|' ) WITHIN GROUP (ORDER BY val)
+                FROM (
+                    SELECT DISTINCT TRIM(s.[value]) AS val
+                    FROM STRING_SPLIT(REPLACE(ISNULL(t.Dimension_Hierarchie,'XXX'), ';', '|'), '|') s
+                    WHERE TRIM(s.[value]) <> '' AND LEN(TRIM(s.[value])) <= 3
+                ) AS vals
+            ),
+            'XXX'
+        ) + '|' AS Cleaned_Dimension_Hierarchie
     FROM dbo.pipe_HDBDatenobjekte_TEST t
     CROSS APPLY OPENJSON(
-        '["' + REPLACE(REPLACE(t.Kennzahl_GGH_STK_BEB, '"', '\"'), ';', '","') + '"]'
-    ) j
+        '["' + REPLACE(REPLACE(t.Kennzahl_GGH_STK_BEB, '"','\"'), ';','","') + '"]'
+    ) AS j
 ),
-exploded_k AS (
-    SELECT
-        r.view_id,
-        tr.identifier_full_raw
-    FROM exploded_k_raw r
-    CROSS APPLY ( SELECT REPLACE(r.raw_value, '|', '_') AS replaced ) rr
-    CROSS APPLY ( SELECT PATINDEX('%[^_]%', REVERSE(rr.replaced)) AS pos ) p
-    CROSS APPLY (
-        SELECT
-            CASE
-                WHEN p.pos = 0 THEN rr.replaced
-                ELSE LEFT(rr.replaced, LEN(rr.replaced) - p.pos + 1)
-            END AS identifier_full_raw
-    ) tr
-),
-exploded_c AS (
-    SELECT
-        t.SASA_Job_Output_Id AS view_id,
-        j.value AS cube_id
-    FROM dbo.pipe_HDBDatenobjekte_TEST t
-    CROSS APPLY OPENJSON(
-        '["' + REPLACE(REPLACE(t.CubeIDS, '"', '\"'), ' ', '","') + '"]'
-    ) j
-),
-mapped AS (
-    SELECT
-        k.view_id,
-        LEFT(k.identifier_full_raw, 3) AS identifier,
-        k.identifier_full_raw AS identifier_full,
-        c.CID AS cube_id,
-        c.Titel AS name,
-        h.Beschreibung AS description
-    FROM exploded_k k
-    JOIN exploded_c ec
-      ON ec.view_id = k.view_id
-    JOIN dbo.pipe_HDBCubeDefinition c
-      ON c.Kennzahl = LEFT(k.identifier_full_raw, 3)
-     AND c.CID = ec.cube_id
-    JOIN dbo.pipe_HDBKennzahlen h
-      ON h.KennzahlCode = LEFT(k.identifier_full_raw, 3)
-),
-deduped AS (
-    SELECT *,
-           ROW_NUMBER() OVER (
-               PARTITION BY view_id, identifier_full
-               ORDER BY cube_id
-           ) AS rn
-    FROM mapped
+cleaned_lookup AS (
+    SELECT DISTINCT
+        h.CID,
+        h.CubeLookupKennzahl,
+        h.CubeLookupDimension,
+        CASE
+            WHEN RIGHT(TRIM(h.CubeLookupKennzahl),1)='|' THEN TRIM(h.CubeLookupKennzahl)
+            ELSE TRIM(h.CubeLookupKennzahl)+'|'
+        END AS CubeLookupKennzahlNorm,
+        COALESCE(
+            (
+                SELECT STRING_AGG(val, '|' ) WITHIN GROUP (ORDER BY val)
+                FROM (
+                    SELECT DISTINCT TRIM(s.[value]) AS val
+                    FROM STRING_SPLIT(REPLACE(ISNULL(h.CubeLookupDimension,''), ';', '|'), '|') s
+                    WHERE TRIM(s.[value]) <> '' AND LEN(TRIM(s.[value])) <= 3
+                ) AS vals
+            ),
+            'XXX'
+        ) + '|' AS Cleaned_CubeLookupDimension
+    FROM dbo.HDBCubeLookup h
 )
 SELECT
-    view_id,
-    identifier,
-    identifier_full,
-    REPLACE(cube_id,'CID_','') AS cube_id,
-    name,
-    description
-FROM deduped
-WHERE rn = 1;
+    cs.view_id,
+    LEFT(cs.raw_value, 3) AS identifier,
+    REPLACE(REPLACE(REPLACE(REPLACE(cs.raw_value, '||||', ''), '|||', ''), '||', ''), '|', '_') AS identifier_full,
+    REPLACE(cl.CID,'CID_','') AS cube_id,
+    c.Titel AS name,
+    h.Beschreibung AS description
+FROM cleaned_source cs
+JOIN cleaned_lookup cl
+    ON cs.raw_value = cl.CubeLookupKennzahlNorm
+   AND cs.Cleaned_Dimension_Hierarchie = cl.Cleaned_CubeLookupDimension
+JOIN dbo.pipe_HDBCubeDefinition c
+    ON c.Kennzahl = LEFT(cs.raw_value, 3)
+   AND c.CID = cl.CID
+JOIN dbo.pipe_HDBKennzahlen h
+    ON h.KennzahlCode = LEFT(cs.raw_value, 3);

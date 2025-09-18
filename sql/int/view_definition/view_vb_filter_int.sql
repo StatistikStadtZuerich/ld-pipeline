@@ -6,8 +6,22 @@ SELECT
 	t.SASA_Job_Output_Id as view_id,
     value AS termset,
 	CASE
-		WHEN value = 'Jahr' THEN 'Zeit'
-		WHEN value = 'Quartal' THEN 'Zeit'
+		WHEN value in ('Jahr'
+					,'Quartal'
+					,'Zeit'
+					,'Monat'
+					,'Tag'
+					,'Periode'
+					,'Quartal'
+					,'Semester'
+					,'Trimester'
+					,'Aktuell'
+					,'Jahreszeit'
+					,'Sommer'
+					,'Winter'
+					,'Herbst'
+					,'Frühling'
+		)THEN 'Zeit'
 		ELSE 'Raum'
 	END as dimension
 FROM
