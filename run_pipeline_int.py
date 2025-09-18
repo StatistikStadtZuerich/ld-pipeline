@@ -1,4 +1,3 @@
-import requests
 import main
 from pipeline.base import Utils
 
