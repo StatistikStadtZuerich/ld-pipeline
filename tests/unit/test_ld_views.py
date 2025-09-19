@@ -32,6 +32,7 @@ class TestLdViews(unittest.TestCase):
             "keyword": None,
             "license": None,
             "usage_notes": None,
+            "dataquality": None,
         }
 
     def _mock_database_query(self, query_name, view_id):
@@ -57,7 +58,6 @@ class TestLdViews(unittest.TestCase):
             return [
                 {"termset": "KreiseZH", "dimension": "RAUM", "view_id": view_id},
                 {"termset": "Jahr", "dimension": "ZEIT", "view_id": view_id},
-                {"termset": "HYTLevel1", "dimension": "HTY", "view_id": view_id},
             ]
         elif query_name == "view_vb_dimension_test":
             return [

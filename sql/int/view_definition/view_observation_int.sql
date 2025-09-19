@@ -146,6 +146,9 @@ FROM dbo.pipe_HDB_TEST h
     LEFT JOIN HDBAbgeleiteteGruppen g5 ON g5.Gruppe = SUBSTRING(h.GESAMTCODE, 47, 3)
     LEFT JOIN HDBZeit z ON z.ZEIT = h.ZEIT
 WHERE
-    h.RECORDSTATUS = '0';
-
+    h.RECORDSTATUS = '0'
+	AND
+	h.PUBLIKATIONSSTATUS = 'veröffentlicht'
+	AND
+	h.CUBEID <> '';
 GO
