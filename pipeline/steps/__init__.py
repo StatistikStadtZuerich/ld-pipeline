@@ -4,6 +4,7 @@ from .copy import Copy
 from .compressing import Compressing
 from .build_termset_hierarchy import BuildTermsetHierarchy
 from .copy_hdb_to_pipe_tables import CopyHDBToPipeTables
+from .create_views_from_sql import CreateViewsFromSQL
 from .write_publication_stati_to_hdb import WritePublicationStatiToHDB
 
 config_path = os.path.join(os.path.dirname(__file__), "..", "..", "config.ini")
@@ -27,5 +28,6 @@ __all__ = [
     "UploadToFuseki",
     "BuildTermsetHierarchy",
     "CopyHDBToPipeTables",
+    "CreateViewsFromSQL"
     "WritePublicationStatiToHDB",
 ]

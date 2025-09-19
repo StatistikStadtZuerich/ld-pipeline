@@ -1,8 +1,10 @@
 DROP VIEW IF EXISTS dbo.view_data_attribute_int;
+GO
+DROP VIEW IF EXISTS dbo.view_data_attribute_int_old;
 
 GO
 
-CREATE VIEW dbo.view_data_attribute_int AS
+CREATE VIEW dbo.view_data_attribute_int_old AS
 SELECT
 	CAST(t.id AS VARCHAR) AS attribute_id,
 	t."Sprechender Feldname" AS name,

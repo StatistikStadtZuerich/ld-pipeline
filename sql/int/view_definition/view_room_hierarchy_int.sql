@@ -1,4 +1,6 @@
 DROP VIEW IF EXISTS dbo.view_room_hierarchy_int;
+GO
+DROP VIEW IF EXISTS dbo.view_room_hierarchy_int_old;
 
 GO
 

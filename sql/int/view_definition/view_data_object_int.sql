@@ -1,7 +1,9 @@
 DROP VIEW IF EXISTS dbo.view_data_object_int;
 GO
+DROP VIEW IF EXISTS dbo.view_data_object_int_old;
+GO
 
-CREATE VIEW dbo.view_data_object_int AS
+CREATE VIEW dbo.view_data_object_int_old AS
 SELECT
     CAST(t.ID AS VARCHAR) AS "object_id",
     FORMAT(CAST(t.Erstmalige_Veroeffentlichung AS DATE), 'yyyy-MM-dd') AS issued,
