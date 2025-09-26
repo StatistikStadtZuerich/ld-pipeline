@@ -35,7 +35,7 @@ class TestCompressingStep(unittest.TestCase):
                     os.path.join(TestUtils.abs_path("tmp"), "sample_2.ttl.gz")
                 )
             )
-            self.assertTrue(len(os.listdir(TestUtils.abs_path("tmp"))) == 2)
+            self.assertEqual(len(os.listdir(TestUtils.abs_path("tmp"))), 2)
 
             sample_1_content = gzip.open(
                 os.path.join(TestUtils.abs_path("tmp"), "sample_1.ttl.gz")
