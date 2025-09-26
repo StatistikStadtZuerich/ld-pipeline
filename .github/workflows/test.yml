@@ -27,7 +27,7 @@ jobs:
         run: SSZ_DB_TYPE=mock  python -m pytest --doctest-modules --junitxml=reports/unittest-results.xml tests/unit
       - name: Create unit tests report
         uses: dorny/test-reporter@v1
-        if: success() || failure()
+        if: ! cancelled()
         with:
           name: Unit Test Report
           path: reports/unittest-results.xml
@@ -43,7 +43,7 @@ jobs:
 #          reporter: java-junit
       - name: Archive test reports
         uses: actions/upload-artifact@v4
-        if: success() || failure()
+        if: ! cancelled()
         with:
           name: test-reports
           path: reports/*
