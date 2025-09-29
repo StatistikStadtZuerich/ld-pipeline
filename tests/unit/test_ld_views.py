@@ -96,6 +96,7 @@ class TestLdViews(unittest.TestCase):
             raise Exception(f"query {query_name} not properly mocked for test")
 
     def test_view_building(self):
+        self.maxDiff = None
         tmp_dir = TestUtils.abs_path("tmp")
         os.makedirs(tmp_dir, exist_ok=True)
 
