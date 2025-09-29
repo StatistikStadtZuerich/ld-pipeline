@@ -133,8 +133,8 @@ class TestLdViews(unittest.TestCase):
             ).read()
             expected_content2 = expected_content.replace("WIR100OD100A", "WIR100OD100B")
 
-            self.assertEqual(content, expected_content)
-            self.assertEqual(content2, expected_content2)
+            self.assertEqual(expected_content, content)
+            self.assertEqual(expected_content2, content2)
 
         finally:
             shutil.rmtree(tmp_dir)

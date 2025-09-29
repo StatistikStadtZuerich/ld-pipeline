@@ -35,7 +35,7 @@ class TestCompressingStep(unittest.TestCase):
                     os.path.join(TestUtils.abs_path("tmp"), "sample_2.ttl.gz")
                 )
             )
-            self.assertEqual(len(os.listdir(TestUtils.abs_path("tmp"))), 2)
+            self.assertEqual(2, len(os.listdir(TestUtils.abs_path("tmp"))))
 
             sample_1_content = gzip.open(
                 os.path.join(TestUtils.abs_path("tmp"), "sample_1.ttl.gz")
@@ -50,8 +50,8 @@ class TestCompressingStep(unittest.TestCase):
                 os.path.join(TestUtils.abs_path("data/triples"), "sample_2.ttl"), "rb"
             ).read()
 
-            self.assertEqual(sample_1_content, sample_1_expected_content)
-            self.assertEqual(sample_2_content, sample_2_expected_content)
+            self.assertEqual(sample_1_expected_content, sample_1_content)
+            self.assertEqual(sample_2_expected_content, sample_2_content)
 
         finally:
             shutil.rmtree(tmp_dir)
