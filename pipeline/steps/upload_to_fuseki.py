@@ -11,7 +11,7 @@ class UploadToFuseki(Step):
     def run(self, environment: Environment):
         directory = environment.config.get("compression_output_path")
         filenames = next(os.walk(directory))[2]
-        url = f"{environment.config.get("fuseki_endpoint")}/{environment.config.get("fuseki_dataset")}/data?{environment.config.get("fuseki_graph")}"
+        url = f"{environment.config.get('fuseki_endpoint')}/{environment.config.get('fuseki_dataset')}/data?{environment.config.get('fuseki_graph')}"
         self.logger.info(f"Uploading to {url} started...")
         for filename in filenames:
             filepath = os.path.join(directory, filename)

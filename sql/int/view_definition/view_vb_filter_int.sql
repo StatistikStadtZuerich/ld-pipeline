@@ -1,0 +1,29 @@
+DROP VIEW IF EXISTS dbo.view_vb_filter_int;
+GO
+
+CREATE VIEW dbo.view_vb_filter_int AS
+SELECT
+	t.SASA_Job_Output_Id as view_id,
+    value AS termset,
+	CASE
+		WHEN value in ('Jahr'
+					,'Quartal'
+					,'Zeit'
+					,'Monat'
+					,'Tag'
+					,'Periode'
+					,'Quartal'
+					,'Semester'
+					,'Trimester'
+					,'Aktuell'
+					,'Jahreszeit'
+					,'Sommer'
+					,'Winter'
+					,'Herbst'
+					,'Frühling'
+		)THEN 'Zeit'
+		ELSE 'Raum'
+	END as dimension
+FROM
+	pipe_HDBDatenobjekte_TEST t
+CROSS APPLY STRING_SPLIT(t.Filter, ' ');

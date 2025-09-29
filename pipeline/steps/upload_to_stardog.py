@@ -29,7 +29,7 @@ class UploadToStardog(Step):
             "username": environment.config.get("stardog_username"),
             "password": environment.config.get("stardog_password"),
         }
-        url = f"{environment.config.get("stardog_endpoint")}/{environment.config.get("stardog_database")}?graph={self._graph}"
+        url = f"{environment.config.get('stardog_endpoint')}/{environment.config.get('stardog_database')}?graph={self._graph}"
         self.logger.info(f"Uploading to {url} started...")
         with stardog.Connection(**connection_details) as connection:
             self.logger.info(f"Connection to {url} established...")

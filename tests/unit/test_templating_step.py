@@ -43,7 +43,7 @@ class TestTemplatingStep(unittest.TestCase):
             expected_content = open(
                 TestUtils.abs_path("data/expected_content.ttl")
             ).read()
-            self.assertEqual(content, expected_content)
+            self.assertEqual(expected_content, content)
 
         finally:
             shutil.rmtree(tmp_dir)

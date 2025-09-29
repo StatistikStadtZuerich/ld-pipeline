@@ -1,0 +1,27 @@
+<https://ld.stadt-zuerich.ch/catalog/SSZ/view> <https://schema.org/dataset> <https://ld.stadt-zuerich.ch/statistics/view/{{ view.id|uri_encode }}> .
+<https://ld.stadt-zuerich.ch/statistics/view/{{ view.id|uri_encode }}> a <http://rdfs.org/ns/void#Dataset> , <https://schema.org/Dataset> , <http://www.w3.org/ns/dcat#Dataset> , <https://cube.link/view/View> ;
+    <https://schema.org/author> {{ view.metadata.author|literal_encode }} ;
+    <https://ld.stadt-zuerich.ch/schema/legalFoundation> {{ view.metadata.legal_foundation|literal_encode }} ;
+    <http://purl.org/dc/elements/1.1/type> {{ view.metadata.data_type|literal_encode }} ;
+    <https://schema.org/version> {{ view.metadata.version|literal_encode }} ;
+    <https://schema.org/description> {{ view.metadata.description|literal_encode }} ;
+    <https://schema.org/name> {{ view.metadata.name|literal_encode }} ;
+    <https://schema.org/alternateName> {{ view.metadata.alt_name|literal_encode }} ;
+    <https://ld.stadt-zuerich.ch/schema/metadataCreator> {{ view.metadata.metadata_creator|literal_encode }} ;
+    {% if view.metadata.start_date|is_valid_date  %}<https://schema.org/startDate> {{ view.metadata.start_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date>;{% endif %}
+    {% if view.metadata.end_date|is_valid_date  %}<https://schema.org/endDate> {{ view.metadata.end_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date>;{% endif %}
+    <http://purl.org/dc/terms/accrualPeriodicity> {{ view.metadata.accrual_periodicity|literal_encode }} ;
+    <http://purl.org/dc/terms/spatial> {{ view.metadata.spatial|literal_encode }} ;
+    {% if view.metadata.issued|is_valid_date  %}<http://purl.org/dc/terms/issued> {{ view.metadata.issued|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date>;{% endif %}
+    <http://purl.org/dc/terms/modified> {{ view.metadata.modified|literal_encode }} ;
+    <http://purl.org/dc/terms/publisher> <https://ld.stadt-zuerich.ch/statistics/meta/org/{{ view.metadata.publisher|uri_encode }}> ;
+    <http://www.w3.org/ns/dcat#theme> {{ view.metadata.theme|literal_encode }} ;
+    <http://www.w3.org/ns/dcat#keyword> {{ view.metadata.keyword|literal_encode }} ;
+    <http://purl.org/dc/terms/license> {{ view.metadata.license|literal_encode }} ;
+    <https://ld.stadt-zuerich.ch/schema/usageNotes> {{ view.metadata.usage_notes|literal_encode }} ;
+    {% if view.metadata.dataquality is defined and view.metadata.dataquality %}<http://www.w3.org/2000/01/rdf-schema#comment>{{ view.metadata.dataquality | literal_encode }}@de;{% endif %}
+    <http://www.w3.org/ns/dcat#distribution> [ a <http://www.w3.org/ns/dcat#Distribution> ;
+            <http://purl.org/dc/terms/format> "CSV" ;
+            <http://www.w3.org/ns/dcat#downloadURL> <https://ld.stadt-zuerich.ch/statistics/view/{{ view.id|uri_encode }}/observation?format=csv> ;
+            <http://www.w3.org/ns/dcat#mediaType> "text/csv"
+    ] .

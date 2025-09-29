@@ -5,4 +5,17 @@
     <https://schema.org/position> {{ position|literal_encode }} ;
     <https://schema.org/isPartOf> <https://ld.stadt-zuerich.ch/statistics/code/{{ part_of|uri_encode }}> ;
     <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/{{ term_group_code|uri_encode }}> ;
-    <https://schema.org/url> {{ url|literal_encode }} . {# added url #}
+    {% if term_sets %}
+	    {% for term_set in term_sets.split(';') %}
+			<https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/{{ term_set|uri_encode }}> ;
+		{% endfor %}
+	{% endif %}
+    <https://schema.org/url> {{ url|literal_encode }} .
+{% if term_sets %}
+	{% for term_set in term_sets.split(';') %}
+		<https://ld.stadt-zuerich.ch/statistics/termset/{{ term_set|uri_encode }}> a <https://schema.org/DefinedTermSet> ;
+			<https://schema.org/identifier> {{ term_set|literal_encode }} ;
+			<https://schema.org/name> {{ term_set|literal_encode }} ;
+			<https://schema.org/hasDefinedTerm> <https://ld.stadt-zuerich.ch/statistics/code/{{ term_code|uri_encode }}> .
+	{% endfor %}
+{% endif %}

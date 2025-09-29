@@ -1,6 +1,7 @@
 from .config import Config, Env
-from .services import MSSQLDbConnection, JinjaTemplateEngine, GzipEngine
+from .services import JinjaTemplateEngine, GzipEngine
 from .base import Base
+from ..interfaces.services import DbConnection
 
 
 class Environment(Base):
@@ -12,12 +13,12 @@ class Environment(Base):
     def config(self):
         return self._config
 
-    def get_db_connection(self) -> MSSQLDbConnection:
+    def get_db_connection(self) -> DbConnection:
         """
         Returns the db connection for the environment
         :return: a database connection
         """
-        return MSSQLDbConnection(self)
+        return None
 
     def get_template_engine(
         self, template_filename: str, output_filepath: str

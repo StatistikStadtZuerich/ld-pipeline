@@ -2,6 +2,8 @@ import os
 import mysql.connector
 import gzip
 import re
+
+from datetime import datetime
 from urllib.parse import quote
 from rdflib import Literal
 from typing import TYPE_CHECKING
@@ -13,7 +15,7 @@ if TYPE_CHECKING:
     from .environment import Environment
 
 
-class MSSQLDbConnection(DbConnection):
+class MySQLDbConnection(DbConnection):
     def __init__(self, environment: "Environment"):
         super().__init__()
         self._config = environment.config
@@ -33,7 +35,7 @@ class MSSQLDbConnection(DbConnection):
             password=self._config.get("mysql_password"),
         )
         self.logger.info(
-            f"Database connection to {self._config.get("mysql_host")}/{self._config.get("mysql_database")} established..."
+            f"Database connection to {self._config.get('mysql_host')}/{self._config.get('mysql_database')} established..."
         )
         self._cursor = self._connection.cursor(dictionary=True)
         return self
@@ -41,7 +43,7 @@ class MSSQLDbConnection(DbConnection):
     def __exit__(self, *exc_details):
         self._connection.close()
         self.logger.info(
-            f"Database connection to {self._config.get("mysql_host")}/{self._config.get("mysql_database")} closed"
+            f"Database connection to {self._config.get('mysql_host')}/{self._config.get('mysql_database')} closed"
         )
 
 
@@ -64,12 +66,14 @@ class JinjaTemplateEngine(TemplateEngine):
             )
             return text.translate(translate_table)
 
-        def uri_encode_filter(value: str) -> str:
-            value = remove_umlauts(str(value))
+        def uri_encode_filter(value) -> str:
+            value = str(value)
+            value = remove_umlauts(value)
             value = re.sub(r"[^A-Za-z0-9-]", "", value)
             return quote(value)
 
-        def literal_encode_filter(value: str) -> str:
+        def literal_encode_filter(value) -> str:
+            value = str(value)
             value = value.replace("\r", " ").replace("\n", " ").strip()
             value = re.sub(r"\s+", " ", value)
             return Literal(value).n3()
@@ -79,6 +83,13 @@ class JinjaTemplateEngine(TemplateEngine):
                 float(value)
                 return True
             except ValueError:
+                return False
+
+        def is_valid_date(date_string):
+            try:
+                datetime.strptime(date_string, "%Y-%m-%d")
+                return True
+            except Exception:
                 return False
 
         self._output_filepath = output_filepath
@@ -91,7 +102,11 @@ class JinjaTemplateEngine(TemplateEngine):
         self._env.filters["uri_encode"] = uri_encode_filter
         self._env.filters["literal_encode"] = literal_encode_filter
         self._env.filters["is_numeric"] = is_numeric
+        self._env.filters["is_valid_date"] = is_valid_date
         self._template = self._env.get_template(template_filename)
+
+    def get_template(self):
+        return self._template
 
     def template(self, data):
         content = self._template.render(data)
