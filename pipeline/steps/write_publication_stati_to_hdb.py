@@ -2,15 +2,12 @@ from ..base import Step, Environment, Utils
 
 
 class WritePublicationStatiToHDB(Step):
-    def __init__(self, env):
+    def __init__(self):
         super().__init__()
-        self._env = env
         self._utils = Utils()
 
     def run(self, environment: Environment):
-        suffix = "TEST"
-        if self._env.upper() == "PROD":
-            suffix = "FINAL"
+        suffix = environment.table_suffix
         self._utils.print_formatted("Calculating observation hashes ...")
         self._calculate_observation_hashes(environment, suffix)
         self._utils.print_formatted("Done")

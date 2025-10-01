@@ -11,12 +11,12 @@ class Pipeline:
     The Pipeline allows to run steps in the defined environment
     """
 
-    def __init__(self, env: Env):
+    def __init__(self, environment: Environment):
         """
         initializes environment for pipeline and configures logger
         :param env: an environment
         """
-        self._environment = Environment(env)
+        self._environment = environment
         logger_config = {
             "encoding": "utf-8",
             "level": logging.getLevelName(

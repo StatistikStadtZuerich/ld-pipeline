@@ -4,15 +4,12 @@ from ..base import Step, Environment, Utils
 
 
 class CopyHDBToPipeTables(Step):
-    def __init__(self, env):
+    def __init__(self):
         super().__init__()
-        self._env = env
         self._utils = Utils()
 
     def run(self, environment: Environment):
-        suffix = "TEST"
-        if self._env.upper() == "PROD":
-            suffix = "FINAL"
+        suffix = environment.table_suffix
         tablenames = [
             "HDBCodeliste",
             "HDBCubeDefinition",
@@ -36,7 +33,7 @@ class CopyHDBToPipeTables(Step):
             f"Execution time for copying HDB data to the pipe tables: {execution_time:.2f} seconds"
         )
 
-    def _copy_hdb_data_to_pipe_tables(self, environment, tablenames):
+    def _copy_hdb_data_to_pipe_tables(self, environment: Environment, tablenames):
         with environment.get_db_connection() as connection:
             try:
                 with connection.cursor() as cursor:

@@ -1,9 +1,10 @@
 import main
-from pipeline.base import Utils, Env
-from argparse import ArgumentParser
+from pathlib import Path
+from pipeline.base import Utils, Env, Environment
+from argparse import ArgumentParser, FileType as ArgFileType
 
 
-def run_pipeline(env: Env):
+def run_pipeline(env: Environment):
     utils = Utils()
     utils.logger.info("Starting Pipeline for %s", env.name)
 
@@ -36,7 +37,7 @@ def run_pipeline(env: Env):
     utils.print_formatted("Pipeline is finished.")
 
 
-def generate_triple_files(env: Env):
+def generate_triple_files(env: Environment):
     triple_types_metadata = [
         "code",
         "cube",
@@ -66,10 +67,20 @@ def generate_triple_files(env: Env):
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="LD Pipeline")
-    parser.add_argument("-e", "--env", help="environment name")
-    args = parser.parse_args()
+    __parser = ArgumentParser(description="The LD Pipeline")
+    __parser.add_argument("-e", "--env",
+                          help="environment name",
+                          choices=[e.name for e in Env],
+                          default=Env.test,
+                          )
+    __parser.add_argument("-c", "--config",
+                          help="config file (config.ini)",
+                          type=lambda p: Path(p).absolute(),
+                          default="config.ini",
+                          )
+    __args = __parser.parse_args()
 
-    _env = Env(args.env)
+    __env = Env(__args.env)
+    __config = Environment(__env, __args.config)
 
-    run_pipeline(env=_env)
+    run_pipeline(__config)

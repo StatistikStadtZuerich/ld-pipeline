@@ -1,24 +1,45 @@
+import os
+
 from .config import Config, Env
-from .services import JinjaTemplateEngine, GzipEngine
+from .mmsql_service import MSSQLDbConnection
+from .services import JinjaTemplateEngine, GzipEngine, MySQLDbConnection
 from .base import Base
 from ..interfaces.services import DbConnection
 
 
 class Environment(Base):
-    def __init__(self, env: Env):
+    def __init__(self, env: Env, config_file: os.PathLike):
         super().__init__()
-        self._config = Config(env)
+        self._env = env
+        self._config = Config(env, config_file)
 
     @property
-    def config(self):
+    def config(self) -> Config:
         return self._config
+
+    @property
+    def name(self) -> str:
+        return self._env.name
+
+    @property
+    def table_suffix(self) -> str:
+        if self._env.upper() == "PROD":
+            return "FINAL"
+        else:
+            return "TEST"
 
     def get_db_connection(self) -> DbConnection:
         """
         Returns the db connection for the environment
         :return: a database connection
         """
-        return None
+        _db_type = self._config.get("db_type")
+        if _db_type == "mssql":
+            return MSSQLDbConnection(self)
+        elif _db_type == "mysql":
+            return MySQLDbConnection(self)
+        else:
+            raise NotImplementedError(f"Database '{_db_type}' is not supported")
 
     def get_template_engine(
         self, template_filename: str, output_filepath: str
