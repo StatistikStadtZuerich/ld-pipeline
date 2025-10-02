@@ -10,13 +10,15 @@ from pipeline.base import Utils, Env, Environment
 
 def run_pipeline(env: Environment):
     utils = Utils()
-    utils.logger.info("Starting Pipeline for %s", env.name)
 
     # Check if start signal has arrived
     if utils.check_start_signal(env):
-        utils.print_formatted("Pipeline started ...")
+        logging.info("Starting Pipeline for %s", env.name)
     else:
-        # utils.print_formatted("There is no start signal.")
+        logging.debug(
+            "Start-Signal for pipeline not found in '%s'",
+            utils.start_signal_folder(env),
+        )
         return
 
     # Update pipe tables
@@ -26,7 +28,7 @@ def run_pipeline(env: Environment):
     generate_triple_files(env=env)
 
     # Create start signal to generate the Fuseki index
-    utils = Utils()
+    logging.info("Create start signal to generate the Fuseki index")
     utils.set_start_signal_fuseki_index(env)
 
     # Write back the publication status to the HDB
@@ -34,7 +36,7 @@ def run_pipeline(env: Environment):
 
     # Set finish signal
     utils.set_finish_signal(env)
-    utils.print_formatted("Pipeline is finished.")
+    logging.info("Pipeline is finished.")
 
 
 def generate_triple_files(env: Environment):
@@ -126,14 +128,14 @@ if __name__ == "__main__":
     __parser.add_argument(
         "-c",
         "--config",
+        action="append",
         help="config file (config.ini)",
         type=lambda p: Path(p).absolute(),
-        default="config.ini",
+        default=["config.ini"],
     )
     __args = __parser.parse_args()
-
+    env: Environment = __args.env
     __config = Environment(Env(__args.env), __args.config)
 
     configure_logging(__config)
-    logging.info("Starting Pipeline for %s", __config.name)
     run_pipeline(__config)

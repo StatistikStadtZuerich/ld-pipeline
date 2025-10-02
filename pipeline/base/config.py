@@ -14,11 +14,11 @@ class Env(str, Enum):
 
 
 class Config(Base):
-    def __init__(self, env: Env, config_file: os.PathLike):
+    def __init__(self, env: Env, config_files: list[os.PathLike]):
         super().__init__()
         self._env = env.value
         self._config_parser = ConfigParser(interpolation=EnvInterpolation())
-        loaded = self._config_parser.read(config_file)
+        loaded = self._config_parser.read(config_files)
         if not loaded:
             self.logger.error("No config file loaded!")
 

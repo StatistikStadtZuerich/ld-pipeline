@@ -8,10 +8,10 @@ from ..interfaces.services import DbConnection
 
 
 class Environment(Base):
-    def __init__(self, env: Env, config_file: os.PathLike):
+    def __init__(self, env: Env, config_files: list[os.PathLike]):
         super().__init__()
         self._env = env
-        self._config = Config(env, config_file)
+        self._config = Config(env, config_files)
 
     @property
     def config(self) -> Config:
@@ -34,6 +34,7 @@ class Environment(Base):
         :return: a database connection
         """
         _db_type = self._config.get("db_type")
+        self.logger.info("Initializing db connection for %s", _db_type)
         if _db_type == "mssql":
             return MSSQLDbConnection(self)
         elif _db_type == "mysql":

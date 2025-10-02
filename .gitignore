@@ -9,3 +9,6 @@ Pipfile.lock
 **/__pycache__
 .DS_Store
 config.server.ini
+config-test.ini
+config-int.ini
+config-prod.ini

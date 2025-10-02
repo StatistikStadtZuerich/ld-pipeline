@@ -49,7 +49,7 @@ class Utils(Base):
             with stardog.Connection(stardog_database, **conn_details) as conn:
                 results = conn.select(query)
         except Exception as e:
-            self.print_formatted(f"An error occured: {e}", error=True)
+            self.logger.error("An error occured: %s", e)
             return None
 
         df = None
@@ -132,7 +132,7 @@ class Utils(Base):
         file_path = os.path.join(output_path, file_name)
         with open(file_path, "w") as file:
             file.write("")
-        self.print_formatted(f"Start signal '{file_name}' has been created.")
+        self.logger(f"Start signal '{file_name}' has been created.")
 
     def delete_stardog_triples(self, limit, environment: Environment):
         stardog_graph_uri = self.get_stardog_graph_uri(environment)
@@ -172,8 +172,6 @@ class Utils(Base):
                     obj = f"<{obj}>"
                 else:
                     obj = f'"{obj}"'
-
-                # self.print_formatted(f"Deleting triple: {sub} {pred} {obj}")
 
                 if sub.startswith('"'):
                     sparql = f"""

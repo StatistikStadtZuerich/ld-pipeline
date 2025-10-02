@@ -1,5 +1,6 @@
 import typer
 from typing import Dict
+import logging
 
 from pipeline import Pipeline
 from pipeline.base import Env, StepDefinition, Environment
@@ -16,6 +17,7 @@ from pipeline.steps import (
 from pipeline.steps.views import ViewsStep
 
 app = typer.Typer()
+logger = logging.getLogger(__name__)
 
 
 def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefinition]:
@@ -201,6 +203,7 @@ def step(
     options=None,
 ):
     steps = get_step_definitions(env, options)
+    logger.info(f"Running step {name}")
     Pipeline(env).step(steps[name].step)
 
 
