@@ -11,7 +11,7 @@ SELECT
     h_filter.KENNZAHL AS measure,
     h_filter.WERT AS value,
     SUBSTRING(h_filter.GESAMTCODE, 1, 9)  AS time_code,
-    FORMAT(DATEFROMPARTS(z.JAHR, z.MONAT, z.TAG), 'dd-MM-yyyy') AS [time],
+    FORMAT(DATEFROMPARTS(z.JAHR, z.MONAT, z.TAG), 'yyyy-MM-dd') AS [time],
     SUBSTRING(h_filter.GESAMTCODE, 10, 6) AS room_code,
 
     -- Property 1
@@ -85,7 +85,7 @@ SELECT
     h.KENNZAHL AS measure,
     h.WERT AS value,
     SUBSTRING(h.GESAMTCODE, 1, 9)  AS time_code,
-    FORMAT(DATEFROMPARTS(z.JAHR, z.MONAT, z.TAG), 'dd-MM-yyyy') AS [time],
+    FORMAT(DATEFROMPARTS(z.JAHR, z.MONAT, z.TAG), 'yyyy-MM-dd') AS [time],
     SUBSTRING(h.GESAMTCODE, 10, 6) AS room_code,
 
     -- Property 1
