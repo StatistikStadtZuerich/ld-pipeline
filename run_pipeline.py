@@ -21,10 +21,6 @@ def run_pipeline(env: Environment):
 
     # Update pipe tables
     main.step(name="copyHDBToPipeTables", env=env)
-    try:
-        main.step(name="syncPipeSharepointSasaOutput", env=env)
-    except Exception as e:
-        utils.print_formatted(f"Could not synchronize sharepoint: {e}")
 
     # Generate triple files
     generate_triple_files(env=env)
