@@ -32,6 +32,7 @@ fi
 for START_FILE in "${START_FILES[@]}"; do
     if [ -e "$START_FILE" ]; then
         log "Moving $START_FILE to $DONE_DIR"
+        mkdir -p "$DONE_DIR"
         mv "$START_FILE" "$DONE_DIR/"
     fi
 done
@@ -39,6 +40,7 @@ done
 log "Starting process for all .gz files in $INPUT_DIR"
 
 # Move all .gz files from the input to the temporary directory
+mkdir -p "$TMP_DIR"
 for FILE in "$INPUT_DIR"/*.gz; do
     if [ -r "$FILE" ]; then
         log "Moving $FILE to $TMP_DIR"
@@ -75,6 +77,7 @@ if [ -d "$STATS_TARGET_DIR" ]; then
     log "Statistics file created: $STATS_TARGET_DIR/stats.opt"
 else
     log "Target directory $STATS_TARGET_DIR not found, skipping stats.opt move"
+    rm -f "$TMP_STATS_FILE"
 fi
 
 # Clean up temporary directory
