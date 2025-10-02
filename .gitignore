@@ -8,3 +8,5 @@ Pipfile
 Pipfile.lock
 **/__pycache__
 .DS_Store
+Archiv/
+*.log
