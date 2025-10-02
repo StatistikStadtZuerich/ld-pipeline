@@ -1,12 +1,7 @@
-import logging
-import sys
-import os
-from datetime import datetime
-
-from .base import Environment, Env, Step
+from .base import Environment, Step, Base
 
 
-class Pipeline:
+class Pipeline(Base):
     """
     The Pipeline allows to run steps in the defined environment
     """
@@ -16,32 +11,9 @@ class Pipeline:
         initializes environment for pipeline and configures logger
         :param env: an environment
         """
+        super().__init__()
         self._environment = environment
-        logger_config = {
-            "encoding": "utf-8",
-            "level": logging.getLevelName(
-                self._environment.config.get("logger.log_level")
-            ),
-            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        }
-        current_date = datetime.now()
-        # formatted_date = current_date.strftime("%Y%m%d")
-        filepath = self._environment.config.get("logger.filepath")
-        filename = (
-            self._environment.config.get("logger.filename")
-            .replace("%Y", current_date.strftime("%Y"))
-            .replace("%m", current_date.strftime("%m"))
-            .replace("%d", current_date.strftime("%d"))
-        )
-
-        if not os.path.exists(filepath):
-            os.makedirs(filepath)
-        if self._environment.config.get("logger.log_to_file", bool, True):
-            logger_config["filename"] = f"{filepath}/{filename}"
-        else:
-            logger_config["stream"] = sys.stdout
-
-        logging.basicConfig(**logger_config)
+        self.logger.info("Initialized pipeline for '%s'", self._environment.name)
 
     def run(self, *steps: Step):
         """

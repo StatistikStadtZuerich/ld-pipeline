@@ -1,7 +1,11 @@
-import main
+import datetime
+import logging
+import logging.config
+from argparse import ArgumentParser
 from pathlib import Path
+
+import main
 from pipeline.base import Utils, Env, Environment
-from argparse import ArgumentParser, FileType as ArgFileType
 
 
 def run_pipeline(env: Environment):
@@ -65,6 +69,50 @@ def generate_triple_files(env: Environment):
     for name in triple_types_others:
         main.step(name=name, env=env)
 
+def configure_logging(env: Environment):
+    loggers = []
+    if env.config.get("log.stdout", bool, True):
+        loggers.append("console")
+    if env.config.get("log.file", bool, False):
+        loggers.append("file")
+
+    logger_config = {
+        "version": 1,
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout",
+                "formatter": "default",
+            },
+            "file": {
+                "class": "logging.handlers.TimedRotatingFileHandler",
+                "filename": datetime.datetime.now().strftime(env.config.get("log.file.name", fallback="output.log")),
+                "when": "MIDNIGHT",
+                "interval": 1,
+                "backupCount": 14,
+                "formatter": "default",
+            }
+        },
+        "formatters": {
+            "default": {
+                "class": "logging.Formatter",
+                "format": env.config.get("log.format",
+                                         return_type=str,
+                                         fallback="%(asctime)s [%(env)s] - %(name)s - %(levelname)s - %(message)s"),
+                "datefmt": "%Y-%m-%d %H:%M:%S",
+                "defaults": {
+                    "env": env.name
+                }
+            }
+        },
+        "root": {
+            "handlers": loggers,
+            "level": env.config.get("log.level", str, logging.DEBUG),
+        },
+    }
+
+    logging.config.dictConfig(logger_config)
+    logging.debug("Logging configured")
 
 if __name__ == "__main__":
     __parser = ArgumentParser(description="The LD Pipeline")
@@ -80,7 +128,8 @@ if __name__ == "__main__":
                           )
     __args = __parser.parse_args()
 
-    __env = Env(__args.env)
-    __config = Environment(__env, __args.config)
+    __config = Environment(Env(__args.env), __args.config)
 
+    configure_logging(__config)
+    logging.info("Starting Pipeline for %s", __config.name)
     run_pipeline(__config)
