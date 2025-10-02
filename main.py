@@ -8,7 +8,10 @@ from pipeline.steps import (
     Compressing,
     CopyHDBToPipeTables,
     BuildTermsetHierarchy,
-    WritePublicationStatiToHDB, create_templating, create_fuseki_uploader, create_stardog_uploader,
+    WritePublicationStatiToHDB,
+    create_templating,
+    create_fuseki_uploader,
+    create_stardog_uploader,
 )
 from pipeline.steps.views import ViewsStep
 
@@ -195,7 +198,7 @@ def step(
         help="The name of the step to be executed. Get supported names with command 'list_steps'"
     ),
     env: Environment = None,
-    options = None,
+    options=None,
 ):
     steps = get_step_definitions(env, options)
     Pipeline(env).step(steps[name].step)

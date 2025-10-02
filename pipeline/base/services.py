@@ -36,7 +36,6 @@ class MySQLDbConnection(DbConnection):
     def rollback(self):
         self._connection.rollback()
 
-
     def __enter__(self):
         self._connection = mysql.connector.connect(
             server=self._config.get("db_host"),
@@ -46,7 +45,7 @@ class MySQLDbConnection(DbConnection):
             password=self._config.get("db_password"),
         )
         self.logger.info(
-            f"Database connection to {self._config.get('db_host')}:{self._config.get("db_port", fallback=3306)}/{self._config.get('db_dbname')} established..."
+            f"Database connection to {self._config.get('db_host')}:{self._config.get('db_port', fallback=3306)}/{self._config.get('db_dbname')} established..."
         )
         self._cursor = self._connection.cursor(dictionary=True)
         return self
@@ -54,7 +53,7 @@ class MySQLDbConnection(DbConnection):
     def __exit__(self, *exc_details):
         self._connection.close()
         self.logger.info(
-            f"Database connection to {self._config.get('db_host')}:{self._config.get("db_port", fallback=3306)}/{self._config.get('db_dbname')} closed"
+            f"Database connection to {self._config.get('db_host')}:{self._config.get('db_port', fallback=3306)}/{self._config.get('db_dbname')} closed"
         )
 
 

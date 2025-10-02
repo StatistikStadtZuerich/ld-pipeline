@@ -124,7 +124,7 @@ class Utils(Base):
 
     def set_start_signal_fuseki_index(self, environment: Environment):
         """
-            Create start-signal for the 'create_fuseki_index'-script
+        Create start-signal for the 'create_fuseki_index'-script
         """
         output_path = environment.config.get("output_path")
         current_datetime = datetime.now().strftime("%Y%m%d%H%M")

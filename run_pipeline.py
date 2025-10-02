@@ -65,6 +65,7 @@ def generate_triple_files(env: Environment):
     for name in triple_types_others:
         main.step(name=name, env=env)
 
+
 def configure_logging(env: Environment):
     loggers = []
     if env.config.get("log.stdout", bool, True):
@@ -82,23 +83,25 @@ def configure_logging(env: Environment):
             },
             "file": {
                 "class": "logging.handlers.TimedRotatingFileHandler",
-                "filename": datetime.datetime.now().strftime(env.config.get("log.file.name", fallback="output.log")),
+                "filename": datetime.datetime.now().strftime(
+                    env.config.get("log.file.name", fallback="output.log")
+                ),
                 "when": "MIDNIGHT",
                 "interval": 1,
                 "backupCount": 14,
                 "formatter": "default",
-            }
+            },
         },
         "formatters": {
             "default": {
                 "class": "logging.Formatter",
-                "format": env.config.get("log.format",
-                                         return_type=str,
-                                         fallback="%(asctime)s [%(env)s] - %(name)s - %(levelname)s - %(message)s"),
+                "format": env.config.get(
+                    "log.format",
+                    return_type=str,
+                    fallback="%(asctime)s [%(env)s] - %(name)s - %(levelname)s - %(message)s",
+                ),
                 "datefmt": "%Y-%m-%d %H:%M:%S",
-                "defaults": {
-                    "env": env.name
-                }
+                "defaults": {"env": env.name},
             }
         },
         "root": {
@@ -110,18 +113,23 @@ def configure_logging(env: Environment):
     logging.config.dictConfig(logger_config)
     logging.debug("Logging configured")
 
+
 if __name__ == "__main__":
     __parser = ArgumentParser(description="The LD Pipeline")
-    __parser.add_argument("-e", "--env",
-                          help="environment name",
-                          choices=[e.name for e in Env],
-                          default=Env.test,
-                          )
-    __parser.add_argument("-c", "--config",
-                          help="config file (config.ini)",
-                          type=lambda p: Path(p).absolute(),
-                          default="config.ini",
-                          )
+    __parser.add_argument(
+        "-e",
+        "--env",
+        help="environment name",
+        choices=[e.name for e in Env],
+        default=Env.test,
+    )
+    __parser.add_argument(
+        "-c",
+        "--config",
+        help="config file (config.ini)",
+        type=lambda p: Path(p).absolute(),
+        default="config.ini",
+    )
     __args = __parser.parse_args()
 
     __config = Environment(Env(__args.env), __args.config)
