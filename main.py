@@ -139,10 +139,10 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
         #     create_stardog_uploader(env),
         #     "Uploads all compressed gzip files to a configured stardog server",
         # ),
-        "uploadToFuseki": StepDefinition(
-            create_fuseki_uploader(env),
-            "Uploads all compressed gzip files to a configured fuseki server",
-        ),
+        # "uploadToFuseki": StepDefinition(
+        #     create_fuseki_uploader(env),
+        #     "Uploads all compressed gzip files to a configured fuseki server",
+        # ),
         "copyHDBToPipeTables": StepDefinition(
             CopyHDBToPipeTables(),
             "Copy HDB to pipe tables",
