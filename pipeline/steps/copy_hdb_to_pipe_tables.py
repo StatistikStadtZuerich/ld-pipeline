@@ -58,6 +58,20 @@ class CopyHDBToPipeTables(Step):
                             stmt_insert = f"""
                                 INSERT INTO pipe_{tablename} ({columns_list}, hash)
                                 SELECT {columns_list}, CAST(NULL AS VARBINARY) FROM #pipe_{tablename}
+
+                                UPDATE pipe_{tablename}
+                                SET GESAMTCODE =
+                                    CASE 
+                                        WHEN SUBSTRING(GESAMTCODE, 2, 8) LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+                                        THEN 
+                                            LEFT(GESAMTCODE, 1)
+                                            + SUBSTRING(GESAMTCODE, 6, 4)
+                                            + SUBSTRING(GESAMTCODE, 4, 2)
+                                            + SUBSTRING(GESAMTCODE, 2, 2)
+                                            + SUBSTRING(GESAMTCODE, 10, LEN(GESAMTCODE) - 9)
+                                        ELSE 
+                                            GESAMTCODE
+                                    END;
                             """
                         else:
                             stmt_insert = f"""
