@@ -8,7 +8,7 @@ from ..interfaces.services import DbConnection
 
 
 class Environment(Base):
-    def __init__(self, env: Env, config_files: list[os.PathLike]):
+    def __init__(self, env: Env, config_files: list[os.PathLike] = None):
         super().__init__()
         self._env = env
         self._config = Config(env, config_files)

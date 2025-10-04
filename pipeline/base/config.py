@@ -14,13 +14,14 @@ class Env(str, Enum):
 
 
 class Config(Base):
-    def __init__(self, env: Env, config_files: list[os.PathLike]):
+    def __init__(self, env: Env, config_files: list[os.PathLike] = None):
         super().__init__()
         self._env = env.value
         self._config_parser = ConfigParser(interpolation=EnvInterpolation())
-        loaded = self._config_parser.read(config_files)
-        if not loaded:
-            self.logger.error("No config file loaded!")
+        if config_files:
+            loaded = self._config_parser.read(config_files)
+            if not loaded:
+                self.logger.error("No config file loaded!")
 
     def get(self, name, return_type=str, fallback=None):
         if return_type is int:
