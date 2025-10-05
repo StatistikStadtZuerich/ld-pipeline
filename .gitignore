@@ -1,13 +1,15 @@
 .venv
 .idea
 tmp
-output
-pipeline.log
+output/
+fuseki_index/
 reports
 Pipfile
 Pipfile.lock
 **/__pycache__
 .DS_Store
+Archiv/
+*.log
 config.server.ini
 config-test.ini
 config-int.ini
