@@ -1,0 +1,17 @@
+DROP TABLE IF EXISTS dbo.pipe_HDBGruppenliste;
+
+GO
+
+SELECT
+    GRUPPENCODE,
+    GRUPPENCODENAME,
+    BESCHREIBUNG,
+    GRUPPE,
+    GRUPPENNAME,
+    PARENTCODE,
+    GRUPPENCODESORT,
+    GLOSSARID,
+    LINK,
+    HIERARCHIE
+INTO dbo.pipe_HDBGruppenliste
+FROM dbo.HDBGruppenliste;
