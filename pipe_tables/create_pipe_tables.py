@@ -1,5 +1,4 @@
 import time
-from pathlib import Path
 from pipeline.base import Step, Environment, Utils
 
 
@@ -11,15 +10,16 @@ class InitPipeTables(Step):
         self._sql_dir = "sql/INT/pipe_tables"
 
     def run(self, environment: Environment, tables=None):
-
         start_time = time.time()
-        self._utils.print_formatted(f"Initializing pipe tables for {self._env.upper()} ...")
+        self._utils.print_formatted(
+            f"Initializing pipe tables for {self._env.upper()} ..."
+        )
 
         if tables is None:
             tables = [f.stem for f in self._sql_dir.glob("*.sql")]
         else:
-            self._utils.print_formatted(f"Using provided table list: {tables}")  
-        print(environment)     
+            self._utils.print_formatted(f"Using provided table list: {tables}")
+        print(environment)
         self._create_pipe_tables(environment, tables)
 
         end_time = time.time()
@@ -35,7 +35,9 @@ class InitPipeTables(Step):
                     for tablename in tables:
                         sql_file = self._sql_dir / f"{tablename}.sql"
                         if not sql_file.exists():
-                            raise FileNotFoundError(f"No SQL file found for {tablename} at {sql_file}")
+                            raise FileNotFoundError(
+                                f"No SQL file found for {tablename} at {sql_file}"
+                            )
 
                         sql = sql_file.read_text(encoding="utf-8")
 
