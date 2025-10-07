@@ -1,3 +1,4 @@
+import os
 import time
 from pipeline.base import Step, Environment, Utils
 
@@ -7,7 +8,7 @@ class InitPipeTables(Step):
         super().__init__()
         self._env = env
         self._utils = Utils()
-        self._sql_dir = "sql/INT/pipe_tables"
+        self._sql_dir = "sql/int/pipe_tables"
 
     def run(self, environment: Environment, tables=None):
         start_time = time.time()
@@ -16,7 +17,7 @@ class InitPipeTables(Step):
         )
 
         if tables is None:
-            tables = [f.stem for f in self._sql_dir.glob("*.sql")]
+            tables = [f[:-4] for f in os.listdir(self._sql_dir) if f.endswith(".sql")]
         else:
             self._utils.print_formatted(f"Using provided table list: {tables}")
         print(environment)
@@ -32,17 +33,12 @@ class InitPipeTables(Step):
         with environment.get_db_connection() as connection:
             try:
                 with connection.cursor() as cursor:
-                    for tablename in tables:
-                        sql_file = self._sql_dir / f"{tablename}.sql"
-                        if not sql_file.exists():
-                            raise FileNotFoundError(
-                                f"No SQL file found for {tablename} at {sql_file}"
-                            )
-
+                    for table in tables:
+                        sql_file = self._sql_dir / f"{table}.sql"
                         sql = sql_file.read_text(encoding="utf-8")
 
                         self._utils.print_formatted(
-                            f"Executing {sql_file.name} for pipe_{tablename} ..."
+                            f"Executing {sql_file.name} for pipe_{table} ..."
                         )
                         cursor.execute(sql)
                         self._utils.print_formatted("Done")
