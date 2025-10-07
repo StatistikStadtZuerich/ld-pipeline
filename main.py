@@ -13,6 +13,7 @@ from pipeline.steps import (
     create_templating,
 )
 from pipeline.steps.views import ViewsStep
+from pipe_tables import InitPipeTables
 
 app = typer.Typer()
 logger = logging.getLogger(__name__)
@@ -150,6 +151,10 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
             CopyHDBToPipeTables(),
             "Copy HDB to pipe tables",
         ),
+        "InitPipeTables": StepDefinition(
+            InitPipeTables(env),
+            "Initiate and define pipe tables",
+        ),
         "generateViews": StepDefinition(
             ViewsStep(),
             "Generate all RDF files for ld views",
@@ -188,6 +193,7 @@ def run(environment: Environment):
         steps["compressing"].step,
         # steps["uploadToStardog"].step,
         steps["copyHDBToPipeTables"].step,
+        steps["InitPipeTables"].step,
         # steps["uploadToFuseki"].step,
     )
 
