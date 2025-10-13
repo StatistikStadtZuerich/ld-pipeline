@@ -32,9 +32,11 @@ def run_pipeline(env: Environment):
     utils.set_start_signal_fuseki_index(env)
 
     # Write back the publication status to the HDB
+    logging.info("Write back the publication status to the HDB")
     main.step(name="writePublicationStatiToHDB", env=env)
 
     # Set finish signal
+    logging.debug("Set Finish-Signal for pipeline")
     utils.set_finish_signal(env)
     logging.info("Pipeline is finished.")
 

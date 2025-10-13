@@ -1,4 +1,5 @@
 import glob
+import logging
 import os
 import shutil
 from datetime import datetime
@@ -73,7 +74,11 @@ class Utils(Base):
         start_signal_folder = Utils.start_signal_folder(environment)
         search_path = os.path.join(start_signal_folder, "Running_pipeline_*.txt")
         files = glob.glob(search_path)
-        return len(files) > 0
+        if len(files) > 0:
+            logging.debug("Found pipeline running: %s", files)
+            return True
+        else:
+            return False
 
     @staticmethod
     def check_start_signal(environment: Environment):
@@ -92,7 +97,7 @@ class Utils(Base):
             running_signal = filename.replace("Start_", "Running_")
             running_signal_path = os.path.join(start_signal_folder, running_signal)
             with open(running_signal_path, "w") as f:
-                f.write("")
+                f.write(f"{datetime.now()}")
             done_folder = os.path.join(start_signal_folder, "done")
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
@@ -115,7 +120,7 @@ class Utils(Base):
             finished_signal = filename.replace("Running_", "Finished_")
             finished_signal_path = os.path.join(start_signal_folder, finished_signal)
             with open(finished_signal_path, "w") as f:
-                f.write("")
+                f.write(f"{datetime.now()}")
             done_folder = os.path.join(start_signal_folder, "done")
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
@@ -131,7 +136,7 @@ class Utils(Base):
         file_name = f"start_fuseki_index_{current_datetime}.txt"
         file_path = os.path.join(output_path, file_name)
         with open(file_path, "w") as file:
-            file.write("")
+            file.write(f"{datetime.now()}")
         self.logger(f"Start signal '{file_name}' has been created.")
 
     def delete_stardog_triples(self, limit, environment: Environment):
