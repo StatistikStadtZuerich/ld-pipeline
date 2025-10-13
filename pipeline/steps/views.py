@@ -16,12 +16,12 @@ class ViewsStep(Step):
     def run(self, environment: Environment):
         serializer = LdViewSerializer(environment)
 
-        self._utils.print_formatted("Start building ld-views")
+        self.logger.info("Start building ld-views")
 
         for view in LdViewBuilder(environment).build_all():
-            self._utils.print_formatted(f"Start building ld-view {view.id}")
+            self.logger.info(f"Start building ld-view {view.id}")
             serializer.serialize(view)
-            self._utils.print_formatted(f"Written ld-view {view.id}")
+            self.logger.info(f"Written ld-view {view.id}")
 
         folderpath = environment.config.get("template_output_path")
         folderpath_ldviews = os.path.join(folderpath, "ldviews")
@@ -32,10 +32,10 @@ class ViewsStep(Step):
         filepath_dest = os.path.join(folderpath, filename_dest)
         with gzip.open(filepath_dest, "wb") as gz_file:
             for filename in os.listdir(folderpath_ldviews):
-                self._utils.print_formatted(f"Zipping {filename} ...")
+                self.logger.info(f"Zipping {filename} ...")
                 if filename.endswith(".ttl"):
                     file_path = os.path.join(folderpath_ldviews, filename)
                     with open(file_path, "rb") as ttl_file:
                         shutil.copyfileobj(ttl_file, gz_file)
                     os.remove(file_path)
-        self._utils.print_formatted(f"Created {filename_dest}")
+        self.logger.info(f"Created {filename_dest}")

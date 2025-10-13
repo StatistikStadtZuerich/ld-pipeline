@@ -1,12 +1,11 @@
 import time
 
-from ..base import Step, Environment, Utils
+from ..base import Step, Environment
 
 
 class CopyHDBToPipeTables(Step):
     def __init__(self):
         super().__init__()
-        self._utils = Utils()
 
     def run(self, environment: Environment):
         suffix = environment.table_suffix
@@ -25,11 +24,11 @@ class CopyHDBToPipeTables(Step):
             f"HDB_{suffix}",
         ]
         start_time = time.time()
-        self._utils.print_formatted('Copying HDB data to the "pipe" tables ...')
+        self.logger.info('Copying HDB data to the "pipe" tables ...')
         self._copy_hdb_data_to_pipe_tables(environment, tablenames)
         end_time = time.time()
         execution_time = end_time - start_time
-        self._utils.print_formatted(
+        self.logger.info(
             f"Execution time for copying HDB data to the pipe tables: {execution_time:.2f} seconds"
         )
 
@@ -38,9 +37,7 @@ class CopyHDBToPipeTables(Step):
             try:
                 with connection.cursor() as cursor:
                     for tablename in tablenames:
-                        self._utils.print_formatted(
-                            f"Copying {tablename} to pipe_{tablename} ..."
-                        )
+                        self.logger.info(f"Copying {tablename} to pipe_{tablename} ...")
                         cursor.execute(f"""
                                 SELECT COLUMN_NAME
                                 FROM INFORMATION_SCHEMA.COLUMNS
@@ -68,7 +65,7 @@ class CopyHDBToPipeTables(Step):
                                 SELECT {columns_list} INTO #pipe_{tablename} FROM {tablename};
                                 {stmt_insert};
                             """)
-                        self._utils.print_formatted("Done")
+                        self.logger.info("Done")
                 connection.commit()
             except Exception:
                 connection.rollback()

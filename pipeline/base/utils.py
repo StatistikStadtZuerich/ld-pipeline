@@ -13,22 +13,11 @@ from .environment import Environment
 
 class Utils(Base):
     _instance = None
-    is_jupyter_notebook = False
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super(Utils, cls).__new__(cls, *args, **kwargs)
         return cls._instance
-
-    def print_formatted(self, msg, error=False):
-        if self.is_jupyter_notebook:
-            now = datetime.now()
-            formatted_datetime = now.strftime("%Y-%m-%d %H:%M:%S")
-            print(f"{formatted_datetime} - {msg}")
-        if error:
-            self.logger.error(msg)
-        else:
-            self.logger.info(msg)
 
     def get_stardog_graph_uri(self, env: Environment):
         return env.config.get("stardog_graph_uri")

@@ -29,27 +29,27 @@ class UploadToStardogOptimized(Step):
 
         files = glob.glob(os.path.join(output_folder, "*.gz"))
         with stardog.Connection(stardog_database, **connection_details) as connection:
-            self._utils.print_formatted(f"Connection to {url} established...")
+            self.logger.info(f"Connection to {url} established...")
             connection.begin()
-            self._utils.print_formatted(
+            self.logger.info(
                 f"Clearing the graph {environment.config.get('stardog_graph_uri')} ..."
             )
             connection.clear(environment.config.get("stardog_graph_uri"))
-            self._utils.print_formatted("Graph cleared.")
+            self.logger.info("Graph cleared.")
             for filepath in files:
                 filename = os.path.basename(filepath)
                 filepath_tmp = f"{output_folder_tmp}/{filename}"
                 shutil.move(filepath, filepath_tmp)
-                self._utils.print_formatted(f"Adding {filename}")
+                self.logger.info(f"Adding {filename}")
                 connection.add(
                     stardog.content.File(filepath_tmp, content_type="text/turtle"),
                     environment.config.get("stardog_graph_uri"),
                 )
-            self._utils.print_formatted("Commit transaction ...")
+            self.logger.info("Commit transaction ...")
             connection.commit()
             for filepath in files:
                 filename = os.path.basename(filepath)
                 filepath_tmp = f"{output_folder_tmp}/{filename}"
                 filepath_done = f"{output_folder_done}/{filename}"
                 shutil.move(filepath_tmp, filepath_done)
-            self._utils.print_formatted("Done")
+            self.logger.info("Done")
