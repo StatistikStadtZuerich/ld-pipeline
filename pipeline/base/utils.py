@@ -137,7 +137,7 @@ class Utils(Base):
         file_path = os.path.join(output_path, file_name)
         with open(file_path, "w") as file:
             file.write(f"{datetime.now()}")
-        self.logger(f"Start signal '{file_name}' has been created.")
+        self.logger.debug(f"Start signal '{file_name}' has been created.")
 
     def delete_stardog_triples(self, limit, environment: Environment):
         stardog_graph_uri = self.get_stardog_graph_uri(environment)
