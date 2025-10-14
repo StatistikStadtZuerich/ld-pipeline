@@ -63,25 +63,25 @@ class TemplatingOptimized(Step):
             batch_query = (
                 f"{query} OFFSET {offset} ROWS FETCH NEXT {db_batch_size} ROWS ONLY"
             )
-            self._utils.print_formatted("Downloading data ...")
+            self.logger.info("Downloading data ...")
             cursor.execute(batch_query)
             rows = cursor.fetchall()
             if not rows:
-                self._utils.print_formatted("No rows left.")
+                self.logger.info("No rows left.")
                 running = False
                 break
             number_rows = len(rows)
             number_rows_total += number_rows
-            self._utils.print_formatted(
+            self.logger.info(
                 f"{number_rows} rows downloaded in the {counter}. iteration."
             )
 
-            self._utils.print_formatted("Generating triples ...")
+            self.logger.info("Generating triples ...")
             for row in rows:
                 counter_rows += 1
                 triples = template.render(row)
                 batch.append(triples)
-            self._utils.print_formatted("done")
+            self.logger.info("done")
 
             end_time = time.time()
             iteration_time = end_time - start_time
@@ -92,22 +92,20 @@ class TemplatingOptimized(Step):
                 filename = f"{env}_{tablename}_{timestamp}_{uniqid}.ttl.gz"
                 dest_file = f"{output_folder}/{filename}"
                 dest_file_tmp = f"{output_folder_tmp}/{filename}"
-                self._utils.print_formatted(
+                self.logger.info(
                     f"Writing batch data to {os.path.basename(dest_file_tmp)} ..."
                 )
                 with gzip.open(dest_file_tmp, "at") as f_out:
                     f_out.write("\n".join(batch) + "\n")
                 batch.clear()
                 shutil.move(dest_file_tmp, dest_file)
-                self._utils.print_formatted("File is created.")
+                self.logger.info("File is created.")
             offset += db_batch_size
 
             if len(iteration_durations) > 10:
                 iteration_durations.pop(0)
             adaptive_threshold = sum(iteration_durations) / len(iteration_durations)
-            self._utils.print_formatted(
-                f"{counter}. iteration took {iteration_time:.2f} seconds."
-            )
+            self.logger.info(f"{counter}. iteration took {iteration_time:.2f} seconds.")
             if iteration_time > adaptive_threshold:
                 delay_increase = (iteration_time - adaptive_threshold) * 0.5
                 delay = min(max_delay, delay + delay_increase)
@@ -115,24 +113,24 @@ class TemplatingOptimized(Step):
                 delay_decrease = (adaptive_threshold - iteration_time) * 0.5
                 delay = max(0, delay - delay_decrease)
             if delay > 0:
-                self._utils.print_formatted(
+                self.logger.info(
                     f"Delaying next iteration by {delay:.2f} seconds to reduce load."
                 )
                 time.sleep(delay)
-            self._utils.print_formatted(f"{counter}. iteration is finished.")
+            self.logger.info(f"{counter}. iteration is finished.")
 
         if batch:
             uniqid = str(uuid.uuid4())
             filename = f"{env}_{tablename}_{timestamp}_{uniqid}.ttl.gz"
             dest_file = f"{output_folder}/{filename}"
             dest_file_tmp = f"{output_folder_tmp}/{filename}"
-            self._utils.print_formatted(
+            self.logger.info(
                 f"Writing remaining batch data to {os.path.basename(dest_file_tmp)} ..."
             )
             with gzip.open(dest_file_tmp, "at") as f_out:
                 f_out.write("\n".join(batch) + "\n")
             shutil.move(dest_file_tmp, dest_file)
-            self._utils.print_formatted("File is created.")
+            self.logger.info("File is created.")
 
     def run(self, environment: Environment):
         output_filepath = os.path.join(
@@ -151,9 +149,7 @@ class TemplatingOptimized(Step):
                 if match:
                     tablename = match.group(1)
                 if not tablename:
-                    self._utils.print_formatted(
-                        f"Invalid query in {self._sql_filepath}", error=True
-                    )
+                    self.logger.error(f"Invalid query in {self._sql_filepath}")
                     return
 
                 with connection.cursor() as cursor:
@@ -172,7 +168,7 @@ class TemplatingOptimized(Step):
                                 [f"cube_ids LIKE '%{row['cube_id']}%'" for row in rows]
                             )
                             like_conditions = f"( {like_conditions} )"
-                            self._utils.print_formatted(
+                            self.logger.info(
                                 "Considering only cubes from the view builder."
                             )
 
@@ -187,17 +183,13 @@ class TemplatingOptimized(Step):
                             f" FROM ({query} WHERE ({like_conditions})) AS original_query"
                         )
 
-                    self._utils.print_formatted(
-                        f"Creating temporary table #{tablename} ..."
-                    )
+                    self.logger.info(f"Creating temporary table #{tablename} ...")
                     cursor.execute(query_tmp_table)
-                    self._utils.print_formatted(
-                        "Creating an index on the _sort_order column ..."
-                    )
+                    self.logger.info("Creating an index on the _sort_order column ...")
                     cursor.execute(
                         f"CREATE INDEX idx_sort_order ON #{tablename} (_sort_order)"
                     )
-                    self._utils.print_formatted("done")
+                    self.logger.info("done")
 
                     with environment.get_template_engine(
                         self._template_filename, output_filepath

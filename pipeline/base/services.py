@@ -27,15 +27,25 @@ class MySQLDbConnection(DbConnection):
         self._cursor.execute(sql_query)
         return self._cursor
 
+    def cursor(self):
+        return self._cursor
+
+    def commit(self):
+        self._connection.commit()
+
+    def rollback(self):
+        self._connection.rollback()
+
     def __enter__(self):
         self._connection = mysql.connector.connect(
-            host=self._config.get("mysql_host"),
-            database=self._config.get("mysql_database"),
-            user=self._config.get("mysql_user"),
-            password=self._config.get("mysql_password"),
+            server=self._config.get("db_host"),
+            port=self._config.get("db_port", fallback=3306),
+            database=self._config.get("db_dbname"),
+            user=self._config.get("db_user"),
+            password=self._config.get("db_password"),
         )
         self.logger.info(
-            f"Database connection to {self._config.get('mysql_host')}/{self._config.get('mysql_database')} established..."
+            f"Database connection to {self._config.get('db_host')}:{self._config.get('db_port', fallback=3306)}/{self._config.get('db_dbname')} established..."
         )
         self._cursor = self._connection.cursor(dictionary=True)
         return self
@@ -43,7 +53,7 @@ class MySQLDbConnection(DbConnection):
     def __exit__(self, *exc_details):
         self._connection.close()
         self.logger.info(
-            f"Database connection to {self._config.get('mysql_host')}/{self._config.get('mysql_database')} closed"
+            f"Database connection to {self._config.get('db_host')}:{self._config.get('db_port', fallback=3306)}/{self._config.get('db_dbname')} closed"
         )
 
 
