@@ -1,4 +1,3 @@
-from .ld_view_builder import LdViewBuilder
 from .ld_view_model import (
     View,
     Filter,
@@ -10,6 +9,7 @@ from .ld_view_model import (
     ViewMetadata,
 )
 from .ld_view_serializer import LdViewSerializer
+from .ld_view_builder import LdViewBuilder
 
 __all__ = [
     "View",
