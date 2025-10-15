@@ -1,47 +1,57 @@
 import os
+import pathlib
 import time
-from pipeline.base import Step, Environment, Utils
+from os import PathLike
+from typing import List
+
+from pipeline.base import Step, Environment
 
 
 class InitPipeTables(Step):
-    def __init__(self, env):
+    def __init__(self, sql_dirs: List[str]):
         super().__init__()
-        self._env = env
-        self._utils = Utils()
-        self._sql_dir = "sql/int/pipe_tables"
+        self._sql_dirs = sql_dirs
+
+    @staticmethod
+    def _list_dir(path: str) -> List[PathLike]:
+        return [
+            pathlib.Path(os.path.join(path, f))
+            for f in os.listdir(path)
+            if f.endswith(".sql")
+        ]
 
     def run(self, environment: Environment, tables=None):
         start_time = time.time()
-        self._utils.print_formatted(
-            f"Initializing pipe tables for {self._env.upper()} ..."
-        )
+        self.logger.info(f"Initializing pipe tables for {environment.name.upper()} ...")
 
         if tables is None:
-            tables = [f[:-4] for f in os.listdir(self._sql_dir) if f.endswith(".sql")]
+            _x = []
+            for _sql_dir in self._sql_dirs:
+                _x.extend(self._list_dir(_sql_dir))
+            tables = _x
         else:
-            self._utils.print_formatted(f"Using provided table list: {tables}")
-        print(environment)
+            self.logger.info(f"Using provided table list: {tables}")
+        self.logger.debug(environment)
         self._create_pipe_tables(environment, tables)
 
         end_time = time.time()
         execution_time = end_time - start_time
-        self._utils.print_formatted(
+        self.logger.info(
             f"Execution time for initializing pipe tables: {execution_time:.2f} seconds"
         )
 
-    def _create_pipe_tables(self, environment, tables):
+    def _create_pipe_tables(self, environment: Environment, tables: List[pathlib.Path]):
         with environment.get_db_connection() as connection:
             try:
                 with connection.cursor() as cursor:
                     for table in tables:
-                        sql_file = self._sql_dir / f"{table}.sql"
-                        sql = sql_file.read_text(encoding="utf-8")
+                        sql = table.read_text(encoding="utf-8")
 
-                        self._utils.print_formatted(
-                            f"Executing {sql_file.name} for pipe_{table} ..."
+                        self.logger.info(
+                            f"Executing {table.name} for pipe_{table.name.removesuffix('.sql')} ..."
                         )
                         cursor.execute(sql)
-                        self._utils.print_formatted("Done")
+                        self.logger.info("Done")
 
                 connection.commit()
             except Exception:

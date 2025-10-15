@@ -151,8 +151,13 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
             CopyHDBToPipeTables(),
             "Copy HDB to pipe tables",
         ),
-        "InitPipeTables": StepDefinition(
-            InitPipeTables(env),
+        "initPipeTables": StepDefinition(
+            InitPipeTables(
+                [
+                    "./sql/shared/pipe_tables",
+                    f"./sql/{env_name}/pipe_tables",
+                ]
+            ),
             "Initiate and define pipe tables",
         ),
         "generateViews": StepDefinition(
@@ -192,8 +197,8 @@ def run(environment: Environment):
         steps["timeTemplating"].step,
         steps["compressing"].step,
         # steps["uploadToStardog"].step,
+        steps["initPipeTables"].step,
         steps["copyHDBToPipeTables"].step,
-        steps["InitPipeTables"].step,
         # steps["uploadToFuseki"].step,
     )
 
@@ -213,7 +218,7 @@ def step(
 
 @app.command(name="list-step-names", short_help="List names of all steps supported")
 def list_step_names():
-    steps = get_step_definitions(Env.test)
+    steps = get_step_definitions(Environment(Env.test))
     print(
         ",\n".join('* "' + key + '": ' + val.description for key, val in steps.items())
     )
