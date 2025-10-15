@@ -49,9 +49,9 @@ class InitPipeTables(Step):
                         sql = table.read_text(encoding="utf-8")
 
                         statements = [
-                        s.strip()
-                        for s in re.split(r'(?im)^\s*GO\s*$', sql)
-                        if s.strip()
+                            s.strip()
+                            for s in re.split(r"(?im)^\s*GO\s*$", sql)
+                            if s.strip()
                         ]
 
                         self.logger.info(
