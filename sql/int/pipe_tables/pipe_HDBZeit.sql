@@ -1,7 +1,5 @@
 DROP TABLE IF EXISTS dbo.pipe_HDBZeit;
 
-GO
-
 SELECT
     ZEIT,
     JAHR,

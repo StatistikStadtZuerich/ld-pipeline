@@ -1,7 +1,5 @@
 DROP TABLE IF EXISTS dbo.pipe_HDBCubeDefinition;
 
-GO
-
 SELECT
     CID,
     Titel,

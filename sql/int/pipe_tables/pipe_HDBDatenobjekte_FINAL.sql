@@ -1,7 +1,5 @@
 DROP TABLE IF EXISTS dbo.pipe_HDBDatenobjekte_FINAL;
 
-GO
-
 SELECT
     ID,
     Titel,

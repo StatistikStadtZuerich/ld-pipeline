@@ -1,7 +1,5 @@
 DROP TABLE IF EXISTS dbo.pipe_HDBDatenattribute_FINAL;
 
-GO
-
 SELECT
     id,
     SASA_OutputsId,

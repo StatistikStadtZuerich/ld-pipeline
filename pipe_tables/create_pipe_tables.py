@@ -1,6 +1,7 @@
 import os
 import pathlib
 import time
+import re
 from os import PathLike
 from typing import List
 
@@ -47,10 +48,19 @@ class InitPipeTables(Step):
                     for table in tables:
                         sql = table.read_text(encoding="utf-8")
 
+                        statements = [
+                        s.strip()
+                        for s in re.split(r'(?im)^\s*GO\s*$', sql)
+                        if s.strip()
+                        ]
+
                         self.logger.info(
                             f"Executing {table.name} for pipe_{table.name.removesuffix('.sql')} ..."
                         )
-                        cursor.execute(sql)
+
+                        for stmt in statements:
+                            cursor.execute(stmt)
+
                         self.logger.info("Done")
 
                 connection.commit()

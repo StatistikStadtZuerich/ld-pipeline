@@ -1,7 +1,5 @@
 DROP TABLE IF EXISTS dbo.pipe_HDBHierarchien;
 
-GO
-
 SELECT
     GRUPPE,
     HIERARCHIE,

@@ -1,7 +1,5 @@
 DROP TABLE IF EXISTS dbo.pipe_HDB_TEST;
 
-GO
-
 SELECT
     GESAMTCODE,
     ZEIT,

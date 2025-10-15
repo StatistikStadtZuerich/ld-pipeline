@@ -1,7 +1,5 @@
 DROP TABLE IF EXISTS dbo.pipe_HDBCodeliste;
 
-GO
-
 SELECT
     CODE,
     CODENAME,
