@@ -1,10 +1,7 @@
 #!/bin/bash
 
-export PYENV_VERSION=3.12.1
+SCRIPT="$(readlink -f "$0")"
+SCRIPT_HOME="$(dirname "$SCRIPT")"
 
-if [[ ":$LD_LIBRARY_PATH:" != *":/home/lod_pipeline/openssl_1_1_1/lib:"* ]]; then
-  export LD_LIBRARY_PATH="/home/lod_pipeline/openssl_1_1_1/lib:$LD_LIBRARY_PATH"
-fi
-
-cd /home/lod_pipeline/ld-pipeline-2024/ || exit 2
-/home/lod_pipeline/venv-ld-pipeline-2024/bin/python /home/lod_pipeline/ld-pipeline-2024/run_pipeline_int.py
+echo "DEPRECATION: Use ${SCRIPT_HOME}/run_pipeline.sh directly!" >&2
+"${SCRIPT_HOME}/run_pipeline.sh" "int"

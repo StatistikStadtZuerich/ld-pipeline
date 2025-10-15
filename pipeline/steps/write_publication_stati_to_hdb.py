@@ -2,18 +2,15 @@ from ..base import Step, Environment, Utils
 
 
 class WritePublicationStatiToHDB(Step):
-    def __init__(self, env):
+    def __init__(self):
         super().__init__()
-        self._env = env
         self._utils = Utils()
 
     def run(self, environment: Environment):
-        suffix = "TEST"
-        if self._env.upper() == "PROD":
-            suffix = "FINAL"
-        self._utils.print_formatted("Calculating observation hashes ...")
+        suffix = environment.table_suffix
+        self.logger.info("Calculating observation hashes ...")
         self._calculate_observation_hashes(environment, suffix)
-        self._utils.print_formatted("Done")
+        self.logger.info("Done")
 
         with environment.get_db_connection() as connection:
             with connection.cursor() as cursor:
@@ -33,9 +30,7 @@ class WritePublicationStatiToHDB(Step):
                     ]
                 )
 
-                self._utils.print_formatted(
-                    f"Creating temporary table #hash_HDB_{suffix} ..."
-                )
+                self.logger.info(f"Creating temporary table #hash_HDB_{suffix} ...")
                 query = f"""
                     DROP TABLE IF EXISTS #hash_HDB_{suffix};
                     CREATE TABLE #hash_HDB_{suffix} (
@@ -57,11 +52,9 @@ class WritePublicationStatiToHDB(Step):
                         h.CUBEID <> ''
                 """
                 cursor.execute(query)
-                self._utils.print_formatted("done")
+                self.logger.info("done")
 
-                self._utils.print_formatted(
-                    f"Updating publication stati to HDB_{suffix} ..."
-                )
+                self.logger.info(f"Updating publication stati to HDB_{suffix} ...")
                 query = f"""
                     UPDATE c
                         SET 
@@ -86,7 +79,7 @@ class WritePublicationStatiToHDB(Step):
                             c.CUBEID <> ''
                 """
                 cursor.execute(query)
-                self._utils.print_formatted("done")
+                self.logger.info("done")
 
                 connection.commit()
 

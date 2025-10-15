@@ -19,6 +19,18 @@ class DbConnection(ContextManager):
     def query(self, data: Dict):
         pass
 
+    @abstractmethod
+    def cursor(self):
+        pass
+
+    @abstractmethod
+    def commit(self):
+        pass
+
+    @abstractmethod
+    def rollback(self):
+        pass
+
 
 class TemplateEngine(ContextManager):
     @abstractmethod

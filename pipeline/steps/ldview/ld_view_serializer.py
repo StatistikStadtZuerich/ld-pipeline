@@ -1,8 +1,8 @@
 import os
 from abc import ABC
 
-from ...base import Environment
 from .ld_view_model import View
+from ...base import Environment
 
 
 class LdViewSerializer(ABC):

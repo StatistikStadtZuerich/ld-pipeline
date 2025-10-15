@@ -1,123 +1,137 @@
 import typer
 from typing import Dict
+import logging
 
 from pipeline import Pipeline
-from pipeline.base import Env, StepDefinition
+from pipeline.base import Env, StepDefinition, Environment
 from pipeline.steps import (
     Copy,
-    Templating,
     Compressing,
-    UploadToFuseki,
     CopyHDBToPipeTables,
     BuildTermsetHierarchy,
     WritePublicationStatiToHDB,
+    create_templating,
 )
 from pipeline.steps.views import ViewsStep
 from pipe_tables import InitPipeTables
 
 app = typer.Typer()
+logger = logging.getLogger(__name__)
 
 
-def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
-    env = env.value
-    options["env"] = env
+def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefinition]:
+    if options is None:
+        options = {}
+    env_name = env.name
+    options["env"] = env_name
     return {
         "copyStatic": StepDefinition(
             Copy("./static/static.ttl", "static.ttl", options=options),
             "Copies static.ttl files from /static to defined output folder",
         ),
         "codeTemplating": StepDefinition(
-            Templating(
+            create_templating(
+                env,
                 "code.ttl.jinja",
                 "code.ttl",
-                f"./sql/{env}/view_access/view_code.sql",
+                f"./sql/{env_name}/view_access/view_code.sql",
                 options=options,
             ),
             "Creates triples from the view_code data with the code.ttl template",
         ),
         "cubeTemplating": StepDefinition(
-            Templating(
+            create_templating(
+                env,
                 "cube.ttl.jinja",
                 "cube.ttl",
-                f"./sql/{env}/view_access/view_cube.sql",
+                f"./sql/{env_name}/view_access/view_cube.sql",
                 options=options,
             ),
             "Creates triples from the view_cube data with the cube.ttl template",
         ),
         "groupCodeTemplating": StepDefinition(
-            Templating(
+            create_templating(
+                env,
                 "group_code.ttl.jinja",
                 "group_code.ttl",
-                f"./sql/{env}/view_access/view_group_code.sql",
+                f"./sql/{env_name}/view_access/view_group_code.sql",
                 options=options,
             )
         ),
         "hierarchyTemplating": StepDefinition(
-            Templating(
+            create_templating(
+                env,
                 "hierarchy.ttl.jinja",
                 "hierarchy.ttl",
-                f"./sql/{env}/view_access/view_hierarchy.sql",
+                f"./sql/{env_name}/view_access/view_hierarchy.sql",
                 options=options,
             ),
             "Creates triples from the view_hierarchy data with the hierarchy.ttl template",
         ),
         "legalFoundationTemplating": StepDefinition(
-            Templating(
+            create_templating(
+                env,
                 "legal_foundation.ttl.jinja",
                 "legal_foundation.ttl",
-                f"./sql/{env}/view_access/view_legal_foundation.sql",
+                f"./sql/{env_name}/view_access/view_legal_foundation.sql",
                 options=options,
             )
         ),
         "measureUnitTemplating": StepDefinition(
-            Templating(
+            create_templating(
+                env,
                 "measure_unit.ttl.jinja",
                 "measure_unit.ttl",
-                f"./sql/{env}/view_access/view_measure_unit.sql",
+                f"./sql/{env_name}/view_access/view_measure_unit.sql",
                 options=options,
             )
         ),
         "measureTemplating": StepDefinition(
-            Templating(
+            create_templating(
+                env,
                 "measure.ttl.jinja",
                 "measure.ttl",
-                f"./sql/{env}/view_access/view_measure.sql",
+                f"./sql/{env_name}/view_access/view_measure.sql",
                 options=options,
             ),
             "Creates triples from the view_measure data with the measure.ttl template",
         ),
         "observationTemplating": StepDefinition(
-            Templating(
+            create_templating(
+                env,
                 "observation.ttl.jinja",
                 "observation.ttl",
-                f"./sql/{env}/view_access/view_observation.sql",
+                f"./sql/{env_name}/view_access/view_observation.sql",
                 options=options,
             ),
             "Creates triples from the view_observation data with the observation.ttl template",
         ),
         "propertyTemplating": StepDefinition(
-            Templating(
+            create_templating(
+                env,
                 "property.ttl.jinja",
                 "property.ttl",
-                f"./sql/{env}/view_access/view_property.sql",
+                f"./sql/{env_name}/view_access/view_property.sql",
                 options=options,
             ),
             "Creates triples from the view_property data with the property.ttl template",
         ),
         "roomTemplating": StepDefinition(
-            Templating(
+            create_templating(
+                env,
                 "room.ttl.jinja",
                 "room.ttl",
-                f"./sql/{env}/view_access/view_room.sql",
+                f"./sql/{env_name}/view_access/view_room.sql",
                 options=options,
             ),
             "Creates triples from the view_room data with the room.ttl template",
         ),
         "timeTemplating": StepDefinition(
-            Templating(
+            create_templating(
+                env,
                 "time.ttl.jinja",
                 "time.ttl",
-                f"./sql/{env}/view_access/view_time.sql",
+                f"./sql/{env_name}/view_access/view_time.sql",
                 options=options,
             ),
             "Creates triples from the view_time data with the time.ttl template",
@@ -126,44 +140,49 @@ def get_step_definitions(env: Env, options={}) -> Dict[str, StepDefinition]:
             Compressing(), "Compresses all triple files to gzip files"
         ),
         # "uploadToStardog": StepDefinition(
-        #   UploadToStardog(),
-        #  "Uploads all compressed gzip files to a configured stardog server",
+        #     create_stardog_uploader(env),
+        #     "Uploads all compressed gzip files to a configured stardog server",
         # ),
-        "uploadToFuseki": StepDefinition(
-            UploadToFuseki(),
-            "Uploads all compressed gzip files to a configured fuseki server",
-        ),
+        # "uploadToFuseki": StepDefinition(
+        #     create_fuseki_uploader(env),
+        #     "Uploads all compressed gzip files to a configured fuseki server",
+        # ),
         "copyHDBToPipeTables": StepDefinition(
-            CopyHDBToPipeTables(env),
+            CopyHDBToPipeTables(),
             "Copy HDB to pipe tables",
         ),
-        "InitPipeTables": StepDefinition(
-            InitPipeTables(env),
+        "initPipeTables": StepDefinition(
+            InitPipeTables(
+                [
+                    "./sql/shared/pipe_tables",
+                    f"./sql/{env_name}/pipe_tables",
+                ]
+            ),
             "Initiate and define pipe tables",
         ),
         "generateViews": StepDefinition(
-            ViewsStep(env),
+            ViewsStep(),
             "Generate all RDF files for ld views",
         ),
         "buildTermsetHierarchy": StepDefinition(
             BuildTermsetHierarchy(
                 "raum_hierarchy.ttl.jinja",
                 "termset_hierarchy.ttl",
-                f"./sql/{env}/view_access/view_room_hierarchy.sql",
+                f"./sql/{env_name}/view_access/view_room_hierarchy.sql",
                 options=options,
             ),
             "Creates triples from the view_room_hierarchy data with the raum_hierarchy.ttl template",
         ),
         "writePublicationStatiToHDB": StepDefinition(
-            WritePublicationStatiToHDB(env), "Write publication stati back to the HDB"
+            WritePublicationStatiToHDB(), "Write publication stati back to the HDB"
         ),
     }
 
 
 @app.command(short_help="Run pipeline on given environment")
-def run(env: Env = Env.test):
-    steps = get_step_definitions(env)
-    Pipeline(env).run(
+def run(environment: Environment):
+    steps = get_step_definitions(environment)
+    Pipeline(environment).run(
         steps["copyStatic"].step,
         steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
@@ -178,6 +197,7 @@ def run(env: Env = Env.test):
         steps["timeTemplating"].step,
         steps["compressing"].step,
         # steps["uploadToStardog"].step,
+        steps["initPipeTables"].step,
         steps["copyHDBToPipeTables"].step,
         steps["InitPipeTables"].step,
         # steps["uploadToFuseki"].step,
@@ -189,16 +209,17 @@ def step(
     name: str = typer.Option(
         help="The name of the step to be executed. Get supported names with command 'list_steps'"
     ),
-    env: Env = Env.test,
-    options={},
+    env: Environment = None,
+    options=None,
 ):
     steps = get_step_definitions(env, options)
+    logger.info(f"Running step {name}")
     Pipeline(env).step(steps[name].step)
 
 
 @app.command(name="list-step-names", short_help="List names of all steps supported")
 def list_step_names():
-    steps = get_step_definitions(Env.test)
+    steps = get_step_definitions(Environment(Env.test))
     print(
         ",\n".join('* "' + key + '": ' + val.description for key, val in steps.items())
     )

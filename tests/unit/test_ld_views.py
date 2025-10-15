@@ -109,7 +109,7 @@ class TestLdViews(unittest.TestCase):
         )
 
         try:
-            view_builder = LdViewBuilder(env, "test")
+            view_builder = LdViewBuilder(env)
             view_builder._get_view_data = MagicMock(
                 side_effect=self._mock_database_query
             )

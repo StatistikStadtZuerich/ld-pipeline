@@ -4,7 +4,7 @@ import gzip
 import shutil
 from datetime import datetime
 
-from ..base import Step, Environment, Utils
+from ..base import Step, Environment
 
 
 class Copy(Step):
@@ -28,8 +28,7 @@ class Copy(Step):
         out_dir = environment.config.get("output_path")
         os.makedirs(out_dir, exist_ok=True)
         out_file = os.path.join(out_dir, self._target)
-        utils = Utils()
-        utils.print_formatted(f"Copy {self._source} to {out_file}")
+        self.logger.info(f"Copy {self._source} to {out_file}")
         shutil.copyfile(self._source, out_file)
         uniqid = str(uuid.uuid4())
         now = datetime.now()
@@ -39,7 +38,7 @@ class Copy(Step):
         folderpath = environment.config.get("output_path")
         filepath_dest = os.path.join(folderpath, filename_dest)
         with gzip.open(filepath_dest, "wb") as gz_file:
-            utils.print_formatted(f"Zipping {self._target} ...")
+            self.logger.info(f"Zipping {self._target} ...")
             with open(out_file, "rb") as ttl_file:
                 shutil.copyfileobj(ttl_file, gz_file)
-        utils.print_formatted(f"Created {filename_dest}")
+        self.logger.info(f"Created {filename_dest}")
