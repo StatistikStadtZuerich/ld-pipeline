@@ -5,7 +5,7 @@ SELECT
     RaumLang,
     RaumParent,
     RaumParentLang,
-    NULL as wikidataURI,
+    WikidataURI,
     Beschreibung,
     GueltigkeitsbereicheID,
     RaumSort,
