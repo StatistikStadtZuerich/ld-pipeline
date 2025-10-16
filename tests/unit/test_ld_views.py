@@ -96,6 +96,7 @@ class TestLdViews(unittest.TestCase):
             raise Exception(f"query {query_name} not properly mocked for test")
 
     def test_view_building(self):
+        self.maxDiff = None
         tmp_dir = TestUtils.abs_path("tmp")
         os.makedirs(tmp_dir, exist_ok=True)
 
@@ -108,7 +109,7 @@ class TestLdViews(unittest.TestCase):
         )
 
         try:
-            view_builder = LdViewBuilder(env, "test")
+            view_builder = LdViewBuilder(env)
             view_builder._get_view_data = MagicMock(
                 side_effect=self._mock_database_query
             )
@@ -132,8 +133,8 @@ class TestLdViews(unittest.TestCase):
             ).read()
             expected_content2 = expected_content.replace("WIR100OD100A", "WIR100OD100B")
 
-            self.assertTrue(content == expected_content)
-            self.assertTrue(content2 == expected_content2)
+            self.assertEqual(expected_content, content)
+            self.assertEqual(expected_content2, content2)
 
         finally:
             shutil.rmtree(tmp_dir)

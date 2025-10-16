@@ -61,7 +61,7 @@ class TestTermsetHierarchyStep(unittest.TestCase):
             expected_content = open(
                 TestUtils.abs_path("data/expected_content_hierarchies.ttl")
             ).read()
-            self.assertEqual(content, expected_content)
+            self.assertEqual(expected_content, content)
 
         finally:
             shutil.rmtree(tmp_dir)

@@ -16,7 +16,6 @@
     <http://www.w3.org/ns/dcat#keyword> "None" ;
     <http://purl.org/dc/terms/license> "None" ;
     <https://ld.stadt-zuerich.ch/schema/usageNotes> "None" ;
-
     <http://www.w3.org/ns/dcat#distribution> [ a <http://www.w3.org/ns/dcat#Distribution> ;
             <http://purl.org/dc/terms/format> "CSV" ;
             <http://www.w3.org/ns/dcat#downloadURL> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A/observation?format=csv> ;

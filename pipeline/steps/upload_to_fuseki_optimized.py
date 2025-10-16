@@ -25,7 +25,7 @@ class UploadToFusekiOptimized(Step):
             filepath_tmp = f"{output_folder_tmp}/{filename}"
             filepath_done = f"{output_folder_done}/{filename}"
             shutil.move(filepath, filepath_tmp)
-            self._utils.print_formatted(f"Uploading {filename}")
+            self.logger.info(f"Uploading {filename}")
             with open(filepath_tmp, "rb") as file_data:
                 response = requests.post(
                     url=url,
@@ -43,8 +43,6 @@ class UploadToFusekiOptimized(Step):
 
                 if response.status_code == 200:
                     shutil.move(filepath_tmp, filepath_done)
-                    self._utils.print_formatted("OK")
+                    self.logger.info("OK")
                 else:
-                    self._utils.print_formatted(
-                        f"{response.status_code}: {response.text}", error=True
-                    )
+                    self.logger.error(f"{response.status_code}: {response.text}")

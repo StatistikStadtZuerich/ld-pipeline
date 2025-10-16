@@ -1,39 +1,28 @@
-import stardog
-import os
 import glob
-import pandas as pd
+import logging
+import os
 import shutil
 from datetime import datetime
-from .environment import Env, Environment
+
+import pandas as pd
+import stardog
 
 from .base import Base
+from .environment import Environment
 
 
 class Utils(Base):
     _instance = None
-    is_jupyter_notebook = False
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super(Utils, cls).__new__(cls, *args, **kwargs)
         return cls._instance
 
-    def print_formatted(self, msg, error=False):
-        if Utils.is_jupyter_notebook:
-            now = datetime.now()
-            formatted_datetime = now.strftime("%Y-%m-%d %H:%M:%S")
-            print(f"{formatted_datetime} - {msg}")
-        if error:
-            self.logger.error(msg)
-        else:
-            self.logger.info(msg)
+    def get_stardog_graph_uri(self, env: Environment):
+        return env.config.get("stardog_graph_uri")
 
-    def get_stardog_graph_uri(self, env: Env):
-        environment = Environment(env)
-        return environment.config.get("stardog_graph_uri")
-
-    def execute_sparql(self, query, env: Env):
-        environment = Environment(env)
+    def execute_sparql(self, query, environment: Environment):
         cert_path = environment.config.get("stardog_cert_path")
         stardog_database = environment.config.get("stardog_database")
         stardog_endpoint = environment.config.get("stardog_endpoint")
@@ -50,7 +39,7 @@ class Utils(Base):
             with stardog.Connection(stardog_database, **conn_details) as conn:
                 results = conn.select(query)
         except Exception as e:
-            self.print_formatted(f"An error occured: {e}", error=True)
+            self.logger.error("An error occured: %s", e)
             return None
 
         df = None
@@ -62,23 +51,34 @@ class Utils(Base):
             df = pd.DataFrame(data)
         return df
 
-    def is_pipeline_running(self, env: Env):
-        environment = Environment(env)
-        start_signal_folder = environment.config.get("start_signal_folder")
+    @staticmethod
+    def start_signal_folder(env: Environment) -> str:
+        folder = env.config.get("start_signal_folder")
+        if folder is None:
+            raise ValueError("start_signal_folder must be set")
+        return folder
+
+    @staticmethod
+    def is_pipeline_running(environment: Environment):
+        start_signal_folder = Utils.start_signal_folder(environment)
         search_path = os.path.join(start_signal_folder, "Running_pipeline_*.txt")
         files = glob.glob(search_path)
-        return len(files) > 0
+        if len(files) > 0:
+            logging.debug("Found pipeline running: %s", files)
+            return True
+        else:
+            return False
 
-    def check_start_signal(self, env: Env):
-        environment = Environment(env)
-        start_signal_folder = environment.config.get("start_signal_folder")
+    @staticmethod
+    def check_start_signal(environment: Environment):
+        if Utils.is_pipeline_running(environment):
+            return False
+
+        start_signal_folder = Utils.start_signal_folder(environment)
         search_path = os.path.join(start_signal_folder, "Start_pipeline_*.txt")
         files = glob.glob(search_path)
 
         if len(files) == 0:
-            return False
-
-        if self.is_pipeline_running(env):
             return False
 
         for file in files:
@@ -86,7 +86,7 @@ class Utils(Base):
             running_signal = filename.replace("Start_", "Running_")
             running_signal_path = os.path.join(start_signal_folder, running_signal)
             with open(running_signal_path, "w") as f:
-                f.write("")
+                f.write(f"{datetime.now()}")
             done_folder = os.path.join(start_signal_folder, "done")
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
@@ -95,9 +95,9 @@ class Utils(Base):
 
         return True
 
-    def set_finish_signal(self, env: Env):
-        environment = Environment(env)
-        start_signal_folder = environment.config.get("start_signal_folder")
+    @staticmethod
+    def set_finish_signal(environment: Environment):
+        start_signal_folder = Utils.start_signal_folder(environment)
         search_path = os.path.join(start_signal_folder, "Running_pipeline_*.txt")
         files = glob.glob(search_path)
 
@@ -109,26 +109,27 @@ class Utils(Base):
             finished_signal = filename.replace("Running_", "Finished_")
             finished_signal_path = os.path.join(start_signal_folder, finished_signal)
             with open(finished_signal_path, "w") as f:
-                f.write("")
+                f.write(f"{datetime.now()}")
             done_folder = os.path.join(start_signal_folder, "done")
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
             shutil.move(file, os.path.join(done_folder, filename))
             break
 
-    def set_start_signal_fuseki_index(self, env: Env):
-        environment = Environment(env)
+    def set_start_signal_fuseki_index(self, environment: Environment):
+        """
+        Create start-signal for the 'create_fuseki_index'-script
+        """
         output_path = environment.config.get("output_path")
         current_datetime = datetime.now().strftime("%Y%m%d%H%M")
         file_name = f"start_fuseki_index_{current_datetime}.txt"
         file_path = os.path.join(output_path, file_name)
         with open(file_path, "w") as file:
-            file.write("")
-        self.print_formatted(f"Start signal '{file_name}' has been created.")
+            file.write(f"{datetime.now()}")
+        self.logger.debug(f"Start signal '{file_name}' has been created.")
 
-    def delete_stardog_triples(self, limit, env: Env):
-        environment = Environment(env)
-        stardog_graph_uri = self.get_stardog_graph_uri(env=env)
+    def delete_stardog_triples(self, limit, environment: Environment):
+        stardog_graph_uri = self.get_stardog_graph_uri(environment)
         cert_path = environment.config.get("stardog_cert_path")
         os.environ["REQUESTS_CA_BUNDLE"] = cert_path
         df = self.execute_sparql(
@@ -137,9 +138,9 @@ class Utils(Base):
                 ?sub ?pred ?obj
             }} LIMIT {limit}
         """,
-            env=env,
+            environment,
         )
-        stardog_graph_uri = self.get_stardog_graph_uri(env=env)
+        stardog_graph_uri = self.get_stardog_graph_uri(environment)
         stardog_database = environment.config.get("stardog_database")
         connection_details = {
             "endpoint": environment.config.get("stardog_endpoint"),
@@ -165,8 +166,6 @@ class Utils(Base):
                     obj = f"<{obj}>"
                 else:
                     obj = f'"{obj}"'
-
-                # self.print_formatted(f"Deleting triple: {sub} {pred} {obj}")
 
                 if sub.startswith('"'):
                     sparql = f"""
@@ -195,14 +194,14 @@ class Utils(Base):
                 connection.update(sparql)
             connection.commit()
 
-    def get_number_triples(self, env: Env):
-        stardog_graph_uri = self.get_stardog_graph_uri(env=env)
+    def get_number_triples(self, environment: Environment):
+        stardog_graph_uri = self.get_stardog_graph_uri(environment)
         df = self.execute_sparql(
             f"""
             SELECT (COUNT(*) AS ?triplesCount) FROM <{stardog_graph_uri}> WHERE {{
                 ?sub ?pred ?obj
             }}
         """,
-            env=env,
+            environment,
         )
         return df["triplesCount"].iloc[0]

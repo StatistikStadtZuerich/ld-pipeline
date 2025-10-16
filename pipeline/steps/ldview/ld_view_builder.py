@@ -14,10 +14,10 @@ from pipeline.steps.ldview import (
 
 
 class LdViewBuilder(Base):
-    def __init__(self, environment: Environment, env):
+    def __init__(self, environment: Environment):
         super().__init__()
         self._environment = environment
-        self._env = env
+        self._env = environment.name
         self._cache = {}
 
     def build_all(self) -> List[View]:

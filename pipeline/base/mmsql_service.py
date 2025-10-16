@@ -1,11 +1,15 @@
+from typing import TYPE_CHECKING
+
 import pymssql
 
-from pipeline.base import Environment
 from pipeline.interfaces.services import DbConnection
+
+if TYPE_CHECKING:
+    from .environment import Environment
 
 
 class MSSQLDbConnection(DbConnection):
-    def __init__(self, environment: Environment):
+    def __init__(self, environment: "Environment"):
         super().__init__()
         self._config = environment.config
 
@@ -27,19 +31,20 @@ class MSSQLDbConnection(DbConnection):
 
     def __enter__(self):
         self._connection = pymssql.connect(
-            server=self._config.get("mssql_host"),
-            database=self._config.get("mssql_database"),
-            user=self._config.get("mssql_user"),
-            password=self._config.get("mssql_password"),
+            server=self._config.get("db_host"),
+            port=self._config.get("db_port", fallback=1433),
+            database=self._config.get("db_dbname"),
+            user=self._config.get("db_user"),
+            password=self._config.get("db_password"),
         )
         self._cursor = self._connection.cursor(as_dict=True)
         self.logger.info(
-            f"Database connection to {self._config.get('mssql_server')}/{self._config.get('mssql_database')} established..."
+            f"Database connection to {self._config.get('db_host')}:{self._config.get('db_port', fallback=1433)}/{self._config.get('db_dbname')} established..."
         )
         return self
 
     def __exit__(self, *exc_details):
         self._connection.close()
         self.logger.info(
-            f"Database connection to {self._config.get('mssql_server')}/{self._config.get('mssql_database')} closed"
+            f"Database connection to {self._config.get('db_host')}:{self._config.get('db_port', fallback=1433)}/{self._config.get('db_dbname')} closed"
         )

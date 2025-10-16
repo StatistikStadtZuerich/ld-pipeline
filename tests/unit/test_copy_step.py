@@ -26,7 +26,7 @@ class TestCopy(unittest.TestCase):
             copy.run(env)
 
             with open(os.path.join(TestUtils.abs_path("tmp"), output_file)) as f:
-                self.assertEqual(f.read(), "Hello World\n")
+                self.assertEqual("Hello World\n", f.read())
 
         finally:
             shutil.rmtree(tmp_dir)
