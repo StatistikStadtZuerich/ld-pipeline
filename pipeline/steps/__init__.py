@@ -21,7 +21,7 @@ __all__ = [
     "Compressing",
     "BuildTermsetHierarchy",
     "CopyHDBToPipeTables",
-    "CreateViewsFromSQL"
+    "CreateViewsFromSQL",
     "WritePublicationStatiToHDB",
     "Templating",
     "TemplatingOptimized",

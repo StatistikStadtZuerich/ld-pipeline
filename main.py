@@ -151,9 +151,8 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
             CopyHDBToPipeTables(),
             "Copy HDB to pipe tables",
         ),
-        # FIXME
         "createViewsFromSQL": StepDefinition(
-            CreateViewsFromSQL(env),
+            CreateViewsFromSQL(f"./sql/{env_name}/view_definition"),
             "Create DB Views from SQL",
         ),
         "generateViews": StepDefinition(
