@@ -8,7 +8,9 @@ SELECT DISTINCT
         WHEN ag.gruppe IS NOT NULL THEN REPLACE(t.GRUPPE, ag.gruppe, ag.origin)
         ELSE t.GRUPPE
     END AS term_group_code,
+
     REPLACE(t.HIERARCHIE, '-', '') AS term,
+
     t.HIERARCHIE AS name
     
 FROM
