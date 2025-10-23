@@ -11,8 +11,6 @@ SELECT
     t.Schlagworte AS keywords,
     t.Beschreibungsdetails AS description,
     t.SASA_Job_Output_Id AS alternate_name,
-    FORMAT(CAST(t.Zeitraum_Anfang AS DATE), 'yyyy-MM-dd') AS start_date,
-    FORMAT(CAST(t.Zeitraum_ENDE AS DATE), 'yyyy-MM-dd') AS end_date,
     FORMAT(CAST(t.Aktualisierungsdatum AS DATE), 'yyyy-MM-dd') AS modified,
     t.Bemerkungen AS notes,
     t.Raeumliche_Beziehung AS spatial,

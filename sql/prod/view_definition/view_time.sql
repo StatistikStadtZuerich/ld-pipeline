@@ -34,7 +34,5 @@ SELECT
 				SUBSTRING(t.ZEIT, 2, 2))
 		END, '') AS "date",
 	ISNULL(t.PERIODESTART, '') AS "reference_time",
-	ISNULL(t.PERIODESTART, '') AS "start_date",
-	ISNULL(t.PERIODEENDE, '') AS "end_date"
 FROM
 	dbo.pipe_HDBZeit t;

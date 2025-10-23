@@ -75,8 +75,6 @@ class ViewMetadata(TypedDict):
     name: str
     alt_name: str
     metadata_creator: str
-    start_date: str
-    end_date: str
     accrual_periodicity: str
     spatial: str
     issued: str
