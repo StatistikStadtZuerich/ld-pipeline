@@ -12,14 +12,11 @@ class CopyHDBToPipeTables(Step):
         tablenames = [
             "HDBCodeliste",
             "HDBCubeDefinition",
-            f"HDBDatenattribute_{suffix}",
-            f"HDBDatenattributeObjekte_{suffix}",
             f"HDBDatenobjekte_{suffix}",
             "HDBGruppenliste",
             "HDBHierarchien",
             "HDBKennzahlen",
             "HDBRaum",
-            f"HDBRechtsgrundlagen_{suffix}",
             "HDBZeit",
             f"HDB_{suffix}",
         ]
