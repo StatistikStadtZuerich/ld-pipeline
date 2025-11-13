@@ -10,6 +10,7 @@ from pipeline.steps import (
     CopyHDBToPipeTables,
     BuildTermsetHierarchy,
     WritePublicationStatiToHDB,
+    CreateViewsFromSQL,
     create_templating,
 )
 from pipeline.steps.views import ViewsStep
@@ -150,6 +151,10 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
             CopyHDBToPipeTables(),
             "Copy HDB to pipe tables",
         ),
+        "createViewsFromSQL": StepDefinition(
+            CreateViewsFromSQL(f"./sql/{env_name}/view_definition"),
+            "Create DB Views from SQL",
+        ),
         "generateViews": StepDefinition(
             ViewsStep(),
             "Generate all RDF files for ld views",
@@ -188,6 +193,7 @@ def run(environment: Environment):
         steps["compressing"].step,
         # steps["uploadToStardog"].step,
         steps["copyHDBToPipeTables"].step,
+        steps["createViewsFromSQL"].step,
         # steps["uploadToFuseki"].step,
     )
 

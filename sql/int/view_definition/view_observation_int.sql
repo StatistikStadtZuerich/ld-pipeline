@@ -6,7 +6,7 @@ CREATE VIEW dbo.view_observation_int
 AS
 
 SELECT
-    h_filter.GESAMTCODE AS gesamtcode,
+    --h_filter.GESAMTCODE AS gesamtcode,
     REPLACE(REPLACE(TRIM(h_filter.CUBEID), 'CID_', ''), ' ', ',') AS cube_ids,
     h_filter.KENNZAHL AS measure,
     h_filter.WERT AS value,
@@ -61,7 +61,7 @@ SELECT
         WHEN h_filter.DATENSTATUS LIKE '%definitiv%'     THEN 'DEFINITIV'
         ELSE 'PROVISORISCH'
     END AS status,
-    h_filter.REFERENZNUMMER AS reference_number,
+    --h_filter.REFERENZNUMMER AS reference_number,
     h_filter.DATENSTAND as modified
 
 FROM (SELECT * FROM dbo.pipe_HDB_TEST WHERE Publikationsstatus <> 'veröffentlicht') AS h_filter   
@@ -80,7 +80,7 @@ WHERE
 	h_filter.CUBEID <> ''
 UNION ALL
 SELECT
-    h.GESAMTCODE AS gesamtcode,
+    --h.GESAMTCODE AS gesamtcode,
     REPLACE(REPLACE(TRIM(h.CUBEID), 'CID_', ''), ' ', ',') AS cube_ids,
     h.KENNZAHL AS measure,
     h.WERT AS value,
@@ -135,7 +135,7 @@ SELECT
         WHEN h.DATENSTATUS LIKE '%definitiv%'     THEN 'DEFINITIV'
         ELSE 'PROVISORISCH'
     END AS status,
-    h.REFERENZNUMMER AS reference_number,
+    --h.REFERENZNUMMER AS reference_number,
     h.DATENSTAND as modified
 
 FROM dbo.pipe_HDB_TEST h
