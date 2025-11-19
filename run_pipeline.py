@@ -47,7 +47,7 @@ def generate_triple_files(env: Environment):
         "cube",
         "groupCode",
         "hierarchy",
-        #"legalFoundation",
+        # "legalFoundation",
         "measureUnit",
         "measure",
         "property",

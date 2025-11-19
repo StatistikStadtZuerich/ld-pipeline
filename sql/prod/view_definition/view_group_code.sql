@@ -3,6 +3,7 @@ DROP VIEW IF EXISTS dbo.view_group_code;
 GO
 
 CREATE VIEW dbo.view_group_code AS
+
 SELECT DISTINCT
     CASE 
         WHEN ag.gruppe IS NOT NULL THEN REPLACE(t.GRUPPENCODE, ag.gruppe, ag.origin)
