@@ -160,6 +160,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 ]
             ),
             "Initiate and define pipe tables",
+        ),
         "createViewsFromSQL": StepDefinition(
             CreateViewsFromSQL(f"./sql/{env_name}/view_definition"),
             "Create DB Views from SQL",
