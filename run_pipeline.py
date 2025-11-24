@@ -136,7 +136,6 @@ if __name__ == "__main__":
         default=["config.ini"],
     )
     __args = __parser.parse_args()
-    env: Environment = __args.env
     __config = Environment(Env(__args.env), __args.config)
 
     configure_logging(__config)

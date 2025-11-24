@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS dbo.pipe_HDBZeit;
+
+SELECT
+    ZEIT,
+    JAHR,
+    MONAT,
+    TAG,
+    PERIODESTART,
+    PERIODEENDE
+INTO dbo.pipe_HDBZeit
+FROM dbo.HDBZeit;
