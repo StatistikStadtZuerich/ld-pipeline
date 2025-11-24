@@ -19,7 +19,7 @@ SELECT DISTINCT
     END AS term_group_code,
  
     t.GRUPPENCODESORT AS position,
-    t.GLOSSARID AS glossarid,
+    --t.GLOSSARID AS glossarid,
  
     CASE 
         WHEN ag.gruppe IS NOT NULL THEN REPLACE(t.PARENTCODE, ag.gruppe, ag.origin)

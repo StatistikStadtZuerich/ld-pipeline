@@ -6,8 +6,8 @@ CREATE VIEW dbo.view_room_int AS
 SELECT
     t.Raum AS term_code,
     t.RaumLang AS title,
-    t.RaumParent AS raum_parent,
-    t.RaumParentLang AS raum_parent_lang,
+    --t.RaumParent AS raum_parent,
+    --t.RaumParentLang AS raum_parent_lang,
     t.WikidataURI AS same_as,
     t.Beschreibung AS description,
     t.GueltigkeitsbereicheID AS available,

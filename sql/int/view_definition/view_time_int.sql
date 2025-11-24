@@ -33,8 +33,6 @@ SELECT
                 SUBSTRING(t.ZEIT, 2, 2))
     END, '') AS "date",
     ISNULL(t.PERIODESTART, '') AS "reference_time",
-    ISNULL(t.PERIODESTART, '') AS "start_date",
-    ISNULL(t.PERIODEENDE, '') AS "end_date",
     CASE 
         WHEN (t.ZEIT LIKE 'Z3112%' OR t.ZEIT LIKE 'ZXX12%'
 			OR t.ZEIT LIKE 'ZXXXX%' OR t.ZEIT LIKE 'ZPJ00%') THEN 1 

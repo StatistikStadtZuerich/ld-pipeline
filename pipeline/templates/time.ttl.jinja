@@ -9,12 +9,6 @@
     {% if date|is_valid_date %}
         <https://ld.stadt-zuerich.ch/schema/hasEnd> {{ date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
     {% endif %}
-    {% if end_date|is_valid_date %}
-        <https://ld.stadt-zuerich.ch/schema/hasEnd> {{ end_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
-    {% endif %}
-    {% if start_date|is_valid_date %}
-        <https://ld.stadt-zuerich.ch/schema/hasBeginning> {{ start_date|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date> ;
-    {% endif %}
     <https://ld.stadt-zuerich.ch/schema/referenceTime> {{ reference_time|literal_encode }} ;
     {% if filter_day|int == 1 %}
         <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/Tag> ;

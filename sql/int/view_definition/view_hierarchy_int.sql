@@ -7,11 +7,11 @@ SELECT DISTINCT
     CASE 
         WHEN ag.gruppe IS NOT NULL THEN REPLACE(t.GRUPPE, ag.gruppe, ag.origin)
         ELSE t.GRUPPE
-    END AS term_group_code,
+    END AS term_group_code
 
-    REPLACE(t.HIERARCHIE, '-', '') AS term,
+    --,REPLACE(t.HIERARCHIE, '-', '') AS term,
 
-    t.HIERARCHIE AS name
+    --t.HIERARCHIE AS name
     
 FROM
     dbo.pipe_HDBHierarchien t

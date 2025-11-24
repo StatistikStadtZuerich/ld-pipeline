@@ -1,7 +1,7 @@
-DROP VIEW IF EXISTS dbo.view_vb_view_int;
+DROP VIEW IF EXISTS dbo.view_vb_view;
 GO
 
-CREATE VIEW dbo.view_vb_view_int AS
+CREATE VIEW dbo.view_vb_view AS
 SELECT
 	t.SASA_Job_Output_Id AS id,
 	t.Titel AS name,
@@ -14,6 +14,8 @@ SELECT
 	t.SASA_Job_Output_Id AS alt_name,
 	t.Lieferant AS metadata_creator,
 	FORMAT(CAST(t.Erstmalige_Veroeffentlichung AS DATE), 'yyyy-MM-dd') AS issued,
+	FORMAT(CAST(t.Zeitraum_Anfang AS DATE), 'yyyy-MM-dd') AS start_date,
+    FORMAT(CAST(t.Zeitraum_ENDE AS DATE), 'yyyy-MM-dd') AS end_date,
     FORMAT(CAST(t.Aktualisierungsdatum AS DATE), 'yyyy-MM-dd') AS modified,
     t.Aktualisierungsintervall AS accrual_periodicity,
     t.Raeumliche_Beziehung AS spatial,
@@ -24,6 +26,6 @@ SELECT
     t.Kategorie AS theme,
 	t.Datenqualitaet as dataquality
 FROM
-	dbo.pipe_HDBDatenobjekte_TEST t
+	dbo.pipe_HDBDatenobjekte_FINAL t
 WHERE
 	t.CubeIDs IS NOT NULL;

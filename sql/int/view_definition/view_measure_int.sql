@@ -6,8 +6,8 @@ CREATE VIEW dbo.view_measure_int AS
 SELECT
 	t.KennzahlCode AS measure_code,
 	t.Kennzahlname AS title,
-	t.Einheit AS name,
-	t.Einheit_Kurz AS identifier,
+	--t.Einheit AS name,
+	--t.Einheit_Kurz AS identifier,
 	t.Methode AS method,
 	REPLACE(t.Einheit_URI, ' ', '_') AS unit,
 	REPLACE(REPLACE(
