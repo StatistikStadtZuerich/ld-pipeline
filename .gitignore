@@ -12,5 +12,6 @@ Archiv/
 *.log
 config.server.ini
 config-dev.ini
+config-test.ini
 config-int.ini
 config-prod.ini
