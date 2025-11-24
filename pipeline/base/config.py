@@ -11,6 +11,7 @@ class Env(str, Enum):
     local = "local"
     int = "int"
     prod = "prod"
+    dev = "dev"
 
 
 class Config(Base):

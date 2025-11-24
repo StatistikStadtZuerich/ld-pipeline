@@ -23,7 +23,7 @@ class Environment(Base):
 
     @property
     def table_suffix(self) -> str:
-        if self._env.upper() == "PROD":
+        if self._env.upper() in ["PROD", "DEV"]:
             return "FINAL"
         else:
             return "TEST"
