@@ -21,7 +21,7 @@ SELECT
     t.Raeumliche_Beziehung AS spatial,
     4 AS publisher,
     t.Schlagworte AS keyword,
-    t.Lizenz AS license,
+    'cc-zero' AS license,
     t.Bemerkungen AS usage_notes,
     t.Kategorie AS theme,
 	t.Datenqualitaet as dataquality
