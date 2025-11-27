@@ -59,4 +59,7 @@ JOIN dbo.pipe_HDBCubeDefinition c
     ON c.Kennzahl = LEFT(cs.raw_value, 3)
    AND c.CID = cl.CID
 JOIN dbo.pipe_HDBKennzahlen h
-    ON h.KennzahlCode = LEFT(cs.raw_value, 3);
+    ON h.KennzahlCode = LEFT(cs.raw_value, 3)
+JOIN dbo.view_vb_source_INT s
+    ON s.view_id = cs.view_id
+   AND s.cube_id = REPLACE(cl.CID,'CID_','');
