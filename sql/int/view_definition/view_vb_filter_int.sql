@@ -21,6 +21,7 @@ SELECT
 					,'Winter'
 					,'Herbst'
 					,'Frühling'
+					,'5-Jahre'
 		)THEN 'Zeit'
 		ELSE 'Raum'
 	END as dimension
