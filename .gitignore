@@ -15,3 +15,8 @@ config-dev.ini
 config-test.ini
 config-int.ini
 config-prod.ini
+.env
+dev.env
+test.env
+int.env
+prod.env
