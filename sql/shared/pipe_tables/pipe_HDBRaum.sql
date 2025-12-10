@@ -7,7 +7,8 @@ SELECT
     RaumLang,
     RaumParent,
     RaumParentLang,
-    NULL as wikidataURI,
+    -- FIXME: warum NULL und nicht die Daten aus der HDBRaum-Tabelle?
+    CAST(NULL AS VARCHAR(MAX)) as wikidataURI,
     Beschreibung,
     GueltigkeitsbereicheID,
     RaumSort,
