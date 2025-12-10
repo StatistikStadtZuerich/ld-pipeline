@@ -22,6 +22,8 @@ def run_pipeline(env: Environment):
         return
 
     # Update pipe tables
+    main.step(name="createViewsFromSQL", env=env)
+    main.step(name="initPipeTables", env=env)
     main.step(name="copyHDBToPipeTables", env=env)
 
     # Generate triple files
