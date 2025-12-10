@@ -1,25 +1,32 @@
 #!/usr/bin/env bash
+set -e
 
 ENV_NAME="${1:-local}"
 
+SCRIPT="$(readlink -f "$0")"
+SCRIPT_HOME="$(dirname "$SCRIPT")"
+
+function load_env() {
+  [ -r "$1" ] && . "$1" || true
+}
+
+# load local settings
+load_env "${SCRIPT_HOME}/.env"
+load_env "${SCRIPT_HOME}/${ENV_NAME}.env"
+load_env "./.env"
+load_env "./${ENV_NAME}.env"
+
 JENA_DIR="${JENA_DIR:-/home/lod_pipeline/apache-jena-fuseki-4.9.0/jena}"
-DATA_ROOT="${DATA_ROOT:-/home/lod_pipeline/ld-pipeline-2024/fuseki_index/${ENV_NAME}}"
+FUSEKI_INDEX_DIR="${FUSEKI_INDEX_DIR:-/home/lod_pipeline/ld-pipeline-2024/fuseki_index/${ENV_NAME}}"
 INPUT_DIR="${INPUT_DIR:-/home/lod_pipeline/ld-pipeline-2024/output/${ENV_NAME}}"
 TMP_DIR="$INPUT_DIR/tmp"
 DONE_DIR="$INPUT_DIR/done"
 CURRENT=current
-TARGET_DIR="${TARGET_DIR:-/home/lod_pipeline/hdb_dropzone/prod/test/Pipeline_Data}"
+PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-/home/lod_pipeline/hdb_dropzone/prod/test/Pipeline_Data}"
 
 function log() {
     echo "$(date +"%FT%H:%M:%S%Z") $*"
 }
-
-VERSION="$(date +"%F_%H-%M-%S_%Z")"
-DATA_DIR="$DATA_ROOT/$VERSION"
-
-# Get the current date and time for the filename
-CURRENT_DATETIME=$(date +"%Y%m%d%H%M%S")
-FINAL_COMBINED_FILE="$TMP_DIR/${ENV_NAME}_combined_${CURRENT_DATETIME}.ttl.gz"
 
 # Check for start signal files
 START_FILES=("$INPUT_DIR"/start_fuseki_index_*.txt)
@@ -40,6 +47,14 @@ for START_FILE in "${START_FILES[@]}"; do
 done
 
 log "Starting process for all .gz files in $INPUT_DIR"
+
+mkdir -p "$FUSEKI_INDEX_DIR"
+VERSION="$(date +"%F_%H-%M-%S_%Z")"
+DATA_DIR="$FUSEKI_INDEX_DIR/$VERSION"
+
+# Get the current date and time for the filename
+CURRENT_DATETIME=$(date +"%Y%m%d%H%M%S")
+FINAL_COMBINED_FILE="$TMP_DIR/${ENV_NAME}_combined_${CURRENT_DATETIME}.ttl.gz"
 
 # Move all .gz files from the input to the temporary directory
 for FILE in "$INPUT_DIR"/*.gz; do
@@ -78,14 +93,14 @@ TMP_STATS_FILE="/tmp/stats_${CURRENT_DATETIME}.opt"
 "${JENA_DIR}/bin/tdb2.tdbstats" --loc="$DATA_DIR" > "$TMP_STATS_FILE" \
   || { log "tdb2.tdbstats failed" >&2; exit 2; }
 
-STATS_TARGET_DIR="$DATA_DIR/Data-0001"
-if [ -d "$STATS_TARGET_DIR" ]; then
-    log "Moving stats file to $STATS_TARGET_DIR"
-    mv "$TMP_STATS_FILE" "$STATS_TARGET_DIR/stats.opt" \
+STATS_PIPELINE_DATA_DIR="$DATA_DIR/Data-0001"
+if [ -d "$STATS_PIPELINE_DATA_DIR" ]; then
+    log "Moving stats file to $STATS_PIPELINE_DATA_DIR"
+    mv "$TMP_STATS_FILE" "$STATS_PIPELINE_DATA_DIR/stats.opt" \
       || { log "Failed to move stats file" >&2; exit 2; }
-    log "Statistics file created: $STATS_TARGET_DIR/stats.opt"
+    log "Statistics file created: $STATS_PIPELINE_DATA_DIR/stats.opt"
 else
-    log "Target directory $STATS_TARGET_DIR not found, skipping stats.opt move"
+    log "Target directory $STATS_PIPELINE_DATA_DIR not found, skipping stats.opt move"
     rm -f "$TMP_STATS_FILE"
 fi
 
@@ -96,24 +111,24 @@ rm -f "$TMP_DIR"/*.gz "$TMP_DIR/${ENV_NAME}_combined_${CURRENT_DATETIME}.ttl"
 # Update 'current' symlink after processing all files
 (
     log "Updating '${CURRENT}' symlink"
-    cd "$DATA_ROOT" || { log "Could not cd to $DATA_ROOT, exit" >&2; exit 2; }
+    cd "$FUSEKI_INDEX_DIR" || { log "Could not cd to $FUSEKI_INDEX_DIR, exit" >&2; exit 2; }
     [ -L "${CURRENT}" ] && rm -f "${CURRENT}"
     ln -s "$VERSION" "${CURRENT}"
-    log "$DATA_ROOT/${CURRENT} -> $DATA_ROOT/$VERSION"
+    log "$FUSEKI_INDEX_DIR/${CURRENT} -> $FUSEKI_INDEX_DIR/$VERSION"
 )
 
 # Compress the current directory to a tar.gz file
 log "Compressing the current directory to a tar.gz file"
-CURRENT_DIR="${DATA_ROOT}/${CURRENT}"
-TAR_FILE="${DATA_ROOT}/${ENV_NAME}_${CURRENT_DATETIME}.tar.gz"
+CURRENT_DIR="${FUSEKI_INDEX_DIR}/${CURRENT}"
+TAR_FILE="${FUSEKI_INDEX_DIR}/${ENV_NAME}_${CURRENT_DATETIME}.tar.gz"
 
-tar -czf "$TAR_FILE" -C "$DATA_ROOT" "$VERSION" \
+tar -czf "$TAR_FILE" -C "$FUSEKI_INDEX_DIR" "$VERSION" \
   || { log "Failed to create tar file for $CURRENT_DIR" >&2; exit 2; }
 log "Compressed tar file created: $TAR_FILE"
 
 # Copy the .tar.gz file to the target directory
-log "Copying $TAR_FILE to $TARGET_DIR"
-cp "$TAR_FILE" "$TARGET_DIR" || { log "Failed to copy $TAR_FILE to $TARGET_DIR" >&2; exit 2; }
-log "File successfully copied to $TARGET_DIR"
+log "Copying $TAR_FILE to $PIPELINE_DATA_DIR"
+cp "$TAR_FILE" "$PIPELINE_DATA_DIR" || { log "Failed to copy $TAR_FILE to $PIPELINE_DATA_DIR" >&2; exit 2; }
+log "File successfully copied to $PIPELINE_DATA_DIR"
 
 log "All files processed and import complete"
