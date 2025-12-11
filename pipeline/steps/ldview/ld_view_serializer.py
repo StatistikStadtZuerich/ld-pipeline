@@ -1,11 +1,10 @@
 import os
-from abc import ABC
 
 from .ld_view_model import View
 from ...base import Environment
 
 
-class LdViewSerializer(ABC):
+class LdViewSerializer:
     def __init__(self, environment: Environment):
         self._environment = environment
 
