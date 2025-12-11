@@ -141,4 +141,8 @@ if __name__ == "__main__":
     __config = Environment(Env(__args.env), __args.config)
 
     configure_logging(__config)
-    run_pipeline(__config)
+    try:
+        run_pipeline(__config)
+    except Exception as e:
+        logging.fatal("Unexpected Error while running pipeline", exc_info=e)
+        exit(1)
