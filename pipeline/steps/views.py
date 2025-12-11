@@ -25,6 +25,7 @@ class ViewsStep(Step):
 
         folderpath = environment.config.get("template_output_path")
         folderpath_ldviews = os.path.join(folderpath, "ldviews")
+        os.makedirs(folderpath_ldviews, exist_ok=True)
         uniqid = str(uuid.uuid4())
         now = datetime.now()
         timestamp = now.strftime("%Y%m%d%H%M%S")
@@ -32,8 +33,8 @@ class ViewsStep(Step):
         filepath_dest = os.path.join(folderpath, filename_dest)
         with gzip.open(filepath_dest, "wb") as gz_file:
             for filename in os.listdir(folderpath_ldviews):
-                self.logger.info(f"Zipping {filename} ...")
                 if filename.endswith(".ttl"):
+                    self.logger.info(f"Zipping {filename} ...")
                     file_path = os.path.join(folderpath_ldviews, filename)
                     with open(file_path, "rb") as ttl_file:
                         shutil.copyfileobj(ttl_file, gz_file)
