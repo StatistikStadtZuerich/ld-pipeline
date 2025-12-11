@@ -28,6 +28,12 @@ class Environment(Base):
         else:
             return "TEST"
 
+    def view_name(self, view_name: str) -> str:
+        if self._env.upper() in ["PROD", "DEV"]:
+            return view_name
+        else:
+            return f"{view_name}_{self._env}"
+
     def get_db_connection(self) -> DbConnection:
         """
         Returns the db connection for the environment
