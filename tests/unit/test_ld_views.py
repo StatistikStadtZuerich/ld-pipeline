@@ -34,12 +34,12 @@ class TestLdViews(unittest.TestCase):
         }
 
     def _mock_database_query(self, query_name, view_id):
-        if query_name == "view_vb_view_test":
+        if query_name == "view_vb_view":
             return [
                 self._mock_view_props("WIR100OD100A"),
                 self._mock_view_props("WIR100OD100B"),
             ]
-        elif query_name == "view_vb_source_test":
+        elif query_name == "view_vb_source":
             return [
                 {
                     "cube_id": "000610",
@@ -52,12 +52,12 @@ class TestLdViews(unittest.TestCase):
                     "view_id": view_id,
                 },
             ]
-        elif query_name == "view_vb_filter_test":
+        elif query_name == "view_vb_filter":
             return [
                 {"termset": "KreiseZH", "dimension": "RAUM", "view_id": view_id},
                 {"termset": "Jahr", "dimension": "ZEIT", "view_id": view_id},
             ]
-        elif query_name == "view_vb_dimension_test":
+        elif query_name == "view_vb_dimension":
             return [
                 {
                     "identifier": "HTY",
@@ -66,7 +66,7 @@ class TestLdViews(unittest.TestCase):
                     "view_id": view_id,
                 }
             ]
-        elif query_name == "view_vb_measure_test":
+        elif query_name == "view_vb_measure":
             return [
                 {
                     "identifier": "HAE",
@@ -85,13 +85,13 @@ class TestLdViews(unittest.TestCase):
                     "view_id": view_id,
                 },
             ]
-        elif query_name == "view_vb_room_hierarchy_test":
+        elif query_name == "view_vb_room_hierarchy":
             return [
                 {"termset": "KreiseZH", "dimension": "RAUM", "view_id": view_id},
                 {"termset": "QuartiereZH", "dimension": "RAUM", "view_id": view_id},
             ]
         else:
-            raise Exception(f"query {query_name} not properly mocked for test")
+            raise AssertionError(f"query {query_name} not properly mocked for test")
 
     def test_view_building(self):
         self.maxDiff = None
