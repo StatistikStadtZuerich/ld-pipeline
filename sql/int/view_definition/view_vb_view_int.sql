@@ -14,7 +14,6 @@ SELECT
 	t.SASA_Job_Output_Id AS alt_name,
 	t.Lieferant AS metadata_creator,
 	FORMAT(CAST(t.Erstmalige_Veroeffentlichung AS DATE), 'yyyy-MM-dd') AS issued,
-    FORMAT(CAST(t.Aktualisierungsdatum AS DATE), 'yyyy-MM-dd') AS modified,
     t.Aktualisierungsintervall AS accrual_periodicity,
     t.Raeumliche_Beziehung AS spatial,
     4 AS publisher,

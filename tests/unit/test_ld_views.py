@@ -24,7 +24,6 @@ class TestLdViews(unittest.TestCase):
             "accrual_periodicity": None,
             "spatial": None,
             "issued": None,
-            "modified": None,
             "publisher": None,
             "theme": None,
             "keyword": None,

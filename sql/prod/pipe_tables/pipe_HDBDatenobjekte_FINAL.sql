@@ -9,7 +9,6 @@ SELECT
     Raeumliche_Beziehung,
     Lieferant,
     Erstmalige_Veroeffentlichung,
-    Aktualisierungsdatum,
     Schlagworte,
     Aktuelle_Version,
     Bemerkungen,

@@ -78,7 +78,6 @@ class ViewMetadata(TypedDict):
     accrual_periodicity: str
     spatial: str
     issued: str
-    modified: str
     publisher: str
     theme: str
     keyword: str
