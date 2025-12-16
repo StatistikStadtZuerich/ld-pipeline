@@ -11,7 +11,6 @@
     <http://purl.org/dc/terms/accrualPeriodicity> {{ view.metadata.accrual_periodicity|literal_encode }} ;
     <http://purl.org/dc/terms/spatial> {{ view.metadata.spatial|literal_encode }} ;
     {% if view.metadata.issued|is_valid_date  %}<http://purl.org/dc/terms/issued> {{ view.metadata.issued|literal_encode }}^^<http://www.w3.org/2001/XMLSchema#date>;{% endif %}
-    <http://purl.org/dc/terms/modified> {{ view.metadata.modified|literal_encode }} ;
     <http://purl.org/dc/terms/publisher> <https://ld.stadt-zuerich.ch/statistics/meta/org/{{ view.metadata.publisher|uri_encode }}> ;
     <http://www.w3.org/ns/dcat#theme> {{ view.metadata.theme|literal_encode }} ;
     <http://www.w3.org/ns/dcat#keyword> {{ view.metadata.keyword|literal_encode }} ;

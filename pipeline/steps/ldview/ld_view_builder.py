@@ -235,7 +235,6 @@ class LdViewBuilder(Base):
             accrual_periodicity=view_dict["accrual_periodicity"],
             spatial=view_dict["spatial"],
             issued=view_dict["issued"],
-            modified=view_dict["modified"],
             publisher=view_dict["publisher"],
             theme=view_dict["theme"],
             keyword=view_dict["keyword"],

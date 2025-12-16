@@ -10,7 +10,6 @@
     <https://ld.stadt-zuerich.ch/schema/metadataCreator> "None" ;
     <http://purl.org/dc/terms/accrualPeriodicity> "None" ;
     <http://purl.org/dc/terms/spatial> "None" ;
-    <http://purl.org/dc/terms/modified> "None" ;
     <http://purl.org/dc/terms/publisher> <https://ld.stadt-zuerich.ch/statistics/meta/org/None> ;
     <http://www.w3.org/ns/dcat#theme> "None" ;
     <http://www.w3.org/ns/dcat#keyword> "None" ;
