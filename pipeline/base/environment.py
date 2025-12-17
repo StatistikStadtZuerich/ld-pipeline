@@ -32,7 +32,7 @@ class Environment(Base):
         if self._env.upper() in ["PROD", "DEV"]:
             return view_name
         else:
-            return f"{view_name}_{self._env}"
+            return f"{view_name}_{self.name}"
 
     def get_db_connection(self) -> DbConnection:
         """
