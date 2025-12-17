@@ -22,9 +22,14 @@ class Step(Base):
 
 
 class StepDefinition:
-    def __init__(self, step: Step, description: str = ""):
+    def __init__(self, name: str, step: Step, description: str = ""):
+        self._name = name
         self._step = step
         self._description = description
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def step(self):

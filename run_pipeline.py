@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 import main
+from pipeline import Pipeline
 from pipeline.base import Utils, Env, Environment
 
 
@@ -21,13 +22,21 @@ def run_pipeline(env: Environment):
         )
         return
 
+    options_batching = {
+        "db_batch_size": 100000,
+        "write_batch_size": 600000,
+        "max_iteration": None,
+    }
+    step_definitions = main.get_step_definitions(env, options_batching)
+    pipeline = Pipeline(env, step_definitions)
+
     # Update pipe tables
-    main.step(name="initPipeTables", env=env)
-    main.step(name="copyHDBToPipeTables", env=env)
-    main.step(name="createViewsFromSQL", env=env)
+    pipeline.execute("initPipeTables")
+    pipeline.execute("copyHDBToPipeTables")
+    pipeline.execute("createViewsFromSQL")
 
     # Generate triple files
-    generate_triple_files(env=env)
+    generate_triple_files(pipeline=pipeline)
 
     # Create start signal to generate the Fuseki index
     logging.info("Create start signal to generate the Fuseki index")
@@ -35,7 +44,7 @@ def run_pipeline(env: Environment):
 
     # Write back the publication status to the HDB
     logging.info("Write back the publication status to the HDB")
-    main.step(name="writePublicationStatiToHDB", env=env)
+    pipeline.execute("writePublicationStatiToHDB")
 
     # Set finish signal
     logging.debug("Set Finish-Signal for pipeline")
@@ -43,7 +52,7 @@ def run_pipeline(env: Environment):
     logging.info("Pipeline is finished.")
 
 
-def generate_triple_files(env: Environment):
+def generate_triple_files(pipeline: Pipeline):
     triple_types_metadata = [
         "code",
         "cube",
@@ -59,17 +68,12 @@ def generate_triple_files(env: Environment):
     triple_types_observations = ["observation"]
     triple_types_others = ["copyStatic", "buildTermsetHierarchy", "generateViews"]
 
-    options_batching = {
-        "db_batch_size": 100000,
-        "write_batch_size": 600000,
-        "max_iteration": None,
-    }
     for name in triple_types_metadata:
-        main.step(name=f"{name}Templating", env=env, options=options_batching)
+        pipeline.execute(f"{name}Templating")
     for name in triple_types_observations:
-        main.step(name=f"{name}Templating", env=env, options=options_batching)
+        pipeline.execute(f"{name}Templating")
     for name in triple_types_others:
-        main.step(name=name, env=env)
+        pipeline.execute(name)
 
 
 def configure_logging(env: Environment):

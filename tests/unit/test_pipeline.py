@@ -1,6 +1,6 @@
 import unittest
 from pipeline import Pipeline
-from pipeline.base import Environment, Env, Step
+from pipeline.base import Environment, Env, Step, StepDefinition
 
 
 class TestStep(Step):
@@ -25,10 +25,13 @@ class TestPipeline(unittest.TestCase):
     """
 
     def test_run(self):
-        step = TestStep()
-        pipeline = Pipeline(Env.test)
+        step = StepDefinition(
+            "test",
+            TestStep(),
+        )
+        pipeline = Pipeline(Environment(Env.test), {})
         pipeline.run(step, step, step)
-        self.assertEqual(3, step.count)
+        self.assertEqual(3, step.step.count)
 
 
 if __name__ == "__main__":
