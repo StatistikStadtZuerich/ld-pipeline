@@ -66,7 +66,7 @@ def generate_triple_files(pipeline: Pipeline):
         "time",
     ]
     triple_types_observations = ["observation"]
-    triple_types_others = ["copyStatic", "buildTermsetHierarchy", "generateViews"]
+    triple_types_others = ["copyStatic", "buildTermsetHierarchy", "buildGroupHierarchy", "generateViews"]
 
     for name in triple_types_metadata:
         pipeline.execute(f"{name}Templating")
