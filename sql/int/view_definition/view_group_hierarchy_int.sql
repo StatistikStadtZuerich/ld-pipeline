@@ -1,8 +1,3 @@
-DROP VIEW IF EXISTS dbo.view_group_hierarchy_int;
-GO
-
-CREATE VIEW dbo.view_group_hierarchy_int AS
-
 WITH hierarchy AS (
     SELECT  
         r.Gruppe,
@@ -35,9 +30,9 @@ SELECT
 FROM hierarchy l4
 LEFT JOIN hierarchy l3 ON l3.parentcode = l4.gruppencode 
     AND l3.parent_level = 3 
-LEFT JOIN hierarchy l2 ON l2.parentcode IN (l3.gruppencode, l4.gruppencode)
+LEFT JOIN hierarchy l2 ON (l2.parentcode = l3.gruppencode or (l2.parentcode = l4.gruppencode and l2.gruppencode=l3.gruppencode))
     AND l2.parent_level = 2 
-LEFT JOIN hierarchy l1 ON l1.parentcode IN (l2.gruppencode, l3.gruppencode, l4.gruppencode)
+LEFT JOIN hierarchy l1 ON (l1.parentcode = l2.gruppencode or (l1.parentcode = l3.gruppencode and l1.gruppencode=l2.gruppencode) or (l1.parentcode = l4.gruppencode and l1.gruppencode=l3.gruppencode))
     AND l1.parent_level = 1 
 WHERE l4.parent_level = 4
     AND l1.gruppencode IS NOT NULL
