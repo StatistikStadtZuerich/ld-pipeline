@@ -202,6 +202,16 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 "Creates triples from the view_room_hierarchy data with the raum_hierarchy.ttl template",
             ),
             StepDefinition(
+                "buildGroupHierarchy",
+                BuildTermsetHierarchy(
+                    "raum_hierarchy.ttl.jinja",
+                    "termset_group_hierarchy.ttl",
+                    f"./sql/{env_name}/view_access/view_group_hierarchy.sql",
+                    options=options,
+                ),
+                "Creates triples from the view_group_hierarchy data with the group_hierarchy.ttl template",
+            ),
+            StepDefinition(
                 "writePublicationStatiToHDB",
                 WritePublicationStatiToHDB(),
                 "Write publication stati back to the HDB",
