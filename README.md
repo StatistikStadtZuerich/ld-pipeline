@@ -1,6 +1,6 @@
-# LD Pipeline 2024
+# LD Pipeline
 
-"LD Pipeline 2024" is a redevelopment of the existing pipeline, focusing on
+"LD Pipeline" (_fka "LD Pipeline 2024"_) is a redevelopment of the existing pipeline, focusing on
 improving flexibility, efficiency and scalability. This project involves
 extracting data from the Harmonized Database (HDB), converting it into triples,
 and then transferring it into an RDF database.
@@ -22,8 +22,8 @@ Follow these steps to set up your development environment:
 
 1. Clone the repository:
 
-   1. `git clone https://github.com/StatistikStadtZuerich/ld-pipeline-2024.git`
-   2. `cd ld-pipeline-2024`
+   1. `git clone https://cmp-sdlc.stzh.ch/OE-7035/ssz-lod/ld-pipeline.git`
+   2. `cd ld-pipeline`
 
 2. It is recommended to use a virtual environment.
 
