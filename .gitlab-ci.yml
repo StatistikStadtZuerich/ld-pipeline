@@ -12,11 +12,6 @@ stages:
   - package
   - publish
 
-cache:
-  key: "pip-$CI_JOB_IMAGE"
-  paths:
-    - .cache/pip/
-
 generate-version:
   extends: .determine-build-version
   stage: prepare
@@ -26,6 +21,10 @@ python-test:
   image: ${DOCKER_HUB_PROXY}library/python:3.12
   needs:
     - generate-version
+  cache:
+    - key: "pip-$CI_JOB_IMAGE"
+      paths:
+        - .cache/pip/
   before_script:
     - mkdir -p reports
     - python -c "import sys; print(sys.version)"
