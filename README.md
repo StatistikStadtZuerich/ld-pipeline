@@ -92,3 +92,9 @@ _HINT_: be sure to use only _local_, _int_ or _prod_ as environment within docke
 4. Linter
    - Run `ruff check` to lint all files in the current directory
    - Run `ruff format` to format all files in the current directory
+
+## License
+
+This project is licensed under the Apache License 2.0 (Apache-2.0).
+See the `LICENSE` file for details.
+
