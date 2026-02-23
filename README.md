@@ -5,6 +5,8 @@ improving flexibility, efficiency and scalability. This project involves
 extracting data from the Harmonized Database (HDB), converting it into triples,
 and then transferring it into an RDF database.
 
+The pipeline code is developed on GitLab and mirrored on GitHub.
+
 ## Getting Started
 
 These instructions will help you get a copy of the project up and running on your
