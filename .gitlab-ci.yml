@@ -10,11 +10,7 @@ stages:
   - prepare
   - test
   - package
-
-cache:
-  key: "pip-$CI_JOB_IMAGE"
-  paths:
-    - .cache/pip/
+  - publish
 
 generate-version:
   extends: .determine-build-version
@@ -23,6 +19,12 @@ generate-version:
 python-test:
   stage: test
   image: ${DOCKER_HUB_PROXY}library/python:3.12
+  needs:
+    - generate-version
+  cache:
+    - key: "pip-$CI_JOB_IMAGE"
+      paths:
+        - .cache/pip/
   before_script:
     - mkdir -p reports
     - python -c "import sys; print(sys.version)"
@@ -47,6 +49,27 @@ python-test:
     reports:
       junit: reports/unittest-results.xml
       codequality: reports/code-quality-report.json
+
+sync-to-github:
+  stage: publish
+  needs:
+    - job: python-test
+      artifacts: false
+  rules:
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+      when: on_success
+    - when: never
+  image: ${DOCKER_HUB_PROXY}alpine/git:latest
+  before_script:
+    - git config --global http.proxy ${DEV_PROXY}
+  script:
+    - git checkout ${CI_COMMIT_BRANCH}
+    - git pull --ff-only origin ${CI_COMMIT_BRANCH}
+    - git remote add github https://${GITHUB_USER}:${GITHUB_TOKEN}@${GITHUB_REMOTE}
+    - git push --force --follow-tags github ${CI_COMMIT_BRANCH}:${CI_COMMIT_BRANCH}
+  variables:
+    GIT_STRATEGY: fetch
+    GIT_DEPTH: "0"
 
 # If you want the integration tests like in the GitHub Actions workflow, enable this job:
 # python-integration-test:
