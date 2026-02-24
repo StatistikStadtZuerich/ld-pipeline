@@ -55,13 +55,14 @@ class TestLdViews(unittest.TestCase):
             return [
                 {"termset": "KreiseZH", "dimension": "RAUM", "view_id": view_id},
                 {"termset": "Jahr", "dimension": "ZEIT", "view_id": view_id},
+                {"termset": "EigentuemerLevel1Cd", "dimension": "EIG", "view_id": view_id},
             ]
         elif query_name == "view_vb_dimension":
             return [
                 {
-                    "identifier": "HTY",
-                    "name": "Haushaltstyp",
-                    "description": "Haushaltstyp nach Haushaltstyp 1",
+                    "identifier": "EIG",
+                    "name": "Eigentümerart",
+                    "description": "Eigentümerart",
                     "view_id": view_id,
                 }
             ]
@@ -88,6 +89,9 @@ class TestLdViews(unittest.TestCase):
             return [
                 {"termset": "KreiseZH", "dimension": "RAUM", "view_id": view_id},
                 {"termset": "QuartiereZH", "dimension": "RAUM", "view_id": view_id},
+                {"termset": "EigentuemerLevel4Cd", "dimension": "EIG", "view_id": view_id},
+                {"termset": "EigentuemerLevel3Cd", "dimension": "EIG", "view_id": view_id},
+                {"termset": "EigentuemerLevel2Cd", "dimension": "EIG", "view_id": view_id},
             ]
         else:
             raise AssertionError(f"query {query_name} not properly mocked for test")
@@ -130,8 +134,8 @@ class TestLdViews(unittest.TestCase):
             ).read()
             expected_content2 = expected_content.replace("WIR100OD100A", "WIR100OD100B")
 
-            self.assertEqual(expected_content, content)
-            self.assertEqual(expected_content2, content2)
+            self.assertEqual(expected_content.strip(), content.strip())
+            self.assertEqual(expected_content2.strip(), content2.strip())
 
         finally:
             shutil.rmtree(tmp_dir)
