@@ -10,4 +10,4 @@ FROM
 	pipe_HDBDatenobjekte_TEST t
 CROSS APPLY STRING_SPLIT(t.Raum_Hierarchie, ';')
 WHERE
-	CHARINDEX(value, t.Filter) = 0;
+	CHARINDEX(value, t.RaumFilter) = 0;

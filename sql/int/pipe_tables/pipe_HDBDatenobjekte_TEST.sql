@@ -22,7 +22,8 @@ SELECT
     Zeit_Hierarchie,
     Dimension_Hierarchie,
     CubeIDs,
-    Filter,
+    RaumFilter,
+    DimensionFilter,
     Datenowner,
     Datenqualitaet
 INTO dbo.pipe_HDBDatenobjekte_TEST

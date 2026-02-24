@@ -152,6 +152,17 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 "Creates triples from the view_time data with the time.ttl template",
             ),
             StepDefinition(
+                "timeTermsetTemplating",
+                create_templating(
+                    env,
+                    "time_termset.ttl.jinja",
+                    "time_termset.ttl",
+                    f"./sql/{env_name}/view_access/view_time_termset_relation.sql",
+                    options=options,
+                ),
+                "Creates triples for time termset relations",
+            ),
+            StepDefinition(
                 "compressing",
                 Compressing(),
                 "Compresses all triple files to gzip files",
@@ -226,6 +237,7 @@ def run(environment: Environment):
         steps["propertyTemplating"].step,
         steps["roomTemplating"].step,
         steps["timeTemplating"].step,
+        steps["timeTermsetTemplating"].step,
         steps["compressing"].step,
         # steps["uploadToStardog"].step,
         steps["initPipeTables"].step,
