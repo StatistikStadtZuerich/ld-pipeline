@@ -15,11 +15,10 @@ UNION ALL
 
 SELECT
     t.SASA_Job_Output_Id AS view_id,
-    SUBSTRING(t.RaumFilter,1, CHARINDEX(' ', t.RaumFilter) -1) AS termset,
+    t.RaumFilter AS termset,
     'Raum' AS dimension
 FROM
     dbo.pipe_HDBDatenobjekte_TEST t
-WHERE CHARINDEX(' ', t.RaumFilter) > 0 
 
 union all
 
@@ -30,4 +29,4 @@ SELECT
 FROM
     dbo.pipe_HDBDatenobjekte_TEST t
 CROSS APPLY STRING_SPLIT(t.Zeit_Hierarchie, '|')
-WHERE CHARINDEX('|', value) > 0;
+WHERE CHARINDEX('|', t.Zeit_Hierarchie) > 0;
