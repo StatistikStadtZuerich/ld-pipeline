@@ -253,7 +253,7 @@ class LdViewBuilder(Base):
         return Source(name=source_dict["name"], cube_id=source_dict["cube_id"])
 
     def _create_filter_from_dict(
-            self, filter_dict: dict, dim_list: List
+        self, filter_dict: dict, dim_list: List
     ) -> Tuple[Optional[Filter], Optional[LookupDimension]]:
         basic_dimension = next(
             (d for d in dim_list if d.identifier == filter_dict["dimension"].upper()),

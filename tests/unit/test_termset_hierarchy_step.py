@@ -8,7 +8,7 @@ from pipeline.steps import BuildTermsetHierarchy
 from tests.unit.utils import TestUtils
 
 
-'''
+"""
 A query like this generated the hierarchy we need (in this case for EIG)
 
 PREFIX schema: <https://schema.org/>
@@ -31,7 +31,9 @@ SELECT DISTINCT ?r0 ?f0 ?r1 ?f1 ?r2 ?f2 ?r3 ?f3 WHERE {
     }
   }
 }
-'''
+"""
+
+
 class TestTermsetHierarchyStep(unittest.TestCase):
     def test_templating(self):
         tmp_dir = TestUtils.abs_path("tmp")
