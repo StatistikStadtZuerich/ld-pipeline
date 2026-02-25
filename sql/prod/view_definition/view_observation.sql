@@ -5,6 +5,7 @@ GO
 CREATE VIEW dbo.view_observation
 AS
 
+WITH base_data AS (
 SELECT
     h_filter.GESAMTCODE AS gesamtcode,
     REPLACE(REPLACE(TRIM(h_filter.CUBEID), 'CID_', ''), ' ', ',') AS cube_ids,
@@ -150,5 +151,30 @@ WHERE
 	AND
 	h.PUBLIKATIONSSTATUS = 'veröffentlicht'
 	AND
-	h.CUBEID <> '';
+	h.CUBEID <> ''
+	)
+SELECT 
+    b.cube_ids,
+    b.measure,
+    b.value,
+    b.time_code,
+    b.[time],
+    --room_code durch die Codes in HDBRaumHistorisch ersetzen, wenn vorhanden
+    COALESCE(rh.LDID, b.room_code) AS room_code,
+    b.prop1_code_short,
+    b.prop1_code,
+    b.prop2_code_short,
+    b.prop2_code,
+    b.prop3_code_short,
+    b.prop3_code,
+    b.prop4_code_short,
+    b.prop4_code,
+    b.prop5_code_short,
+    b.prop5_code,
+    b.number_groups,
+    b.status,
+    b.modified
+FROM base_data b
+LEFT JOIN HDBRaumHistorisch rh ON rh.Code = b.room_code AND b.[time] BETWEEN ISNULL(rh.GueltigVon, '0001-01-01') AND rh.GueltigBis;
+
 GO
