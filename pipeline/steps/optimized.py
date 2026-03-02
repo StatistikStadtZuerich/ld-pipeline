@@ -31,5 +31,3 @@ def create_fuseki_uploader(environment: Environment) -> Step:
         return UploadToFusekiOptimized()
     else:
         return UploadToFuseki()
-
-

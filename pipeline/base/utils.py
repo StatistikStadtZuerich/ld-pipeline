@@ -92,4 +92,3 @@ class Utils(Base):
         with open(file_path, "w") as file:
             file.write(f"{datetime.now()}")
         self.logger.debug(f"Start signal '{file_name}' has been created.")
-
