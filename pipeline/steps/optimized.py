@@ -5,8 +5,6 @@ from .templating import Templating
 from .templating_optimized import TemplatingOptimized
 from .upload_to_fuseki import UploadToFuseki
 from .upload_to_fuseki_optimized import UploadToFusekiOptimized
-from .upload_to_stardog import UploadToStardog
-from .upload_to_stardog_optimized import UploadToStardogOptimized
 
 
 def _is_optimized(environment: Environment) -> bool:
@@ -35,8 +33,3 @@ def create_fuseki_uploader(environment: Environment) -> Step:
         return UploadToFuseki()
 
 
-def create_stardog_uploader(environment: Environment) -> Step:
-    if _is_optimized(environment):
-        return UploadToStardogOptimized()
-    else:
-        return UploadToStardog()

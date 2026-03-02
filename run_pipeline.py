@@ -58,7 +58,6 @@ def generate_triple_files(pipeline: Pipeline):
         "cube",
         "groupCode",
         "hierarchy",
-        # "legalFoundation",
         "measureUnit",
         "measure",
         "property",
