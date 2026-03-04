@@ -77,6 +77,12 @@ class WritePublicationStatiToHDB(Step):
                             c.RECORDSTATUS = 0
                         AND
                             c.CUBEID <> ''
+                        JOIN 
+                            Diffusionsereignisse d 
+                        ON 
+                            c.DiffusionsID = d.id
+                        WHERE 
+                            COALESCE(d.StartDate, '') <= GETDATE()
                 """
                 cursor.execute(query)
                 self.logger.info("done")
