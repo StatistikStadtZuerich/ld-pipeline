@@ -64,6 +64,8 @@ def generate_triple_files(pipeline: Pipeline):
         "property",
         "room",
         "time",
+        "timeTermset",
+        "dimensionTermset",
     ]
     triple_types_observations = ["observation"]
     triple_types_others = ["copyStatic", "buildTermsetHierarchy", "generateViews"]
