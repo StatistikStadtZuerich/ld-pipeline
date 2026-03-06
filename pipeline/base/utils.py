@@ -4,9 +4,6 @@ import os
 import shutil
 from datetime import datetime
 
-import pandas as pd
-import stardog
-
 from .base import Base
 from .environment import Environment
 
@@ -18,38 +15,6 @@ class Utils(Base):
         if cls._instance is None:
             cls._instance = super(Utils, cls).__new__(cls, *args, **kwargs)
         return cls._instance
-
-    def get_stardog_graph_uri(self, env: Environment):
-        return env.config.get("stardog_graph_uri")
-
-    def execute_sparql(self, query, environment: Environment):
-        cert_path = environment.config.get("stardog_cert_path")
-        stardog_database = environment.config.get("stardog_database")
-        stardog_endpoint = environment.config.get("stardog_endpoint")
-        stardog_username = environment.config.get("stardog_username")
-        stardog_password = environment.config.get("stardog_password")
-        os.environ["REQUESTS_CA_BUNDLE"] = cert_path
-        conn_details = {
-            "endpoint": stardog_endpoint,
-            "username": stardog_username,
-            "password": stardog_password,
-        }
-        results = None
-        try:
-            with stardog.Connection(stardog_database, **conn_details) as conn:
-                results = conn.select(query)
-        except Exception as e:
-            self.logger.error("An error occured: %s", e)
-            return None
-
-        df = None
-        if results:
-            data = []
-            for binding in results["results"]["bindings"]:
-                row = {var: binding[var]["value"] for var in results["head"]["vars"]}
-                data.append(row)
-            df = pd.DataFrame(data)
-        return df
 
     @staticmethod
     def start_signal_folder(env: Environment) -> str:
@@ -127,81 +92,3 @@ class Utils(Base):
         with open(file_path, "w") as file:
             file.write(f"{datetime.now()}")
         self.logger.debug(f"Start signal '{file_name}' has been created.")
-
-    def delete_stardog_triples(self, limit, environment: Environment):
-        stardog_graph_uri = self.get_stardog_graph_uri(environment)
-        cert_path = environment.config.get("stardog_cert_path")
-        os.environ["REQUESTS_CA_BUNDLE"] = cert_path
-        df = self.execute_sparql(
-            f"""
-            SELECT * FROM <{stardog_graph_uri}> WHERE {{
-                ?sub ?pred ?obj
-            }} LIMIT {limit}
-        """,
-            environment,
-        )
-        stardog_graph_uri = self.get_stardog_graph_uri(environment)
-        stardog_database = environment.config.get("stardog_database")
-        connection_details = {
-            "endpoint": environment.config.get("stardog_endpoint"),
-            "username": environment.config.get("stardog_username"),
-            "password": environment.config.get("stardog_password"),
-        }
-
-        with stardog.Connection(stardog_database, **connection_details) as connection:
-            connection.begin()
-            for index, row in df.iterrows():
-                sub = row["sub"]
-                pred = row["pred"]
-                obj = row["obj"]
-                if sub.startswith("http"):
-                    sub = f"<{sub}>"
-                else:
-                    sub = f'"{sub}"'
-                if pred.startswith("http"):
-                    pred = f"<{pred}>"
-                else:
-                    pred = f'"{pred}"'
-                if obj.startswith("http"):
-                    obj = f"<{obj}>"
-                else:
-                    obj = f'"{obj}"'
-
-                if sub.startswith('"'):
-                    sparql = f"""
-                        DELETE {{
-                            GRAPH <{stardog_graph_uri}> {{
-                                ?blankNode {pred} {obj}
-                            }}
-                        }}
-                        WHERE {{
-                            GRAPH <{stardog_graph_uri}> {{
-                                ?blankNode {pred} {obj} .
-                                FILTER(STR(?blankNode) = {sub})
-                            }}
-                        }}
-                    """
-                else:
-                    sparql = f"""
-                        DELETE WHERE {{
-                            GRAPH <{stardog_graph_uri}> {{
-                                {sub} {pred} {obj}
-                            }}
-                        }}
-            
-                    """
-
-                connection.update(sparql)
-            connection.commit()
-
-    def get_number_triples(self, environment: Environment):
-        stardog_graph_uri = self.get_stardog_graph_uri(environment)
-        df = self.execute_sparql(
-            f"""
-            SELECT (COUNT(*) AS ?triplesCount) FROM <{stardog_graph_uri}> WHERE {{
-                ?sub ?pred ?obj
-            }}
-        """,
-            environment,
-        )
-        return df["triplesCount"].iloc[0]

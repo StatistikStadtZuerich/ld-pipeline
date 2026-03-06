@@ -77,16 +77,6 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 "Creates triples from the view_hierarchy data with the hierarchy.ttl template",
             ),
             StepDefinition(
-                "legalFoundationTemplating",
-                create_templating(
-                    env,
-                    "legal_foundation.ttl.jinja",
-                    "legal_foundation.ttl",
-                    f"./sql/{env_name}/view_access/view_legal_foundation.sql",
-                    options=options,
-                ),
-            ),
-            StepDefinition(
                 "measureUnitTemplating",
                 create_templating(
                     env,
@@ -179,11 +169,6 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 "Compresses all triple files to gzip files",
             ),
             # StepDefinition(
-            #     "uploadToStardog",
-            #     create_stardog_uploader(env),
-            #     "Uploads all compressed gzip files to a configured stardog server",
-            # ),
-            # StepDefinition(
             #     "uploadToFuseki",
             #     create_fuseki_uploader(env),
             #     "Uploads all compressed gzip files to a configured fuseki server",
@@ -241,7 +226,6 @@ def run(environment: Environment):
         steps["cubeTemplating"].step,
         steps["groupCodeTemplating"].step,
         steps["hierarchyTemplating"].step,
-        steps["legalFoundationTemplating"].step,
         steps["measureUnitTemplating"].step,
         steps["measureTemplating"].step,
         steps["observationTemplating"].step,
@@ -251,7 +235,6 @@ def run(environment: Environment):
         steps["timeTermsetTemplating"].step,
         steps["dimensionTermsetTemplating"].step,
         steps["compressing"].step,
-        # steps["uploadToStardog"].step,
         steps["initPipeTables"].step,
         steps["copyHDBToPipeTables"].step,
         steps["InitPipeTables"].step,
