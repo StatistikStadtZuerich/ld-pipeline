@@ -57,10 +57,10 @@ CURRENT_DATETIME=$(date +"%Y%m%d%H%M%S")
 FINAL_COMBINED_FILE="$TMP_DIR/${ENV_NAME}_combined_${CURRENT_DATETIME}.ttl.gz"
 
 # Move all .gz files from the input to the temporary directory
+rm -rf "$TMP_DIR" && mkdir -p "$TMP_DIR"
 for FILE in "$INPUT_DIR"/*.gz; do
     if [ -r "$FILE" ]; then
         log "Moving $FILE to $TMP_DIR"
-        mkdir -p "$TMP_DIR"
         mv "$FILE" "$TMP_DIR/"
     else
         log "No readable .gz files found in $INPUT_DIR, skipping"
