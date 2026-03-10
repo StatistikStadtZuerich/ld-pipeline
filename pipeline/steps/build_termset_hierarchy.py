@@ -13,7 +13,10 @@ class BuildTermsetHierarchy(Templating):
         rows = []
         for x in range(1, 4):
             for y in range(0, x):
-                for relation in row[f"f{y}"].split(";"):
+                value = row.get(f"f{y}")
+                if not value:
+                    continue
+                for relation in value.split(";"):
                     rows.append(
                         {
                             "child_code": row[f"r{x}"],
