@@ -7,7 +7,7 @@ from pipeline.base import Env, StepDefinition, Environment
 from pipeline.steps import (
     Copy,
     Compressing,
-    CopyHDBToPipeTables,
+    #CopyHDBToPipeTables,
     BuildTermsetHierarchy,
     WritePublicationStatiToHDB,
     CreateViewsFromSQL,

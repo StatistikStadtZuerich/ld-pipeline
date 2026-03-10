@@ -1,7 +1,7 @@
 from .build_termset_hierarchy import BuildTermsetHierarchy
 from .compressing import Compressing
 from .copy import Copy
-from .copy_hdb_to_pipe_tables import CopyHDBToPipeTables
+#from .copy_hdb_to_pipe_tables import CopyHDBToPipeTables
 from .create_views_from_sql import CreateViewsFromSQL
 from .optimized import (
     create_templating,
