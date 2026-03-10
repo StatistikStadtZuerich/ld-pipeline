@@ -20,7 +20,7 @@ __all__ = [
     "Copy",
     "Compressing",
     "BuildTermsetHierarchy",
-    "CopyHDBToPipeTables",
+    # "CopyHDBToPipeTables",
     "CreateViewsFromSQL",
     "WritePublicationStatiToHDB",
     "Templating",

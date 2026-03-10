@@ -188,11 +188,11 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
             #     create_fuseki_uploader(env),
             #     "Uploads all compressed gzip files to a configured fuseki server",
             # ),
-            StepDefinition(
-                "copyHDBToPipeTables",
-                CopyHDBToPipeTables(),
-                "Copy HDB to pipe tables",
-            ),
+            # StepDefinition(
+            #    "copyHDBToPipeTables",
+            #    CopyHDBToPipeTables(),
+            #    "Copy HDB to pipe tables",
+            # ),
             StepDefinition(
                 "initPipeTables",
                 InitPipeTables(

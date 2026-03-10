@@ -55,7 +55,7 @@ class InitPipeTables(Step):
                         ]
 
                         self.logger.info(
-                            f"Executing {table.name} for pipe_{table.name.removesuffix('.sql')} ..."
+                            f"Executing {table.name} for {table.name.removesuffix('.sql')} ..."
                         )
 
                         for stmt in statements:
