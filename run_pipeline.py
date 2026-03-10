@@ -32,7 +32,7 @@ def run_pipeline(env: Environment):
 
     # Update pipe tables
     pipeline.execute("initPipeTables")
-    pipeline.execute("copyHDBToPipeTables")
+    # pipeline.execute("copyHDBToPipeTables")
     pipeline.execute("createViewsFromSQL")
 
     # Generate triple files
