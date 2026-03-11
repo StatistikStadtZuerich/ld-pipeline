@@ -65,6 +65,16 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 ),
             ),
             StepDefinition(
+                "groupTermsetTemplating",
+                create_templating(
+                    env,
+                    "group_termset.ttl.jinja",
+                    "group_termset.ttl",
+                    f"./sql/{env_name}/view_access/view_group_termset.sql",
+                    options=options,
+                ),
+            ),
+            StepDefinition(
                 "hierarchyTemplating",
                 create_templating(
                     env,
@@ -224,6 +234,7 @@ def run(environment: Environment):
         steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
         steps["groupCodeTemplating"].step,
+        steps["groupTermsetTemplating"].step,
         steps["hierarchyTemplating"].step,
         steps["measureUnitTemplating"].step,
         steps["measureTemplating"].step,
