@@ -6,8 +6,8 @@
     <https://schema.org/isPartOf> <https://ld.stadt-zuerich.ch/statistics/code/{{ part_of|uri_encode }}> ;
     <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/{{ term_group_code|uri_encode }}> ;
     {% if term_sets %}
-	    {% for term_set in term_sets.split(';') %}
-			<https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/{{ term_set|uri_encode }}> ;
+	  {% for term_set in term_sets.split(';') %}
+		<https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/{{ term_set|uri_encode }}> ;
 		{% endfor %}
-	{% endif %}
-    <https://schema.org/url> {{ url|literal_encode }} .
+	  {% endif %}
+    .
