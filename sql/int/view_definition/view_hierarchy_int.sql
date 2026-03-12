@@ -4,18 +4,13 @@ GO
 
 CREATE VIEW dbo.view_hierarchy_int AS
 SELECT DISTINCT
-    CASE 
-        WHEN ag.gruppe IS NOT NULL THEN REPLACE(t.GRUPPE, ag.gruppe, ag.origin)
-        ELSE t.GRUPPE
-    END AS term_group_code,
+    t.GRUPPE AS term_group_code,
 
-    UPPER(REPLACE(t.HIERARCHIE, '-', '')) AS term
+    UPPER(REPLACE(t.GRUPPENCODE, '-', '')) AS term,
 
-    --t.HIERARCHIE AS name
+    t.GRUPPENNAME AS name
     
 FROM
-    dbo.pipe_HDBHierarchien t
-    LEFT JOIN dbo.HDBAbgeleiteteGruppen ag
-        ON t.GRUPPE = ag.Gruppe
+    dbo.pipe_HDBGruppenliste t
 WHERE
-    t.HIERARCHIE <> '';
+    t.GRUPPE = t.ORIGIN;
