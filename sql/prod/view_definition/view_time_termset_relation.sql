@@ -1,8 +1,8 @@
-DROP VIEW IF EXISTS dbo.view_time_termset_relation_int;
+DROP VIEW IF EXISTS dbo.view_time_termset_relation;
 
 GO
 
-CREATE VIEW dbo.view_time_termset_relation_int AS
+CREATE VIEW dbo.view_time_termset_relation AS
 SELECT
     t.ZEIT AS term_code,
     REPLACE(UPPER(trim(value)),'-','') as termset_code,
