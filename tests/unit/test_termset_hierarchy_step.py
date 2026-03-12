@@ -66,6 +66,15 @@ class TestTermsetHierarchyStep(unittest.TestCase):
                 "f2": "QuartiereZH",
                 "r3": "R3Z004",
             },
+            {
+                "r0": "R30000",
+                "f0": "KantonZH; StadtZH",
+                "r1": "R10022",
+                "f1": "KreiseZH; WahlkreiseZH; StadtZHAlt",
+                "r2": "R00022",
+                "f2": "QuartiereZH",
+                "r3": None,
+            },
         ]
 
         sql_filepath = TestUtils.abs_path("data/sample.sql")
