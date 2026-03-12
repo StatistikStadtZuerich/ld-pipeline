@@ -1,8 +1,8 @@
-DROP VIEW IF EXISTS dbo.view_group_termset_int;
+DROP VIEW IF EXISTS dbo.view_group_termset;
 
 GO
 
-CREATE VIEW dbo.view_group_termset_int AS
+CREATE VIEW dbo.view_group_termset AS
 
 SELECT DISTINCT
     CASE 
