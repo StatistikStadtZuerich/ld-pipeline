@@ -64,6 +64,7 @@ def generate_triple_files(pipeline: Pipeline):
         "property",
         "room",
         "time",
+        "timeRelation",
         "timeTermset",
         "dimensionTermset",
     ]
