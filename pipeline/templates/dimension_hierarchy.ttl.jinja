@@ -1,4 +1,4 @@
-<https://ld.stadt-zuerich.ch/statistics/code/{{ child_code|uri_encode }}>;
+<https://ld.stadt-zuerich.ch/statistics/code/{{ child_code|uri_encode }}>
 {% for parent in parent_code.split(',') %}
 	 <https://schema.org/inDefinedTermSet>  <https://ld.stadt-zuerich.ch/statistics/termset/{{ parent|uri_encode }}>;
 {% endfor %}
