@@ -9,5 +9,4 @@ SELECT
 FROM
 	pipe_HDBDatenobjekte_FINAL t
 CROSS APPLY STRING_SPLIT(t.Raum_Hierarchie, ';')
-WHERE
-	CHARINDEX(value, t.Filter) = 0;
+;
