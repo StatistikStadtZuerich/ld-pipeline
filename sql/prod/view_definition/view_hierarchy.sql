@@ -9,9 +9,9 @@ SELECT DISTINCT
         ELSE t.GRUPPE
     END AS term_group_code,
 
-    REPLACE(t.HIERARCHIE, '-', '') AS term,
+    UPPER(REPLACE(t.HIERARCHIE, '-', '')) AS term
 
-    t.HIERARCHIE AS name
+    --t.HIERARCHIE AS name
     
 FROM
     dbo.pipe_HDBHierarchien t

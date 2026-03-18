@@ -12,6 +12,7 @@ SELECT
     GRUPPENCODESORT,
     GLOSSARID,
     LINK,
-    HIERARCHIE
+    HIERARCHIE,
+    ORIGIN
 INTO dbo.pipe_HDBGruppenliste
 FROM dbo.HDBGruppenliste;
