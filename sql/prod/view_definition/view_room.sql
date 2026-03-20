@@ -8,7 +8,7 @@ SELECT
     t.RaumLang AS title,
     t.RaumParent AS raum_parent,
     t.RaumParentLang AS raum_parent_lang,
-    t.WikidataURI AS same_as,
+    t.sameAs AS same_as,
     t.Beschreibung AS description,
     t.GueltigkeitsbereicheID AS available,
     t.RaumSort AS position,
