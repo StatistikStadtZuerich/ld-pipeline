@@ -2,7 +2,7 @@ DROP VIEW IF EXISTS dbo.view_vb_dimension_int;
 GO
 
 CREATE VIEW dbo.view_vb_dimension_int AS
-SELECT 
+SELECT DISTINCT
     t.SASA_Job_Output_Id AS view_id,
     h.GRUPPE AS identifier,
     h.Gruppenname AS name,
