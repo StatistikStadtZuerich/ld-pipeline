@@ -32,7 +32,7 @@ def run_pipeline(env: Environment):
 
     # Update pipe tables
     pipeline.execute("initPipeTables")
-    pipeline.execute("copyHDBToPipeTables")
+    # pipeline.execute("copyHDBToPipeTables")
     pipeline.execute("createViewsFromSQL")
 
     # Generate triple files
@@ -57,13 +57,15 @@ def generate_triple_files(pipeline: Pipeline):
         "code",
         "cube",
         "groupCode",
+        "groupTermset",
         "hierarchy",
-        # "legalFoundation",
         "measureUnit",
         "measure",
         "property",
         "room",
         "time",
+        "timeTermset",
+        "dimensionTermset",
     ]
     triple_types_observations = ["observation"]
     triple_types_others = ["copyStatic", "buildTermsetHierarchy", "generateViews"]

@@ -2,17 +2,17 @@ DROP VIEW IF EXISTS dbo.view_vb_dimension;
 GO
 
 CREATE VIEW dbo.view_vb_dimension AS
-SELECT 
+SELECT DISTINCT
     t.SASA_Job_Output_Id AS view_id,
     h.GRUPPE AS identifier,
-    h.SprechenderFeldname AS name,
-    h.Beschreibung AS description
+    h.Gruppenname AS name,
+    h.Gruppenname as description
 FROM 
     pipe_HDBDatenobjekte_FINAL t
 CROSS APPLY 
     STRING_SPLIT(t.DIMENSION_Hierarchie, ';') AS split_values
 JOIN 
-    pipe_HDBHierarchien h
+    pipe_HDBGruppenliste h
 ON 
     h.GRUPPE = LEFT(split_values.value, 3)
 AND

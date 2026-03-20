@@ -57,15 +57,23 @@ CURRENT_DATETIME=$(date +"%Y%m%d%H%M%S")
 FINAL_COMBINED_FILE="$TMP_DIR/${ENV_NAME}_combined_${CURRENT_DATETIME}.ttl.gz"
 
 # Move all .gz files from the input to the temporary directory
+rm -rf "$TMP_DIR" && mkdir -p "$TMP_DIR"
 for FILE in "$INPUT_DIR"/*.gz; do
     if [ -r "$FILE" ]; then
         log "Moving $FILE to $TMP_DIR"
-        mkdir -p "$TMP_DIR"
         mv "$FILE" "$TMP_DIR/"
     else
         log "No readable .gz files found in $INPUT_DIR, skipping"
     fi
 done
+
+# Validate all the input files
+RIOT_LOG="$TMP_DIR/riot.log"
+if ! "${JENA_DIR}/bin/riot" --validate "$TMP_DIR"/*.gz &>"$RIOT_LOG"; then
+  log "Invalid data-files, refuse to build fuseki-index"
+  cat "$RIOT_LOG"
+  exit 3
+fi
 
 # Combine all .gz files into a single .ttl file and then compress it into a single .gz file
 log "Combining all .gz files into a single gz file"

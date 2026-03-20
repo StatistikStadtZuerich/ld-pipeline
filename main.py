@@ -7,7 +7,6 @@ from pipeline.base import Env, StepDefinition, Environment
 from pipeline.steps import (
     Copy,
     Compressing,
-    CopyHDBToPipeTables,
     BuildTermsetHierarchy,
     WritePublicationStatiToHDB,
     CreateViewsFromSQL,
@@ -66,6 +65,16 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 ),
             ),
             StepDefinition(
+                "groupTermsetTemplating",
+                create_templating(
+                    env,
+                    "group_termset.ttl.jinja",
+                    "group_termset.ttl",
+                    f"./sql/{env_name}/view_access/view_group_termset.sql",
+                    options=options,
+                ),
+            ),
+            StepDefinition(
                 "hierarchyTemplating",
                 create_templating(
                     env,
@@ -75,16 +84,6 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     options=options,
                 ),
                 "Creates triples from the view_hierarchy data with the hierarchy.ttl template",
-            ),
-            StepDefinition(
-                "legalFoundationTemplating",
-                create_templating(
-                    env,
-                    "legal_foundation.ttl.jinja",
-                    "legal_foundation.ttl",
-                    f"./sql/{env_name}/view_access/view_legal_foundation.sql",
-                    options=options,
-                ),
             ),
             StepDefinition(
                 "measureUnitTemplating",
@@ -179,20 +178,15 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 "Compresses all triple files to gzip files",
             ),
             # StepDefinition(
-            #     "uploadToStardog",
-            #     create_stardog_uploader(env),
-            #     "Uploads all compressed gzip files to a configured stardog server",
-            # ),
-            # StepDefinition(
             #     "uploadToFuseki",
             #     create_fuseki_uploader(env),
             #     "Uploads all compressed gzip files to a configured fuseki server",
             # ),
-            StepDefinition(
-                "copyHDBToPipeTables",
-                CopyHDBToPipeTables(),
-                "Copy HDB to pipe tables",
-            ),
+            # StepDefinition(
+            #    "copyHDBToPipeTables",
+            #    CopyHDBToPipeTables(),
+            #    "Copy HDB to pipe tables",
+            # ),
             StepDefinition(
                 "initPipeTables",
                 InitPipeTables(
@@ -240,8 +234,8 @@ def run(environment: Environment):
         steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
         steps["groupCodeTemplating"].step,
+        steps["groupTermsetTemplating"].step,
         steps["hierarchyTemplating"].step,
-        steps["legalFoundationTemplating"].step,
         steps["measureUnitTemplating"].step,
         steps["measureTemplating"].step,
         steps["observationTemplating"].step,
@@ -251,7 +245,6 @@ def run(environment: Environment):
         steps["timeTermsetTemplating"].step,
         steps["dimensionTermsetTemplating"].step,
         steps["compressing"].step,
-        # steps["uploadToStardog"].step,
         steps["initPipeTables"].step,
         steps["copyHDBToPipeTables"].step,
         steps["InitPipeTables"].step,
