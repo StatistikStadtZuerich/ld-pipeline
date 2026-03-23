@@ -246,7 +246,7 @@ def run(environment: Environment):
         steps["dimensionTermsetTemplating"].step,
         steps["compressing"].step,
         steps["initPipeTables"].step,
-        steps["copyHDBToPipeTables"].step,
+        # steps["copyHDBToPipeTables"].step,
         steps["InitPipeTables"].step,
         steps["createViewsFromSQL"].step,
         # steps["uploadToFuseki"].step,
