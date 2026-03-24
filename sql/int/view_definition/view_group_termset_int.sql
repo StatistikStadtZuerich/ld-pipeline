@@ -11,7 +11,7 @@ SELECT DISTINCT
     END AS term_code,
   
     REPLACE(value, ' ', '') AS term_set_name,
-    UPPER(REPLACE(value, ' ', '')) AS term_set
+    UPPER(REPLACE(REPLACE(value, ' ', ''), '_', '')) AS term_set
  
 FROM dbo.pipe_HDBGruppenliste t
 LEFT JOIN dbo.HDBAbgeleiteteGruppen ag
