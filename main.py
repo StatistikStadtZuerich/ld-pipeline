@@ -37,7 +37,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
             StepDefinition(
                 "buildInfo",
                 BuildInfo(options=options),
-                "Builds the info.ttl file with the current build date and time"
+                "Builds the info.ttl file with the current build date and time",
             ),
             StepDefinition(
                 "codeTemplating",
