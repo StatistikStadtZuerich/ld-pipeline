@@ -13,6 +13,7 @@ SELECT
     GLOSSARID,
     LINK,
     HIERARCHIE,
-    ORIGIN
+    ORIGIN,
+    SAMEAS
 INTO dbo.pipe_HDBGruppenliste
 FROM dbo.HDBGruppenliste;
