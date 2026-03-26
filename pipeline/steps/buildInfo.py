@@ -15,7 +15,7 @@ class BuildInfo(Step):
     def run(self, environment: Environment):
         out_dir = environment.config.get("output_path")
         os.makedirs(out_dir, exist_ok=True)
-        out_file = os.path.join(out_dir, "info.n3")
+        out_file = os.path.join(out_dir, "info.ttl")
 
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         with open(out_file, "w") as f:

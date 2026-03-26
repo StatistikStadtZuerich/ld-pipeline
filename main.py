@@ -238,6 +238,7 @@ def run(environment: Environment):
     steps = get_step_definitions(environment)
     Pipeline(environment).run(
         steps["copyStatic"].step,
+        steps["buildInfo"].step,
         steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
         steps["groupCodeTemplating"].step,
