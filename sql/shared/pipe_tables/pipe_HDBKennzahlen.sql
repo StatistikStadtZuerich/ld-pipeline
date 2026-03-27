@@ -9,6 +9,7 @@ SELECT
     Einheit_Kurz,
     Einheit_URI,
     Methode,
-    Beschreibung
+    Beschreibung,
+    equivalentProperty
 INTO dbo.pipe_HDBKennzahlen
 FROM dbo.HDBKennzahlen;
