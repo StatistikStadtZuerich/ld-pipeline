@@ -1,0 +1,12 @@
+DROP VIEW IF EXISTS '{{ 'dbo.view_measure_unit' | view_name }}';
+
+GO
+
+CREATE VIEW '{{ 'dbo.view_measure_unit' | view_name }}' AS
+SELECT
+    t.KennzahlCode AS unit_code,
+    STRING_AGG(t.Kennzahlname, ', ') AS title
+FROM
+    '{{ 'dbo.pipe_HDBKennzahlen' | pipe_table_name }}' t
+GROUP BY
+    t.KennzahlCode;

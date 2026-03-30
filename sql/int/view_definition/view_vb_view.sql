@@ -1,7 +1,7 @@
-DROP VIEW IF EXISTS dbo.view_vb_view_int;
+DROP VIEW IF EXISTS 'dbo.view_vb_view_int';
 GO
 
-CREATE VIEW dbo.view_vb_view_int AS
+CREATE VIEW 'dbo.view_vb_view_int' AS
 SELECT
 	t.SASA_Job_Output_Id AS id,
 	t.Titel AS name,
@@ -23,6 +23,6 @@ SELECT
     t.Kategorie AS theme,
 	t.Datenqualitaet as dataquality
 FROM
-	dbo.pipe_HDBDatenobjekte_TEST t
+	'dbo.pipe_HDBDatenobjekte_TEST' t
 WHERE
 	t.CubeIDs IS NOT NULL;

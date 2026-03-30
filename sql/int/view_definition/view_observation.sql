@@ -1,8 +1,8 @@
-DROP VIEW IF EXISTS dbo.view_observation_int;
+DROP VIEW IF EXISTS 'dbo.view_observation_int';
 
 GO
 
-CREATE VIEW dbo.view_observation_int
+CREATE VIEW 'dbo.view_observation_int'
 AS
 
 WITH base_data AS (
@@ -65,14 +65,14 @@ SELECT
     --h_filter.REFERENZNUMMER AS reference_number,
     h_filter.DATENSTAND as modified
 
-FROM (SELECT * FROM dbo.pipe_HDB_TEST WHERE Publikationsstatus <> 'veröffentlicht') AS h_filter   
+FROM (SELECT * FROM 'dbo.pipe_HDB_TEST' WHERE Publikationsstatus <> 'veröffentlicht') AS h_filter
     LEFT JOIN HDBAbgeleiteteGruppen g1 ON g1.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 19, 3)
     LEFT JOIN HDBAbgeleiteteGruppen g2 ON g2.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 26, 3)
     LEFT JOIN HDBAbgeleiteteGruppen g3 ON g3.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 33, 3)
     LEFT JOIN HDBAbgeleiteteGruppen g4 ON g4.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 40, 3)
     LEFT JOIN HDBAbgeleiteteGruppen g5 ON g5.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 47, 3)
     LEFT JOIN HDBZeit z ON z.ZEIT = h_filter.ZEIT
-	LEFT JOIN dbo.Diffusionsereignisse d ON h_filter.DiffusionsID = d.id
+	LEFT JOIN 'dbo.Diffusionsereignisse' d ON h_filter.DiffusionsID = d.id
 WHERE
 	h_filter.RECORDSTATUS = '0'
 	AND
@@ -139,7 +139,7 @@ SELECT
     --h.REFERENZNUMMER AS reference_number,
     h.DATENSTAND as modified
 
-FROM dbo.pipe_HDB_TEST h
+FROM 'dbo.pipe_HDB_TEST' h
     LEFT JOIN HDBAbgeleiteteGruppen g1 ON g1.Gruppe = SUBSTRING(h.GESAMTCODE, 19, 3)
     LEFT JOIN HDBAbgeleiteteGruppen g2 ON g2.Gruppe = SUBSTRING(h.GESAMTCODE, 26, 3)
     LEFT JOIN HDBAbgeleiteteGruppen g3 ON g3.Gruppe = SUBSTRING(h.GESAMTCODE, 33, 3)

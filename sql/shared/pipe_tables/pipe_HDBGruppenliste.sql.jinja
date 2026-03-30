@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS dbo.pipe_HDBGruppenliste;
+DROP TABLE IF EXISTS '{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}';
 
 GO
 
@@ -14,5 +14,5 @@ SELECT
     LINK,
     HIERARCHIE,
     ORIGIN
-INTO dbo.pipe_HDBGruppenliste
-FROM dbo.HDBGruppenliste;
+INTO '{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}'
+FROM'{{ 'dbo.HDBGruppenliste' | table_name }}';

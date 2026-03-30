@@ -1,8 +1,8 @@
-DROP VIEW IF EXISTS dbo.view_time;
+DROP VIEW IF EXISTS 'dbo.view_time';
 
 GO
 
-CREATE VIEW dbo.view_time AS
+CREATE VIEW 'dbo.view_time' AS
 SELECT
     t.ZEIT AS term_code,
     ISNULL(CASE
@@ -16,4 +16,4 @@ SELECT
     ISNULL(t.PERIODESTART, '') AS "start_date",
     ISNULL(t.PERIODEENDE, '') AS "end_date"
 FROM
-    dbo.pipe_HDBZeit t;
+    'dbo.pipe_HDBZeit' t;

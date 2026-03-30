@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS '{{ 'dbo.pipe_HDBHierarchien' | pipe_table_name }}';
+
+GO
+
+SELECT
+    GRUPPE,
+    HIERARCHIE,
+    DWHName,
+    Beschreibung,
+    SprechenderFeldname,
+    Reihenfolge
+INTO '{{ 'dbo.pipe_HDBHierarchien' | pipe_table_name }}'
+FROM'{{ 'dbo.HDBHierarchien' | table_name }}';

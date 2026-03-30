@@ -1,4 +1,4 @@
-from typing import Dict, Self, Any
+from typing import Self, Any
 from abc import abstractmethod
 
 from ..base import Base
@@ -16,7 +16,7 @@ class ContextManager(Base):
 
 class DbConnection(ContextManager):
     @abstractmethod
-    def query(self, data: Dict):
+    def query(self, data: str):
         pass
 
     @abstractmethod

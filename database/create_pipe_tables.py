@@ -1,35 +1,22 @@
-import os
 import pathlib
-import time
 import re
-from os import PathLike
+import time
 from typing import List
 
-from pipeline.base import Step, Environment
+from database import BaseSQLStep
+from pipeline.base import Environment
 
 
-class InitPipeTables(Step):
+class InitPipeTables(BaseSQLStep):
     def __init__(self, sql_dirs: List[str]):
-        super().__init__()
-        self._sql_dirs = sql_dirs
-
-    @staticmethod
-    def _list_dir(path: str) -> List[PathLike]:
-        return [
-            pathlib.Path(os.path.join(path, f))
-            for f in os.listdir(path)
-            if f.endswith(".sql")
-        ]
+        super().__init__(sql_dirs)
 
     def run(self, environment: Environment, tables=None):
         start_time = time.time()
         self.logger.info(f"Initializing pipe tables for {environment.name.upper()} ...")
 
         if tables is None:
-            _x = []
-            for _sql_dir in self._sql_dirs:
-                _x.extend(self._list_dir(_sql_dir))
-            tables = _x
+            tables = self._get_sql_files()
         else:
             self.logger.info(f"Using provided table list: {tables}")
         self.logger.debug(environment)
@@ -46,7 +33,10 @@ class InitPipeTables(Step):
             try:
                 with connection.cursor() as cursor:
                     for table in tables:
-                        sql = table.read_text(encoding="utf-8")
+                        sql = self.render_sql_file(environment, table)
+                        if sql is None:
+                            self.logger.error(f"Invalid SQL file: {table}, skipping ...")
+                            continue
 
                         statements = [
                             s.strip()
@@ -55,7 +45,7 @@ class InitPipeTables(Step):
                         ]
 
                         self.logger.info(
-                            f"Executing {table.name} for {table.name.removesuffix('.sql')} ..."
+                            f"Executing {table.name}..."
                         )
 
                         for stmt in statements:
