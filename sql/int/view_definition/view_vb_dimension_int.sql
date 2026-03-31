@@ -15,6 +15,4 @@ JOIN
     pipe_HDBGruppenliste h
 ON 
     h.GRUPPE = LEFT(split_values.value, 3)
-AND
-    h.HIERARCHIE = SUBSTRING(split_values.value, 5, LEN(split_values.value) - 4)
 ;
