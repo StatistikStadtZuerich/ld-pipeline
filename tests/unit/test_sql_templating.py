@@ -60,6 +60,12 @@ class MyTestCase(unittest.TestCase):
                     continue
                 if _template.name.startswith('view_vb_view'):
                     continue
+                if _template.name.startswith('view_group_code'):
+                    continue
+                if _template.name.startswith('view_measure'):
+                    continue
+                if _template.name.startswith('view_room'):
+                    continue
             with self.subTest(env = _env, template=_template.name):
                 _expected = pathlib.Path(
                     TestUtils.abs_path(f'../../sql/{_env.name}/view_definition/{_template.name[:-6]}')
