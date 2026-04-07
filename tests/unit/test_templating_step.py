@@ -31,7 +31,7 @@ class TestTemplatingStep(unittest.TestCase):
         output_filename = "test_output.ttl"
 
         try:
-            Templating(template_filename, output_filename, sql_filepath).run(env)
+            Templating(template_filename, output_filename,"view_property", sql_filepath).run(env)
 
             env.get_db_connection().__enter__().query.assert_called_with(
                 open(sql_filepath).read()
