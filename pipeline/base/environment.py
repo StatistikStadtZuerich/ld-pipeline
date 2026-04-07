@@ -34,7 +34,7 @@ class Environment(Base):
 
     def table_name(self, table_name: str) -> str:
         match table_name.removeprefix("dbo.").removeprefix("pipe_"):
-            case "HDB" | "HDBDatenobjekte" :
+            case "HDB" | "HDBDatenobjekte":
                 # TODO: return self.pipe_table_name(table_name)
                 return f"{table_name}_{self.table_suffix}"
             case _:

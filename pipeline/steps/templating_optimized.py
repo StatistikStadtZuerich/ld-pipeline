@@ -164,10 +164,7 @@ class TemplatingOptimized(Step):
             with connection.cursor() as cursor:
                 like_conditions = ""
 
-                if (
-                    only_vb_cubes == "true"
-                    and tablename == f"view_observation_{env}"
-                ):
+                if only_vb_cubes == "true" and tablename == f"view_observation_{env}":
                     cursor.execute(
                         f"SELECT DISTINCT t.cube_id FROM view_vb_source_{env} t"
                     )

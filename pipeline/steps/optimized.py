@@ -21,10 +21,20 @@ def create_templating(
 ) -> Step:
     if _is_optimized(environment):
         return TemplatingOptimized(
-            template_filename, output_filename, view_or_table_name, sql_filepath, options
+            template_filename,
+            output_filename,
+            view_or_table_name,
+            sql_filepath,
+            options,
         )
     else:
-        return Templating(template_filename, output_filename, view_or_table_name, sql_filepath, options)
+        return Templating(
+            template_filename,
+            output_filename,
+            view_or_table_name,
+            sql_filepath,
+            options,
+        )
 
 
 def create_fuseki_uploader(environment: Environment) -> Step:

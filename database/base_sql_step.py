@@ -7,24 +7,27 @@ from jinja2 import Environment as JinjaEnv, FileSystemLoader, Template
 
 
 class BaseSQLStep(Step, ABC):
-
     def __init__(
-            self,
-            sql_dirs: List[str],
+        self,
+        sql_dirs: List[str],
     ):
         super().__init__()
         self._sql_dirs = sql_dirs
 
     def _get_sql_files(self) -> List[pathlib.Path]:
-        return sorted([
-            filepath
-            for path in self._sql_dirs
-            for pattern in ("*.sql", "*.sql.jinja")
-            for filepath in pathlib.Path(path).glob(pattern)
-        ])
+        return sorted(
+            [
+                filepath
+                for path in self._sql_dirs
+                for pattern in ("*.sql", "*.sql.jinja")
+                for filepath in pathlib.Path(path).glob(pattern)
+            ]
+        )
 
     @staticmethod
-    def render_sql_file(environment: Environment, input_file: pathlib.Path) -> str | None:
+    def render_sql_file(
+        environment: Environment, input_file: pathlib.Path
+    ) -> str | None:
         if input_file.suffix == ".sql":
             return input_file.read_text(encoding="utf-8")
         elif input_file.suffix == ".jinja":
@@ -33,7 +36,9 @@ class BaseSQLStep(Step, ABC):
             return None
 
     @staticmethod
-    def _create_jinja_engine(environment: Environment, template_file: pathlib.Path) -> Template:
+    def _create_jinja_engine(
+        environment: Environment, template_file: pathlib.Path
+    ) -> Template:
         _jinja = BaseSQLStep._init_jinja_env(environment)
         _jinja.loader = FileSystemLoader(template_file.parent.absolute().as_posix())
         return _jinja.get_template(template_file.name)
@@ -49,8 +54,8 @@ class BaseSQLStep(Step, ABC):
             trim_blocks=True,
             lstrip_blocks=True,
         )
-        _jinja.filters['pipe_table_name'] = environment.pipe_table_name
-        _jinja.filters['table_name'] = environment.table_name
-        _jinja.filters['view_name'] = environment.view_name
+        _jinja.filters["pipe_table_name"] = environment.pipe_table_name
+        _jinja.filters["table_name"] = environment.table_name
+        _jinja.filters["view_name"] = environment.view_name
 
         return _jinja

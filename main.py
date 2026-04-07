@@ -189,7 +189,11 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
             # ),
             StepDefinition(
                 "initPipeTables",
-                InitPipeTables(["./sql/shared/pipe_tables", ]),
+                InitPipeTables(
+                    [
+                        "./sql/shared/pipe_tables",
+                    ]
+                ),
                 "Initiate and define pipe tables",
             ),
             StepDefinition(

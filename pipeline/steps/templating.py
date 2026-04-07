@@ -13,7 +13,7 @@ class Templating(Step):
         output_filename: str,
         sql_view_name: str,
         sql_filepath: str | None = None,
-        options: Dict[str, Any] | None = None
+        options: Dict[str, Any] | None = None,
     ):
         super().__init__()
         self._template_filename = template_filename
@@ -47,7 +47,7 @@ class Templating(Step):
         with environment.get_db_connection() as connection:
             with connection.query(query) as cursor:
                 with environment.get_template_engine(
-                        self._template_filename, output_filepath
+                    self._template_filename, output_filepath
                 ) as template_engine:
                     self.logger.info(f"Started templating to {output_filepath}...")
                     for row in cursor:

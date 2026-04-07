@@ -35,7 +35,9 @@ class InitPipeTables(BaseSQLStep):
                     for table in tables:
                         sql = self.render_sql_file(environment, table)
                         if sql is None:
-                            self.logger.error(f"Invalid SQL file: {table}, skipping ...")
+                            self.logger.error(
+                                f"Invalid SQL file: {table}, skipping ..."
+                            )
                             continue
 
                         statements = [
@@ -44,9 +46,7 @@ class InitPipeTables(BaseSQLStep):
                             if s.strip()
                         ]
 
-                        self.logger.info(
-                            f"Executing {table.name}..."
-                        )
+                        self.logger.info(f"Executing {table.name}...")
 
                         for stmt in statements:
                             cursor.execute(stmt)

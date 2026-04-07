@@ -24,7 +24,8 @@ class WritePublicationStatiToHDB(Step):
                         WHERE TABLE_NAME = '{{ 'pipe_HDB' | pipe_table_name }}'
                         AND TABLE_SCHEMA = 'dbo'
                         AND COLUMN_NAME NOT IN ('hash')
-                        """)
+                        """,
+                    )
                 )
                 columns = cursor.fetchall()
                 column_names = [column["COLUMN_NAME"] for column in columns]
@@ -44,11 +45,12 @@ class WritePublicationStatiToHDB(Step):
                         GESAMTCODE nvarchar(60),
                         hash VARBINARY(16)
                     )
-                """)
+                """,
+                )
                 cursor.execute(query)
                 query = BaseSQLStep.render_sql(
                     environment,
-                   f"""
+                    f"""
                     INSERT INTO '{{ '#hash_HDB' | pipe_table_name }}' (GESAMTCODE, hash)
                     SELECT 
                         GESAMTCODE,
@@ -59,7 +61,8 @@ class WritePublicationStatiToHDB(Step):
                         h.RECORDSTATUS = '0'
                     AND
                         h.CUBEID <> ''
-                """)
+                """,
+                )
                 cursor.execute(query)
                 self.logger.info("done")
 
@@ -104,16 +107,18 @@ class WritePublicationStatiToHDB(Step):
     def _calculate_observation_hashes(self, environment: Environment, suffix):
         with environment.get_db_connection() as connection:
             with connection.cursor() as cursor:
-                cursor.execute(BaseSQLStep.render_sql(
-                    environment,
-                    """
+                cursor.execute(
+                    BaseSQLStep.render_sql(
+                        environment,
+                        """
                     SELECT COLUMN_NAME
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME = '{{ 'pipe_HDB' | pipe_table_name }}'
                       AND TABLE_SCHEMA = 'dbo'
                       AND COLUMN_NAME NOT IN ('hash')
                     """,
-                ))
+                    )
+                )
                 columns = cursor.fetchall()
                 column_names = [column["COLUMN_NAME"] for column in columns]
                 concat_expression = " + ".join(
