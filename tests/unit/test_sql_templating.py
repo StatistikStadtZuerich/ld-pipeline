@@ -7,7 +7,7 @@ from pipeline.steps import CreateViewsFromSQL
 from tests.unit.utils import TestUtils
 
 
-class MyTestCase(unittest.TestCase):
+class SqlScriptTemplatingTest(unittest.TestCase):
     _prod = Environment(Env.prod)
     _int = Environment(Env.int)
 
