@@ -68,7 +68,7 @@ class Environment(Base):
         self, template_filename: str, output_filepath: str
     ) -> JinjaTemplateEngine:
         """
-        Returns the template engine for the environment, the template file and the defined output
+        Returns the template engine for the environment, the template file, and the defined output
         :param template_filename: the template file that is used by the engine
         :param output_filepath: the output file where the templated data will be written in
         :return: a jinja template engine

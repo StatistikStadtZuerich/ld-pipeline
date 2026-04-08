@@ -32,7 +32,7 @@ SELECT
     END AS GueltigBis
 
 INTO '{{ 'dbo.pipe_HDBRaum' | pipe_table_name }}'
-FROM'{{ 'dbo.HDBRaum' | table_name }}' r
+FROM '{{ 'dbo.HDBRaum' | table_name }}' r
 
 UNION ALL
 
@@ -48,4 +48,4 @@ SELECT
     h.RaumHierarchie,
     h.GueltigVon,
     h.GueltigBis
-FROM'{{ 'dbo.HDBRaumHistorisch' | table_name }}' h;
+FROM '{{ 'dbo.HDBRaumHistorisch' | table_name }}' h;
