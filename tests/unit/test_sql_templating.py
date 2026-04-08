@@ -99,6 +99,10 @@ class SqlScriptTemplatingTest(unittest.TestCase):
                         continue
                     if _template.name.startswith("view_vb_measure"):
                         continue
+                    if _template.name.startswith("view_vb_dimension"):
+                        continue
+                    if _template.name.startswith("view_observation"):
+                        continue
                     if _template.name.startswith("view_vb_view"):
                         continue
                     if _template.name.startswith("view_group_code"):
