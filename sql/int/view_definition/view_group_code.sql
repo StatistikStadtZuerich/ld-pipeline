@@ -25,9 +25,10 @@ SELECT DISTINCT
         WHEN ag.gruppe IS NOT NULL THEN REPLACE(t.PARENTCODE, ag.gruppe, ag.origin)
         ELSE t.PARENTCODE
     END AS part_of,
+    sameAs,
  
     REPLACE(t.HIERARCHIE, ' ', '') AS term_sets_name,
-    UPPER(REPLACE(t.HIERARCHIE, ' ', '')) AS term_sets
+    UPPER(REPLACE(REPLACE(t.HIERARCHIE, ' ', ''), '_', '')) AS term_sets
  
 FROM 'dbo.pipe_HDBGruppenliste' t
 LEFT JOIN 'dbo.HDBAbgeleiteteGruppen' ag

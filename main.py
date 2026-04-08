@@ -6,12 +6,14 @@ from pipeline import Pipeline
 from pipeline.base import Env, StepDefinition, Environment
 from pipeline.steps import (
     Copy,
+    BuildInfo,
     Compressing,
     BuildTermsetHierarchy,
     WritePublicationStatiToHDB,
     CreateViewsFromSQL,
     create_templating,
 )
+
 from pipeline.steps.views import ViewsStep
 from database import InitPipeTables
 
@@ -31,6 +33,11 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 "copyStatic",
                 Copy("./static/static.ttl", "static.ttl", options=options),
                 "Copies static.ttl files from /static to defined output folder",
+            ),
+            StepDefinition(
+                "buildInfo",
+                BuildInfo(options=options),
+                "Builds the info.ttl file with the current build date and time",
             ),
             StepDefinition(
                 "codeTemplating",
@@ -230,6 +237,7 @@ def run(environment: Environment):
     steps = get_step_definitions(environment)
     Pipeline(environment).run(
         steps["copyStatic"].step,
+        steps["buildInfo"].step,
         steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
         steps["groupCodeTemplating"].step,

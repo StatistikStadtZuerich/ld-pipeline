@@ -16,6 +16,7 @@ SELECT
             CHAR(13), ' '
         ), 
         CHAR(10), ' '
-    ), '"', '') AS description
+    ), '"', '') AS description,
+	equivalentProperty
 FROM
 	'dbo.pipe_HDBKennzahlen' t;
