@@ -83,7 +83,11 @@ class TestTermsetHierarchyStep(unittest.TestCase):
 
         try:
             BuildTermsetHierarchy(
-                template_filename, output_filename, sql_filepath, {"env": "test"}
+                template_filename,
+                output_filename,
+                "view_property",
+                sql_filepath,
+                {"env": "test"},
             ).run(env)
 
             env.get_db_connection().__enter__().query.assert_called_with(
