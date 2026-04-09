@@ -7,7 +7,7 @@ SELECT
     SUBSTRING(value, CHARINDEX('|', value) + 1, LEN(value)) AS termset,
     SUBSTRING(value, 1, CHARINDEX('|', value) - 1) AS dimension
 FROM
-    pipe_HDBDatenobjekte_TEST
+    pipe_HDBDatenobjekte_FINAL
 CROSS APPLY STRING_SPLIT(Dimension_Hierarchie, ';')
 WHERE CHARINDEX('|', value) > 0 
 
