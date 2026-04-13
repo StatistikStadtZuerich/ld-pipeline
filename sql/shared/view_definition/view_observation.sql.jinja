@@ -141,7 +141,7 @@ SELECT
     h.DATENSTAND as modified
 
 FROM [{{ 'dbo.pipe_HDB' | pipe_table_name }}] h
-    {#- FIXME: Sind das auch zusätzliche Tabellen die wir beachten müssen? #}
+    {# FIXME: Sind das auch zusätzliche Tabellen die wir beachten müssen? #}
     LEFT JOIN [{{ 'HDBAbgeleiteteGruppen' | table_name }}] g1 ON g1.Gruppe = SUBSTRING(h.GESAMTCODE, 19, 3)
     LEFT JOIN [{{ 'HDBAbgeleiteteGruppen' | table_name }}] g2 ON g2.Gruppe = SUBSTRING(h.GESAMTCODE, 26, 3)
     LEFT JOIN [{{ 'HDBAbgeleiteteGruppen' | table_name }}] g3 ON g3.Gruppe = SUBSTRING(h.GESAMTCODE, 33, 3)

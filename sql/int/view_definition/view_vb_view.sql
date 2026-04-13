@@ -25,4 +25,5 @@ SELECT
 FROM
 	[dbo].[pipe_HDBDatenobjekte_TEST] t
 WHERE
-	t.CubeIDs IS NOT NULL;
+	t.CubeIDs IS NOT NULL
+	and FORMAT(CAST(t.Erstmalige_Veroeffentlichung AS DATE), 'yyyy-MM-dd') <= getdate();

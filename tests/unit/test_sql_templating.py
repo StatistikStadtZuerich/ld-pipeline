@@ -1,5 +1,7 @@
+import difflib
 import pathlib
-import unittest
+import re
+import pytest
 
 from database import InitPipeTables
 from pipeline.base import Environment, Env
@@ -7,11 +9,11 @@ from pipeline.steps import CreateViewsFromSQL
 from tests.unit.utils import TestUtils
 
 
-class SqlScriptTemplatingTest(unittest.TestCase):
+class TestSqlScriptTemplating:
     _prod = Environment(Env.prod)
     _int = Environment(Env.int)
 
-    def test_pipe_HDB(self):
+    def test_pipe_hdb(self):
         ## Test INT rendering
         _step = InitPipeTables([])
         _int_sql = _step.render_sql_file(
@@ -26,7 +28,7 @@ class SqlScriptTemplatingTest(unittest.TestCase):
                 TestUtils.abs_path("../../sql/shared/pipe_tables/pipe_HDB.sql.jinja")
             ),
         )
-        self.assertEqual(_int_sql, _int_rendered, "INT SQL does not match expected SQL")
+        assert _int_sql == _int_rendered, "INT SQL does not match expected SQL"
 
         _prod_sql = _step.render_sql_file(
             self._prod,
@@ -40,11 +42,9 @@ class SqlScriptTemplatingTest(unittest.TestCase):
                 TestUtils.abs_path("../../sql/shared/pipe_tables/pipe_HDB.sql.jinja")
             ),
         )
-        self.assertEqual(
-            _prod_sql, _prod_rendered, "PROD SQL does not match expected SQL"
-        )
+        assert _prod_sql == _prod_rendered, "PROD SQL does not match expected SQL"
 
-    def test_pipe_HDBDatenobjekte(self):
+    def test_pipe_hdb_datenobjekte(self):
         ## Test INT rendering
         _step = InitPipeTables([])
         _int_sql = _step.render_sql_file(
@@ -63,7 +63,7 @@ class SqlScriptTemplatingTest(unittest.TestCase):
                 )
             ),
         )
-        self.assertEqual(_int_sql, _int_rendered, "INT SQL does not match expected SQL")
+        assert _int_sql == _int_rendered, "INT SQL does not match expected SQL"
 
         _prod_sql = _step.render_sql_file(
             self._prod,
@@ -81,56 +81,61 @@ class SqlScriptTemplatingTest(unittest.TestCase):
                 )
             ),
         )
-        self.assertEqual(
-            _prod_sql, _prod_rendered, "PROD SQL does not match expected SQL"
-        )
+        assert _prod_sql == _prod_rendered, "PROD SQL does not match expected SQL"
 
-    def test_view_definitions(self):
+    @staticmethod
+    def _get_view_definition_templates():
         _step = CreateViewsFromSQL(
             [TestUtils.abs_path("../../sql/shared/view_definition")]
         )
-        _templates = [f for f in _step._get_sql_files() if f.suffix == ".jinja"]
-        for _template in _templates:
-            for _env in [self._int, self._prod]:
-                if _env == self._prod:
-                    if _template.name.startswith("view_hierarchy"):
-                        continue
-                    if _template.name.startswith("view_room_hierarchy"):
-                        continue
-                    if _template.name.startswith("view_vb_measure"):
-                        continue
-                    if _template.name.startswith("view_vb_dimension"):
-                        continue
-                    if _template.name.startswith("view_observation"):
-                        continue
-                    if _template.name.startswith("view_vb_view"):
-                        continue
-                    if _template.name.startswith("view_group_code"):
-                        continue
-                    if _template.name.startswith("view_measure"):
-                        continue
-                    if _template.name.startswith("view_room"):
-                        continue
-                with self.subTest(env=_env, template=_template.name):
-                    _expected = pathlib.Path(
-                        TestUtils.abs_path(
-                            f"../../sql/{_env.name}/view_definition/{_template.name[:-6]}"
-                        )
-                    ).read_text(encoding="utf-8")
-                    _rendered = _step.render_sql_file(_env, _template)
-                    self.assertEqualIgnoreWhitespace(
-                        _expected,
-                        _rendered,
-                        f"{_env.name.upper()} SQL does not match expected SQL for {_template.name}",
-                    )
+        return [f for f in _step._get_sql_files() if f.suffix == ".jinja"]
 
-    def assertEqualIgnoreWhitespace(self, first: str, second: str, msg: str = None):
-        return self.assertEqual(
-            first.split(),
-            second.split(),
-            msg,
+    @pytest.mark.parametrize("template", _get_view_definition_templates(), ids=lambda t: t.name)
+    @pytest.mark.parametrize("env_name", [Env.int, Env.prod])
+    def test_view_definitions(self, env_name, template):
+        env = Environment(env_name)
+        _step = CreateViewsFromSQL(
+            [TestUtils.abs_path("../../sql/shared/view_definition")]
         )
 
+        _expected_path = pathlib.Path(
+            TestUtils.abs_path(
+                f"../../sql/{env.name}/view_definition/{template.name[:-6]}"
+            )
+        )
+        if not _expected_path.exists():
+            pytest.skip(f"Expected file {_expected_path} does not exist")
 
-if __name__ == "__main__":
-    unittest.main()
+        _expected = _expected_path.read_text(encoding="utf-8")
+        _rendered = _step.render_sql_file(env, template)
+        self.assert_sql_equal(
+            _expected,
+            _rendered,
+            f"{env.name.upper()} SQL does not match expected SQL for {template.name}",
+        )
+
+    @staticmethod
+    def assert_sql_equal(expected, actual, msg=""):
+        def normalize(sql: str) -> str:
+            sql = sql.replace('\r\n', '\n')  # Windows line endings
+            sql = sql.replace('\r', '\n')  # alte Mac line endings
+            sql = sql.strip('\ufeff')  # BOM
+            sql = re.sub(r'\n[ \t]+\n', '\n\n', sql)  # Leerzeilen mit Whitespace → echte Leerzeile
+            sql = re.sub(r'\n{3,}', '\n\n', sql)  # 3+ Leerzeilen → max. eine
+            return sql.strip()
+
+        _expected = normalize(expected)
+        _actual = normalize(actual)
+
+        if _expected == _actual:
+            return
+
+        diffs = difflib.unified_diff(
+                _expected.splitlines(keepends=True),
+                _actual.splitlines(keepends=True),
+                fromfile="expected",
+                tofile="actual",
+                n=2  # Zeilen Kontext
+            )
+        diff = "".join(diffs)
+        pytest.fail(f"{msg}\n{diff}")
