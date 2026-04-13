@@ -32,7 +32,7 @@ class TemplatingOptimized(Step):
         if self._sql_filepath is None:
             return BaseSQLStep.render_sql(
                 enviroment,
-                f"SELECT * FROM '{{ '{self._sql_view_name}' | view_name }}'",
+                f"SELECT * FROM [{{ '{self._sql_view_name}' | view_name }}]",
             )
         else:
             return BaseSQLStep.render_sql_file(

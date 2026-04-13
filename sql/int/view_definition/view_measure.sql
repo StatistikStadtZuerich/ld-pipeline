@@ -1,8 +1,8 @@
-DROP VIEW IF EXISTS 'dbo.view_measure_int';
+DROP VIEW IF EXISTS [dbo].[view_measure_int];
 
 GO
 
-CREATE VIEW 'dbo.view_measure_int' AS
+CREATE VIEW [dbo].[view_measure_int] AS
 SELECT
 	t.KennzahlCode AS measure_code,
 	t.Kennzahlname AS title,
@@ -19,4 +19,4 @@ SELECT
     ), '"', '') AS description,
 	equivalentProperty
 FROM
-	'dbo.pipe_HDBKennzahlen' t;
+	[dbo].[pipe_HDBKennzahlen] t;

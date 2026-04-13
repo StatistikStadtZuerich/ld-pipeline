@@ -1,8 +1,8 @@
-DROP VIEW IF EXISTS '{{ 'dbo.view_group_termset' | view_name }}';
+DROP VIEW IF EXISTS [{{ 'dbo.view_group_termset' | view_name }}];
 
 GO
 
-CREATE VIEW '{{ 'dbo.view_group_termset' | view_name }}' AS
+CREATE VIEW [{{ 'dbo.view_group_termset' | view_name }}] AS
 
 SELECT DISTINCT
     CASE 
@@ -13,8 +13,8 @@ SELECT DISTINCT
     REPLACE(value, ' ', '') AS term_set_name,
     UPPER(REPLACE(REPLACE(value, ' ', ''), '-', '')) AS term_set
  
-FROM '{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}' t
-LEFT JOIN '{{ 'dbo.HDBAbgeleiteteGruppen' | table_name }}' ag
+FROM [{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}] t
+LEFT JOIN [{{ 'dbo.HDBAbgeleiteteGruppen' | table_name }}] ag
     ON LEFT(t.GRUPPENCODE, 3) = ag.gruppe
     OR LEFT(t.GRUPPE, 3) = ag.gruppe
     OR LEFT(t.PARENTCODE, 3) = ag.gruppe

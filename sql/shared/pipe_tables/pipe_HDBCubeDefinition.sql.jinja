@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS '{{ 'dbo.pipe_HDBCubeDefinition' | pipe_table_name }}';
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBCubeDefinition' | pipe_table_name }}];
 
 GO
 
@@ -15,5 +15,5 @@ SELECT
     Gruppe6,
     Gruppe7,
     Gruppe8
-INTO '{{ 'dbo.pipe_HDBCubeDefinition' | pipe_table_name }}'
-FROM '{{ 'dbo.HDBCubeDefinition' | table_name }}';
+INTO [{{ 'dbo.pipe_HDBCubeDefinition' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBCubeDefinition' | table_name }}];

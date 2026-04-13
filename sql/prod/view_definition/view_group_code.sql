@@ -1,8 +1,8 @@
-DROP VIEW IF EXISTS 'dbo.view_group_code';
+DROP VIEW IF EXISTS [dbo].[view_group_code];
 
 GO
 
-CREATE VIEW 'dbo.view_group_code' AS
+CREATE VIEW [dbo].[view_group_code] AS
 
 SELECT DISTINCT
     CASE 
@@ -30,8 +30,8 @@ SELECT DISTINCT
     REPLACE(t.HIERARCHIE, ' ', '') AS term_sets_name,
     UPPER(REPLACE(t.HIERARCHIE, ' ', '')) AS term_sets
  
-FROM 'dbo.pipe_HDBGruppenliste' t
-LEFT JOIN 'dbo.HDBAbgeleiteteGruppen' ag
+FROM [dbo].[pipe_HDBGruppenliste] t
+LEFT JOIN [dbo].[HDBAbgeleiteteGruppen] ag
     ON LEFT(t.GRUPPENCODE, 3) = ag.gruppe
     OR LEFT(t.GRUPPE, 3) = ag.gruppe
     OR LEFT(t.PARENTCODE, 3) = ag.gruppe;

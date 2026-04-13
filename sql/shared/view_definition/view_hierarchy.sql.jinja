@@ -1,8 +1,8 @@
-DROP VIEW IF EXISTS '{{ 'dbo.view_hierarchy' | view_name }}';
+DROP VIEW IF EXISTS [{{ 'dbo.view_hierarchy' | view_name }}];
 
 GO
 
-CREATE VIEW '{{ 'dbo.view_hierarchy' | view_name }}' AS
+CREATE VIEW [{{ 'dbo.view_hierarchy' | view_name }}] AS
 SELECT DISTINCT
     t.GRUPPE AS term_group_code,
 
@@ -11,6 +11,6 @@ SELECT DISTINCT
     t.GRUPPENNAME AS name
     
 FROM
-    '{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}' t
+    [{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}] t
 WHERE
     t.GRUPPE = t.ORIGIN;

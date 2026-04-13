@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS '{{ 'dbo.pipe_HDBDatenobjekte' | pipe_table_name }}';
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBDatenobjekte' | pipe_table_name }}];
 
 SELECT
     ID,
@@ -26,5 +26,5 @@ SELECT
     DimensionFilter,
     Datenowner,
     Datenqualitaet
-INTO '{{ 'dbo.pipe_HDBDatenobjekte' | pipe_table_name }}'
-FROM '{{ 'dbo.HDBDatenobjekte' | table_name }}';
+INTO [{{ 'dbo.pipe_HDBDatenobjekte' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBDatenobjekte' | table_name }}];

@@ -1,8 +1,8 @@
-DROP VIEW IF EXISTS '{{ 'dbo.view_measure' | view_name }}';
+DROP VIEW IF EXISTS [{{ 'dbo.view_measure' | view_name }}];
 
 GO
 
-CREATE VIEW '{{ 'dbo.view_measure' | view_name }}' AS
+CREATE VIEW [{{ 'dbo.view_measure' | view_name }}] AS
 SELECT
 	t.KennzahlCode AS measure_code,
 	t.Kennzahlname AS title,
@@ -19,4 +19,4 @@ SELECT
     ), '"', '') AS description,
 	equivalentProperty
 FROM
-	'{{ 'dbo.pipe_HDBKennzahlen' | pipe_table_name }}' t;
+	[{{ 'dbo.pipe_HDBKennzahlen' | pipe_table_name }}] t;

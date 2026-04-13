@@ -1,13 +1,13 @@
-DROP VIEW IF EXISTS 'dbo.view_vb_filter_int';
+DROP VIEW IF EXISTS [dbo].[view_vb_filter_int];
 GO
 
-CREATE VIEW 'dbo.view_vb_filter_int' AS
+CREATE VIEW [dbo].[view_vb_filter_int] AS
 SELECT
     t.SASA_Job_Output_Id AS view_id,
     SUBSTRING(value, CHARINDEX('|', value) + 1, LEN(value)) AS termset,
     SUBSTRING(value, 1, CHARINDEX('|', value) - 1) AS dimension
 FROM
-    'dbo.pipe_HDBDatenobjekte_TEST' t
+    [dbo].[pipe_HDBDatenobjekte_TEST] t
 CROSS APPLY STRING_SPLIT(t.DimensionFilter, ';')
 WHERE CHARINDEX('|', value) > 0 
 
@@ -18,7 +18,7 @@ SELECT
     t.RaumFilter AS termset,
     'Raum' AS dimension
 FROM
-    'dbo.pipe_HDBDatenobjekte_TEST' t
+    [dbo].[pipe_HDBDatenobjekte_TEST] t
 
 union all
 
@@ -27,6 +27,6 @@ SELECT
     value AS termset,
     'Zeit' AS dimension
 FROM
-    'dbo.pipe_HDBDatenobjekte_TEST' t
+    [dbo].[pipe_HDBDatenobjekte_TEST] t
 CROSS APPLY STRING_SPLIT(t.Zeit_Hierarchie, '|')
 WHERE CHARINDEX('|', t.Zeit_Hierarchie) > 0;

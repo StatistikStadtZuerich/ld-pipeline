@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS '{{ 'dbo.pipe_HDBZeit' | pipe_table_name }}';
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBZeit' | pipe_table_name }}];
 
 GO
 
@@ -10,5 +10,5 @@ SELECT
     PERIODESTART,
     PERIODEENDE,
 	BEZUGSZEIT
-INTO '{{ 'dbo.pipe_HDBZeit' | pipe_table_name }}'
-FROM '{{ 'dbo.HDBZeit' | table_name }}';
+INTO [{{ 'dbo.pipe_HDBZeit' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBZeit' | table_name }}];

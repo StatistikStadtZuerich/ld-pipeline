@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS 'dbo.pipe_HDBDatenobjekte_TEST';
+DROP TABLE IF EXISTS [dbo].[pipe_HDBDatenobjekte_TEST];
 
 SELECT
     ID,
@@ -26,5 +26,5 @@ SELECT
     DimensionFilter,
     Datenowner,
     Datenqualitaet
-INTO 'dbo.pipe_HDBDatenobjekte_TEST'
-FROM 'dbo.HDBDatenobjekte_TEST';
+INTO [dbo].[pipe_HDBDatenobjekte_TEST]
+FROM [dbo].[HDBDatenobjekte_TEST];

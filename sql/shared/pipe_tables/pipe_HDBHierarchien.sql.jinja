@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS '{{ 'dbo.pipe_HDBHierarchien' | pipe_table_name }}';
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBHierarchien' | pipe_table_name }}];
 
 GO
 
@@ -9,5 +9,5 @@ SELECT
     Beschreibung,
     SprechenderFeldname,
     Reihenfolge
-INTO '{{ 'dbo.pipe_HDBHierarchien' | pipe_table_name }}'
-FROM '{{ 'dbo.HDBHierarchien' | table_name }}';
+INTO [{{ 'dbo.pipe_HDBHierarchien' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBHierarchien' | table_name }}];

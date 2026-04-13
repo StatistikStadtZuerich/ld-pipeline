@@ -21,7 +21,7 @@ class WritePublicationStatiToHDB(Step):
                         """
                         SELECT COLUMN_NAME
                         FROM INFORMATION_SCHEMA.COLUMNS
-                        WHERE TABLE_NAME = '{{ 'pipe_HDB' | pipe_table_name }}'
+                        WHERE TABLE_NAME = '{{ "pipe_HDB" | pipe_table_name(False, False) }}'
                         AND TABLE_SCHEMA = 'dbo'
                         AND COLUMN_NAME NOT IN ('hash')
                         """,
@@ -40,8 +40,8 @@ class WritePublicationStatiToHDB(Step):
                 query = BaseSQLStep.render_sql(
                     environment,
                     """
-                    DROP TABLE IF EXISTS '{{ '#hash_HDB' | pipe_table_name }}';
-                    CREATE TABLE '{{ '#hash_HDB' | pipe_table_name }}' (
+                    DROP TABLE IF EXISTS [{{ '#hash_HDB' | pipe_table_name }}];
+                    CREATE TABLE [{{ '#hash_HDB' | pipe_table_name }}] (
                         GESAMTCODE nvarchar(60),
                         hash VARBINARY(16)
                     )
@@ -51,12 +51,12 @@ class WritePublicationStatiToHDB(Step):
                 query = BaseSQLStep.render_sql(
                     environment,
                     f"""
-                    INSERT INTO '{{ '#hash_HDB' | pipe_table_name }}' (GESAMTCODE, hash)
+                    INSERT INTO [{{ '#hash_HDB' | pipe_table_name }}] (GESAMTCODE, hash)
                     SELECT 
                         GESAMTCODE,
                         HASHBYTES('MD5', CONVERT(VARBINARY(MAX), {concat_expression}))
                     FROM
-                        '{{ 'HDB' | table_name }}' h
+                        [{{ 'HDB' | table_name }}] h
                     WHERE
                         h.RECORDSTATUS = '0'
                     AND
@@ -76,15 +76,15 @@ class WritePublicationStatiToHDB(Step):
                             c.PUBLIKATIONSDATUM = GETDATE(),
                             c.GESAMTCODE_EXPORTIERT = 'Ja'
                         FROM 
-                            '{{ 'pipe_HDB' | pipe_table_name }}' a
+                            [{{ 'pipe_HDB' | pipe_table_name }}] a
                         JOIN 
-                            '{{ '#hash_HDB' | pipe_table_name }}' b
+                            [{{ '#hash_HDB' | pipe_table_name }}] b
                         ON
                             b.GESAMTCODE = a.GESAMTCODE
                         AND
                             b.hash = a.hash
                         JOIN 
-                            '{{ 'HDB' | table_name }}' c
+                            [{{ 'HDB' | table_name }}] c
                         ON
                             c.GESAMTCODE = a.GESAMTCODE
                         AND
@@ -92,7 +92,7 @@ class WritePublicationStatiToHDB(Step):
                         AND
                             c.CUBEID <> ''
                         JOIN 
-                            Diffusionsereignisse d 
+                            [{{ 'Diffusionsereignisse' | pipe_tble_name }}] d 
                         ON 
                             c.DiffusionsID = d.id
                         WHERE 
@@ -113,7 +113,7 @@ class WritePublicationStatiToHDB(Step):
                         """
                     SELECT COLUMN_NAME
                     FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_NAME = '{{ 'pipe_HDB' | pipe_table_name }}'
+                    WHERE TABLE_NAME = '{{ "pipe_HDB" | pipe_table_name(False, False) }}'
                       AND TABLE_SCHEMA = 'dbo'
                       AND COLUMN_NAME NOT IN ('hash')
                     """,
@@ -131,7 +131,7 @@ class WritePublicationStatiToHDB(Step):
                     environment,
                     f"""
                 UPDATE
-                    '{{ 'pipe_HDB' | pipe_table_name }}'
+                    [{{ 'pipe_HDB' | pipe_table_name }}]
                 SET
                     hash = HASHBYTES('MD5', CONVERT(VARBINARY(MAX), {concat_expression}))
                 """,

@@ -1,8 +1,8 @@
-DROP VIEW IF EXISTS 'dbo.view_room';
+DROP VIEW IF EXISTS [dbo].[view_room];
 
 GO
 
-CREATE VIEW 'dbo.view_room' AS
+CREATE VIEW [dbo].[view_room] AS
 SELECT
     t.Raum AS term_code,
     t.RaumLang AS title,
@@ -14,4 +14,4 @@ SELECT
     t.RaumSort AS position,
     REPLACE(t.RaumHierarchie, ' ', '') AS term_sets
 FROM
-	'dbo.pipe_HDBRaum' t;
+	[dbo].[pipe_HDBRaum] t;

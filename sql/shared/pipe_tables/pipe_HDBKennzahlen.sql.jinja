@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS '{{ 'dbo.pipe_HDBKennzahlen' | pipe_table_name }}';
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBKennzahlen' | pipe_table_name }}];
 
 GO
 
@@ -11,5 +11,5 @@ SELECT
     Methode,
     Beschreibung,
     equivalentProperty
-INTO '{{ 'dbo.pipe_HDBKennzahlen' | pipe_table_name }}'
-FROM '{{ 'dbo.HDBKennzahlen' | table_name }}';
+INTO [{{ 'dbo.pipe_HDBKennzahlen' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBKennzahlen' | table_name }}];

@@ -1,6 +1,6 @@
 import pathlib
 from abc import ABC
-from typing import List
+from typing import List, Callable
 
 from pipeline.base import Step, Environment
 from jinja2 import Environment as JinjaEnv, FileSystemLoader, Template
@@ -54,8 +54,21 @@ class BaseSQLStep(Step, ABC):
             trim_blocks=True,
             lstrip_blocks=True,
         )
-        _jinja.filters["pipe_table_name"] = environment.pipe_table_name
-        _jinja.filters["table_name"] = environment.table_name
-        _jinja.filters["view_name"] = environment.view_name
+        _jinja.filters["pipe_table_name"] = BaseSQLStep._fq_sql(environment.pipe_table_name)
+        _jinja.filters["table_name"] = BaseSQLStep._fq_sql(environment.table_name)
+        _jinja.filters["view_name"] = BaseSQLStep._fq_sql(environment.view_name)
 
         return _jinja
+
+    @staticmethod
+    def _fq_sql(delegate: Callable[..., str]) -> Callable[..., str]:
+        def wrapper(value: str, fqa: bool = True, square_brackets: bool = True) -> str:
+            parts = value.split('.')
+            if fqa and len(parts) == 1:
+                parts.insert(0, 'dbo')
+            parts[-1] = delegate(parts[-1])
+            if square_brackets:
+                return '].['.join(parts)
+            else:
+                return '.'.join(parts)
+        return wrapper

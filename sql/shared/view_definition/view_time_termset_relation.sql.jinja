@@ -1,12 +1,12 @@
-DROP VIEW IF EXISTS '{{ 'dbo.view_time_termset_relation' | view_name }}';
+DROP VIEW IF EXISTS [{{ 'dbo.view_time_termset_relation' | view_name }}];
 
 GO
 
-CREATE VIEW '{{ 'dbo.view_time_termset_relation' | view_name }}' AS
+CREATE VIEW [{{ 'dbo.view_time_termset_relation' | view_name }}] AS
 SELECT
     t.ZEIT AS term_code,
     REPLACE(UPPER(trim(value)),'-','') as termset_code,
     trim(value) as termset_name
 FROM
-    '{{ 'dbo.pipe_HDBZeit' | pipe_table_name }}' t
+    [{{ 'dbo.pipe_HDBZeit' | pipe_table_name }}] t
     CROSS APPLY STRING_SPLIT(t.BEZUGSZEIT, ';');
