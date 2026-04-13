@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS [{{ 'pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}];
+
+SELECT
+    GRUPPE,
+    ORIGIN
+INTO [{{ 'dbo.pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBAbgeleiteteGruppen' | table_name }}];

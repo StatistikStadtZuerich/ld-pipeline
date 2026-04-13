@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS [{{ 'pipe_HDBCubeLookup' | pipe_table_name }}];
+
+SELECT
+    CID,
+    CubeLookupKennzahl,
+    CubeLookupDimension,
+
+INTO [{{ 'dbo.pipe_HDBCubeLookup' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBCubeLookup' | table_name }}];

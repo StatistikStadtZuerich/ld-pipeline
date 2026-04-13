@@ -42,7 +42,7 @@ cleaned_lookup AS (
             ),
             'XXX'
         ) + '|' AS Cleaned_CubeLookupDimension
-    FROM [dbo].[HDBCubeLookup] h
+    FROM [dbo].[pipe_HDBCubeLookup] h
 )
 SELECT
     cs.view_id,
