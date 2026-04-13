@@ -8,11 +8,11 @@ SELECT DISTINCT
     h.Gruppenname AS name,
     h.Gruppenname as description
 FROM 
-    [dbo].[pipe_HDBDatenobjekte_TEST] t
+    [dbo].[pipe_HDBDatenobjekte_int] t
 CROSS APPLY 
     STRING_SPLIT(t.DIMENSION_Hierarchie, ';') AS split_values
 JOIN 
-    [dbo].[pipe_HDBGruppenliste] h
+    [dbo].[pipe_HDBGruppenliste_int] h
 ON 
     h.GRUPPE = LEFT(split_values.value, 3)
 ;

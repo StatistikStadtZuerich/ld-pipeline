@@ -8,4 +8,4 @@ SELECT
 	t.CODENAME AS title,
 	t.REFERENZTABELLE AS term_group_code
 FROM
-	[dbo].[pipe_HDBCodeliste] t;
+	[dbo].[pipe_HDBCodeliste_int] t;

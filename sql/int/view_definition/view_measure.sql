@@ -19,4 +19,4 @@ SELECT
     ), '"', '') AS description,
 	equivalentProperty
 FROM
-	[dbo].[pipe_HDBKennzahlen] t;
+	[dbo].[pipe_HDBKennzahlen_int] t;

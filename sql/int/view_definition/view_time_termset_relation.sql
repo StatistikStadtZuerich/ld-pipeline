@@ -8,5 +8,5 @@ SELECT
     REPLACE(UPPER(trim(value)),'-','') as termset_code,
     trim(value) as termset_name
 FROM
-    [dbo].[pipe_HDBZeit] t
+    [dbo].[pipe_HDBZeit_int] t
     CROSS APPLY STRING_SPLIT(t.BEZUGSZEIT, ';');

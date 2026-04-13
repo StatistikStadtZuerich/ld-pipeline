@@ -54,7 +54,9 @@ class BaseSQLStep(Step, ABC):
             trim_blocks=True,
             lstrip_blocks=True,
         )
-        _jinja.filters["pipe_table_name"] = BaseSQLStep._fq_sql(environment.pipe_table_name)
+        _jinja.filters["pipe_table_name"] = BaseSQLStep._fq_sql(
+            environment.pipe_table_name
+        )
         _jinja.filters["table_name"] = BaseSQLStep._fq_sql(environment.table_name)
         _jinja.filters["view_name"] = BaseSQLStep._fq_sql(environment.view_name)
 
@@ -63,12 +65,13 @@ class BaseSQLStep(Step, ABC):
     @staticmethod
     def _fq_sql(delegate: Callable[..., str]) -> Callable[..., str]:
         def wrapper(value: str, fqa: bool = True, square_brackets: bool = True) -> str:
-            parts = value.split('.')
+            parts = value.split(".")
             if fqa and len(parts) == 1:
-                parts.insert(0, 'dbo')
+                parts.insert(0, "dbo")
             parts[-1] = delegate(parts[-1])
             if square_brackets:
-                return '].['.join(parts)
+                return "].[".join(parts)
             else:
-                return '.'.join(parts)
+                return ".".join(parts)
+
         return wrapper

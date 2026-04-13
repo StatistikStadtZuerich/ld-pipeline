@@ -16,7 +16,8 @@ def test_upload_to_fuseki(mock_request_put):
 
     def generate_password(length: int = 16) -> str:
         alphabet = string.ascii_letters + string.digits + string.punctuation
-        return ''.join(secrets.choice(alphabet) for _ in range(length))
+        return "".join(secrets.choice(alphabet) for _ in range(length))
+
     password = generate_password()
 
     env = Environment(Env.test)

@@ -14,17 +14,17 @@ SELECT
 	c2.RaumHierarchie as f2,
 	c3."Raum" as r3
 FROM
-	[dbo].[pipe_HDBRaum] c0
+	[dbo].[pipe_HDBRaum_int] c0
 JOIN
-	[dbo].[pipe_HDBRaum] c1
+	[dbo].[pipe_HDBRaum_int] c1
 ON
 	c1."RaumParent" = c0."Raum"
 LEFT JOIN
-	[dbo].[pipe_HDBRaum] c2
+	[dbo].[pipe_HDBRaum_int] c2
 ON
 	c2."RaumParent" = c1."Raum"
 LEFT JOIN
-	[dbo].[pipe_HDBRaum] c3
+	[dbo].[pipe_HDBRaum_int] c3
 ON
 	c3."RaumParent" = c2."Raum"
 WHERE

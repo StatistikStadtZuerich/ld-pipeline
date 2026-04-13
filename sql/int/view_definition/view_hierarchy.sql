@@ -11,6 +11,6 @@ SELECT DISTINCT
     t.GRUPPENNAME AS name
     
 FROM
-    [dbo].[pipe_HDBGruppenliste] t
+    [dbo].[pipe_HDBGruppenliste_int] t
 WHERE
     t.GRUPPE = t.ORIGIN;

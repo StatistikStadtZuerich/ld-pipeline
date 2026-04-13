@@ -31,7 +31,7 @@ SELECT DISTINCT
     UPPER(REPLACE(REPLACE(t.HIERARCHIE, ' ', ''), '_', '')) AS term_sets
  
 FROM [{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}] t
-LEFT JOIN [{{ 'dbo.pipe_HDBAbgeleiteteGruppen' | table_name }}] ag
+LEFT JOIN [{{ 'dbo.pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] ag
     ON LEFT(t.GRUPPENCODE, 3) = ag.gruppe
     OR LEFT(t.GRUPPE, 3) = ag.gruppe
     OR LEFT(t.PARENTCODE, 3) = ag.gruppe;

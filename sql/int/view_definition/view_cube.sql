@@ -7,7 +7,7 @@ SELECT
 	t.cube_id,
 	d.titel AS title
 FROM
-	[dbo].[pipe_HDBCubeDefinition] d
+	[dbo].[pipe_HDBCubeDefinition_int] d
 JOIN
 	(SELECT
 	    REPLACE(VALUE, 'CID_', '') AS cube_id
@@ -16,7 +16,7 @@ JOIN
 			SELECT
 				h.CUBEID
 			FROM
-				[dbo].[pipe_HDB_TEST] h
+				[dbo].[pipe_HDB_int] h
 			WHERE h.RECORDSTATUS = '0'
 		) AS t
 	CROSS APPLY

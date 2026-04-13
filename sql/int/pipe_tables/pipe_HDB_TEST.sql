@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS [dbo].[pipe_HDB_TEST];
+DROP TABLE IF EXISTS [dbo].[pipe_HDB_int];
 
 SELECT
     GESAMTCODE,
@@ -15,5 +15,5 @@ SELECT
     DATENSTAND,
     PUBLIKATIONSSTATUS,
     DIFFUSIONSID
-INTO [dbo].[pipe_HDB_TEST]
+INTO [dbo].[pipe_HDB_int]
 FROM [dbo].[HDB_TEST];

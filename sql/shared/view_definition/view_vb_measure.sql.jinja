@@ -42,7 +42,7 @@ cleaned_lookup AS (
             ),
             'XXX'
         ) + '|' AS Cleaned_CubeLookupDimension
-    FROM [{{ 'dbo.pipe_HDBCubeLookup' | table_name }}] h
+    FROM [{{ 'dbo.pipe_HDBCubeLookup' | pipe_table_name }}] h
 )
 SELECT
     cs.view_id,

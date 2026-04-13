@@ -13,8 +13,8 @@ SELECT DISTINCT
     REPLACE(value, ' ', '') AS term_set_name,
     UPPER(REPLACE(REPLACE(value, ' ', ''), '-', '')) AS term_set
  
-FROM [dbo].[pipe_HDBGruppenliste] t
-LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen] ag
+FROM [dbo].[pipe_HDBGruppenliste_int] t
+LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
     ON LEFT(t.GRUPPENCODE, 3) = ag.gruppe
     OR LEFT(t.GRUPPE, 3) = ag.gruppe
     OR LEFT(t.PARENTCODE, 3) = ag.gruppe

@@ -14,4 +14,4 @@ SELECT
     t.RaumSort AS position,
     REPLACE(t.RaumHierarchie, ' ', '') AS term_sets
 FROM
-	[dbo].[pipe_HDBRaum] t;
+	[dbo].[pipe_HDBRaum_int] t;

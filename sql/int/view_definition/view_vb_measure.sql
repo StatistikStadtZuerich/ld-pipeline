@@ -17,7 +17,7 @@ WITH cleaned_source AS (
             ),
             'XXX'
         ) + '|' AS Cleaned_Dimension_Hierarchie
-    FROM [dbo].[pipe_HDBDatenobjekte_TEST] t
+    FROM [dbo].[pipe_HDBDatenobjekte_int] t
     CROSS APPLY OPENJSON(
         '["' + REPLACE(REPLACE(t.Kennzahl_GGH_STK_BEB, '"','\"'), ';','","') + '"]'
     ) AS j
@@ -42,7 +42,7 @@ cleaned_lookup AS (
             ),
             'XXX'
         ) + '|' AS Cleaned_CubeLookupDimension
-    FROM [dbo].[pipe_HDBCubeLookup] h
+    FROM [dbo].[pipe_HDBCubeLookup_int] h
 )
 SELECT
     cs.view_id,
@@ -55,10 +55,10 @@ FROM cleaned_source cs
 JOIN cleaned_lookup cl
     ON cs.raw_value = cl.CubeLookupKennzahlNorm
    AND cs.Cleaned_Dimension_Hierarchie = cl.Cleaned_CubeLookupDimension
-JOIN [dbo].[pipe_HDBCubeDefinition] c
+JOIN [dbo].[pipe_HDBCubeDefinition_int] c
     ON c.Kennzahl = LEFT(cs.raw_value, 3)
    AND c.CID = cl.CID
-JOIN [dbo].[pipe_HDBKennzahlen] h
+JOIN [dbo].[pipe_HDBKennzahlen_int] h
     ON h.KennzahlCode = LEFT(cs.raw_value, 3)
 JOIN [dbo].[view_vb_source_int] s
     ON s.view_id = cs.view_id

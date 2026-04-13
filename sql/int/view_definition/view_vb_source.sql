@@ -7,13 +7,13 @@ SELECT
 	t.cube_id,
 	c.Titel as name
 FROM
-	[dbo].[pipe_HDBCubeDefinition] c
+	[dbo].[pipe_HDBCubeDefinition_int] c
 JOIN
 	(SELECT
 		t.SASA_Job_output_id AS view_id,
 		REPLACE(LTRIM(RTRIM(value)), 'CID_', '') AS cube_id
 	FROM
-		[dbo].[pipe_HDBDatenobjekte_TEST] t
+		[dbo].[pipe_HDBDatenobjekte_int] t
 	CROSS APPLY
 		STRING_SPLIT(t.CubeIDs, ' ')) AS t
 ON

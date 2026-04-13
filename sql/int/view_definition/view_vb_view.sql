@@ -23,7 +23,7 @@ SELECT
     t.Kategorie AS theme,
 	t.Datenqualitaet as dataquality
 FROM
-	[dbo].[pipe_HDBDatenobjekte_TEST] t
+	[dbo].[pipe_HDBDatenobjekte_int] t
 WHERE
 	t.CubeIDs IS NOT NULL
 	and FORMAT(CAST(t.Erstmalige_Veroeffentlichung AS DATE), 'yyyy-MM-dd') <= getdate();

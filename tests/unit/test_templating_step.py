@@ -37,12 +37,8 @@ def test_templating():
             open(sql_filepath).read()
         )
 
-        content = open(
-            os.path.join(TestUtils.abs_path("tmp"), output_filename)
-        ).read()
-        expected_content = open(
-            TestUtils.abs_path("data/expected_content.ttl")
-        ).read()
+        content = open(os.path.join(TestUtils.abs_path("tmp"), output_filename)).read()
+        expected_content = open(TestUtils.abs_path("data/expected_content.ttl")).read()
         assert expected_content == content
 
     finally:
