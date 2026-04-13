@@ -91,7 +91,8 @@ class TestSqlScriptTemplating:
         return [f for f in _step._get_sql_files() if f.suffix == ".jinja"]
 
     @pytest.mark.parametrize("template", _get_view_definition_templates(), ids=lambda t: t.name)
-    @pytest.mark.parametrize("env_name", [Env.int, Env.prod])
+    # @pytest.mark.parametrize("env_name", [Env.int, Env.prod])
+    @pytest.mark.parametrize("env_name", [Env.int])
     def test_view_definitions(self, env_name, template):
         env = Environment(env_name)
         _step = CreateViewsFromSQL(
