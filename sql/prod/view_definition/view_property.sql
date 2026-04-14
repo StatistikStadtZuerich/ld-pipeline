@@ -7,4 +7,4 @@ SELECT DISTINCT
 	t.GRUPPE AS property_code,
 	t.GRUPPENNAME AS title
 FROM
-	[dbo].[pipe_HDBGruppenliste] t;
+	[dbo].[pipe_HDBGruppenliste_prod] t;

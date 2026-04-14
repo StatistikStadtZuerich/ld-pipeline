@@ -1,4 +1,6 @@
 DROP VIEW IF EXISTS [dbo].[view_room_hierarchy];
+GO
+DROP VIEW IF EXISTS [dbo].[view_room_hierarchy_int_old];
 
 GO
 
@@ -12,17 +14,17 @@ SELECT
 	c2.RaumHierarchie as f2,
 	c3."Raum" as r3
 FROM
-	[dbo].[pipe_HDBRaum] c0
+	[dbo].[pipe_HDBRaum_prod] c0
 JOIN
-	[dbo].[pipe_HDBRaum] c1
+	[dbo].[pipe_HDBRaum_prod] c1
 ON
 	c1."RaumParent" = c0."Raum"
 LEFT JOIN
-	[dbo].[pipe_HDBRaum] c2
+	[dbo].[pipe_HDBRaum_prod] c2
 ON
 	c2."RaumParent" = c1."Raum"
 LEFT JOIN
-	[dbo].[pipe_HDBRaum] c3
+	[dbo].[pipe_HDBRaum_prod] c3
 ON
 	c3."RaumParent" = c2."Raum"
 WHERE

@@ -101,8 +101,7 @@ class TestSqlScriptTemplating:
     @pytest.mark.parametrize(
         "template", _get_templates("view_definition"), ids=lambda t: t.name
     )
-    # @pytest.mark.parametrize("env_name", [Env.int, Env.prod])
-    @pytest.mark.parametrize("env_name", [Env.int])
+    @pytest.mark.parametrize("env_name", [Env.int, Env.prod])
     def test_view_definitions(self, env_name: Env, template: pathlib.Path):
         env = Environment(env_name)
         _step = CreateViewsFromSQL(
@@ -119,7 +118,7 @@ class TestSqlScriptTemplating:
                 f"""-- FIXME: This file was generated as placeholder.\n--   Verify that it's correct and remove this header.\n\n{_step.render_sql_file(env, template)}""",
                 encoding="utf-8",
             )
-            pytest.skip(
+            pytest.fail(
                 f"Expected file {_expected_path} does not exist, template generated"
             )
 
@@ -149,7 +148,7 @@ class TestSqlScriptTemplating:
                 f"""-- FIXME: This file was generated as placeholder.\n--   Verify that it's correct and remove this header.\n\n{_step.render_sql_file(env, template)}""",
                 encoding="utf-8",
             )
-            pytest.skip(
+            pytest.fail(
                 f"Expected file {_expected_path} does not exist, template generated"
             )
 
@@ -226,7 +225,6 @@ class TestSqlScriptTemplating:
     @staticmethod
     def assert_sql_equal(expected, actual, msg=""):
         def normalize(sql: str) -> str:
-            sql = sql + "\n"
             sql = sql.replace("\r\n", "\n")  # Windows line endings
             sql = sql.replace("\r", "\n")  # alte Mac line endings
             sql = sql.strip("\ufeff")  # BOM
@@ -248,6 +246,7 @@ class TestSqlScriptTemplating:
             fromfile="expected",
             tofile="actual",
             n=2,  # Zeilen Kontext
+            lineterm="\n",
         )
         diff = "".join(diffs)
         pytest.fail(f"{msg}\n{diff}")

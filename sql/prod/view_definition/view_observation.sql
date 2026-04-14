@@ -65,14 +65,14 @@ SELECT
     --h_filter.REFERENZNUMMER AS reference_number,
     h_filter.DATENSTAND as modified
 
-FROM (SELECT * FROM [dbo].[pipe_HDB_FINAL] WHERE Publikationsstatus <> 'veröffentlicht') AS h_filter
-    LEFT JOIN HDBAbgeleiteteGruppen g1 ON g1.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 19, 3)
-    LEFT JOIN HDBAbgeleiteteGruppen g2 ON g2.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 26, 3)
-    LEFT JOIN HDBAbgeleiteteGruppen g3 ON g3.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 33, 3)
-    LEFT JOIN HDBAbgeleiteteGruppen g4 ON g4.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 40, 3)
-    LEFT JOIN HDBAbgeleiteteGruppen g5 ON g5.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 47, 3)
-    LEFT JOIN HDBZeit z ON z.ZEIT = h_filter.ZEIT
-	LEFT JOIN [dbo].[Diffusionsereignisse] d ON h_filter.DiffusionsID = d.id
+FROM (SELECT * FROM [dbo].[pipe_HDB_prod] WHERE Publikationsstatus <> 'veröffentlicht') AS h_filter
+    LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g1 ON g1.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 19, 3)
+    LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g2 ON g2.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 26, 3)
+    LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g3 ON g3.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 33, 3)
+    LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g4 ON g4.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 40, 3)
+    LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g5 ON g5.Gruppe = SUBSTRING(h_filter.GESAMTCODE, 47, 3)
+    LEFT JOIN [dbo].[pipe_HDBZeit_prod] z ON z.ZEIT = h_filter.ZEIT
+	LEFT JOIN [dbo].[pipe_Diffusionsereignisse_prod] d ON h_filter.DiffusionsID = d.id
 WHERE
 	h_filter.RECORDSTATUS = '0'
 	AND
@@ -139,13 +139,13 @@ SELECT
     --h.REFERENZNUMMER AS reference_number,
     h.DATENSTAND as modified
 
-FROM [dbo].[pipe_HDB_FINAL] h
-    LEFT JOIN HDBAbgeleiteteGruppen g1 ON g1.Gruppe = SUBSTRING(h.GESAMTCODE, 19, 3)
-    LEFT JOIN HDBAbgeleiteteGruppen g2 ON g2.Gruppe = SUBSTRING(h.GESAMTCODE, 26, 3)
-    LEFT JOIN HDBAbgeleiteteGruppen g3 ON g3.Gruppe = SUBSTRING(h.GESAMTCODE, 33, 3)
-    LEFT JOIN HDBAbgeleiteteGruppen g4 ON g4.Gruppe = SUBSTRING(h.GESAMTCODE, 40, 3)
-    LEFT JOIN HDBAbgeleiteteGruppen g5 ON g5.Gruppe = SUBSTRING(h.GESAMTCODE, 47, 3)
-    LEFT JOIN HDBZeit z ON z.ZEIT = h.ZEIT
+FROM [dbo].[pipe_HDB_prod] h
+    LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g1 ON g1.Gruppe = SUBSTRING(h.GESAMTCODE, 19, 3)
+    LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g2 ON g2.Gruppe = SUBSTRING(h.GESAMTCODE, 26, 3)
+    LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g3 ON g3.Gruppe = SUBSTRING(h.GESAMTCODE, 33, 3)
+    LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g4 ON g4.Gruppe = SUBSTRING(h.GESAMTCODE, 40, 3)
+    LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g5 ON g5.Gruppe = SUBSTRING(h.GESAMTCODE, 47, 3)
+    LEFT JOIN [dbo].[pipe_HDBZeit_prod] z ON z.ZEIT = h.ZEIT
 WHERE
     h.RECORDSTATUS = '0'
 	AND
@@ -175,6 +175,6 @@ SELECT
     b.status,
     b.modified
 FROM base_data b
-LEFT JOIN HDBRaumHistorisch rh ON rh.Code = b.room_code AND b.[time] BETWEEN ISNULL(rh.GueltigVon, '0001-01-01') AND rh.GueltigBis;
+LEFT JOIN [dbo].[pipe_HDBRaumHistorisch_prod] rh ON rh.Code = b.room_code AND b.[time] BETWEEN ISNULL(rh.GueltigVon, '0001-01-01') AND rh.GueltigBis;
 
 GO

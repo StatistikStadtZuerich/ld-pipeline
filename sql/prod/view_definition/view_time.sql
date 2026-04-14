@@ -16,4 +16,4 @@ SELECT
     ISNULL(t.PERIODESTART, '') AS "start_date",
     ISNULL(t.PERIODEENDE, '') AS "end_date"
 FROM
-    [dbo].[pipe_HDBZeit] t;
+    [dbo].[pipe_HDBZeit_prod] t;

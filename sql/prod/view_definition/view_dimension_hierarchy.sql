@@ -10,7 +10,7 @@ WITH rekursiv AS (
         CAST(NULL AS VARCHAR(MAX)) AS Pfad,
         CAST(GRUPPENCODE AS VARCHAR(MAX)) AS besuchte_codes,
         0 AS Tiefe
-    FROM [dbo].[pipe_HDBGruppenliste]
+    FROM [dbo].[pipe_HDBGruppenliste_prod]
 
     UNION ALL
 
@@ -25,7 +25,7 @@ WITH rekursiv AS (
         CAST(r.besuchte_codes + ',' + p.GRUPPENCODE AS VARCHAR(MAX)),
         r.Tiefe + 1
     FROM rekursiv r
-    JOIN [dbo].[pipe_HDBGruppenliste] p
+    JOIN [dbo].[pipe_HDBGruppenliste_prod] p
         ON p.GRUPPENCODE = r.PARENTCODE
     WHERE r.PARENTCODE IS NOT NULL
     AND r.besuchte_codes NOT LIKE '%' + p.GRUPPENCODE + '%'

@@ -7,6 +7,6 @@ SELECT
 	value as termset,
 	'Raum' as dimension
 FROM
-	[dbo].[pipe_HDBDatenobjekte_FINAL] t
+	[dbo].[pipe_HDBDatenobjekte_prod] t
 CROSS APPLY STRING_SPLIT(t.Raum_Hierarchie, ';')
 ;
