@@ -28,7 +28,7 @@ class TestSqlScriptTemplating:
                 TestUtils.abs_path("../../sql/templates/pipe_tables/pipe_HDB.sql.jinja")
             ),
         )
-        self.assert_sql_equal(
+        TestUtils.assert_text_equals(
             _int_sql, _int_rendered, "INT SQL does not match expected SQL"
         )
 
@@ -44,7 +44,7 @@ class TestSqlScriptTemplating:
                 TestUtils.abs_path("../../sql/templates/pipe_tables/pipe_HDB.sql.jinja")
             ),
         )
-        self.assert_sql_equal(
+        TestUtils.assert_text_equals(
             _prod_sql, _prod_rendered, "PROD SQL does not match expected SQL"
         )
 
@@ -67,7 +67,7 @@ class TestSqlScriptTemplating:
                 )
             ),
         )
-        self.assert_sql_equal(
+        TestUtils.assert_text_equals(
             _int_sql, _int_rendered, "INT SQL does not match expected SQL"
         )
 
@@ -87,7 +87,7 @@ class TestSqlScriptTemplating:
                 )
             ),
         )
-        self.assert_sql_equal(
+        TestUtils.assert_text_equals(
             _prod_sql, _prod_rendered, "PROD SQL does not match expected SQL"
         )
 
@@ -124,7 +124,7 @@ class TestSqlScriptTemplating:
 
         _expected = _expected_path.read_text(encoding="utf-8")
         _rendered = _step.render_sql_file(env, template)
-        self.assert_sql_equal(
+        TestUtils.assert_text_equals(
             _expected,
             _rendered,
             f"{env.name.upper()} SQL does not match expected SQL for {template.name}",
@@ -154,7 +154,7 @@ class TestSqlScriptTemplating:
 
         _expected = _expected_path.read_text(encoding="utf-8")
         _rendered = _step.render_sql_file(env, template)
-        self.assert_sql_equal(
+        TestUtils.assert_text_equals(
             _expected,
             _rendered,
             f"{env.name.upper()} SQL does not match expected SQL for {template.name}",
@@ -221,32 +221,3 @@ class TestSqlScriptTemplating:
         assert expected == rendered, (
             "render_sql with format-string does not work as expected"
         )
-
-    @staticmethod
-    def assert_sql_equal(expected, actual, msg=""):
-        def normalize(sql: str) -> str:
-            sql = sql.replace("\r\n", "\n")  # Windows line endings
-            sql = sql.replace("\r", "\n")  # alte Mac line endings
-            sql = sql.strip("\ufeff")  # BOM
-            sql = re.sub(
-                r"\n[ \t]+\n", "\n\n", sql
-            )  # Leerzeilen mit Whitespace → echte Leerzeile
-            sql = re.sub(r"\n{3,}", "\n\n", sql)  # 3+ Leerzeilen → max. eine
-            return sql.strip()
-
-        _expected = normalize(expected)
-        _actual = normalize(actual)
-
-        if _expected == _actual:
-            return
-
-        diffs = difflib.unified_diff(
-            _expected.splitlines(keepends=True),
-            _actual.splitlines(keepends=True),
-            fromfile="expected",
-            tofile="actual",
-            n=2,  # Zeilen Kontext
-            lineterm="\n",
-        )
-        diff = "".join(diffs)
-        pytest.fail(f"{msg}\n{diff}")
