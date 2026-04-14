@@ -129,6 +129,8 @@ class TestLdViews:
             expected_content2 = expected_content.replace("WIR100OD100A", "WIR100OD100B")
 
             TestUtils.assert_text_equals(expected_content, content, "View WIR100OD100A")
-            TestUtils.assert_text_equals(expected_content2, content2, "View WIR100OD100B")
+            TestUtils.assert_text_equals(
+                expected_content2, content2, "View WIR100OD100B"
+            )
         finally:
             shutil.rmtree(tmp_dir)

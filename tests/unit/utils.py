@@ -13,7 +13,8 @@ class TestUtils:
     @staticmethod
     def assert_text_equals(expected, actual, msg="", normalize=True):
         def _normalize_string(string: str) -> str:
-            if not normalize: return string
+            if not normalize:
+                return string
             string = string.replace("\r\n", "\n")  # Windows line endings
             string = string.replace("\r", "\n")  # alte Mac line endings
             string = string.strip("\ufeff")  # BOM
