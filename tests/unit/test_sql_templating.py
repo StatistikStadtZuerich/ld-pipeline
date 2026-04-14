@@ -25,7 +25,7 @@ class TestSqlScriptTemplating:
         _int_rendered = _step.render_sql_file(
             self._int,
             pathlib.Path(
-                TestUtils.abs_path("../../sql/shared/pipe_tables/pipe_HDB.sql.jinja")
+                TestUtils.abs_path("../../sql/templates/pipe_tables/pipe_HDB.sql.jinja")
             ),
         )
         self.assert_sql_equal(
@@ -41,7 +41,7 @@ class TestSqlScriptTemplating:
         _prod_rendered = _step.render_sql_file(
             self._prod,
             pathlib.Path(
-                TestUtils.abs_path("../../sql/shared/pipe_tables/pipe_HDB.sql.jinja")
+                TestUtils.abs_path("../../sql/templates/pipe_tables/pipe_HDB.sql.jinja")
             ),
         )
         self.assert_sql_equal(
@@ -63,7 +63,7 @@ class TestSqlScriptTemplating:
             self._int,
             pathlib.Path(
                 TestUtils.abs_path(
-                    "../../sql/shared/pipe_tables/pipe_HDBDatenobjekte.sql.jinja"
+                    "../../sql/templates/pipe_tables/pipe_HDBDatenobjekte.sql.jinja"
                 )
             ),
         )
@@ -83,7 +83,7 @@ class TestSqlScriptTemplating:
             self._prod,
             pathlib.Path(
                 TestUtils.abs_path(
-                    "../../sql/shared/pipe_tables/pipe_HDBDatenobjekte.sql.jinja"
+                    "../../sql/templates/pipe_tables/pipe_HDBDatenobjekte.sql.jinja"
                 )
             ),
         )
@@ -94,7 +94,7 @@ class TestSqlScriptTemplating:
     @staticmethod
     def _get_templates(template_dir: str) -> list[pathlib.Path]:
         _step = CreateViewsFromSQL(
-            [TestUtils.abs_path(f"../../sql/shared/{template_dir}")]
+            [TestUtils.abs_path(f"../../sql/templates/{template_dir}")]
         )
         return [f for f in _step._get_sql_files() if f.suffix == ".jinja"]
 
@@ -105,7 +105,7 @@ class TestSqlScriptTemplating:
     def test_view_definitions(self, env_name: Env, template: pathlib.Path):
         env = Environment(env_name)
         _step = CreateViewsFromSQL(
-            [TestUtils.abs_path("../../sql/shared/view_definition")]
+            [TestUtils.abs_path("../../sql/templates/view_definition")]
         )
 
         _expected_path = pathlib.Path(
@@ -136,7 +136,7 @@ class TestSqlScriptTemplating:
     @pytest.mark.parametrize("env_name", [Env.int, Env.prod])
     def test_pipe_tables(self, env_name: Env, template: pathlib.Path):
         env = Environment(env_name)
-        _step = InitPipeTables([TestUtils.abs_path("../../sql/shared/pipe_tables")])
+        _step = InitPipeTables([TestUtils.abs_path("../../sql/templates/pipe_tables")])
 
         _expected_path = pathlib.Path(
             TestUtils.abs_path(
@@ -167,7 +167,7 @@ class TestSqlScriptTemplating:
         def template_exists(tmpl_name: str) -> bool:
             return pathlib.Path(
                 TestUtils.abs_path(
-                    f"../../sql/shared/pipe_tables/{tmpl_name}.sql.jinja"
+                    f"../../sql/templates/pipe_tables/{tmpl_name}.sql.jinja"
                 )
             ).exists()
 
@@ -190,7 +190,7 @@ class TestSqlScriptTemplating:
         def template_exists(tmpl_name: str) -> bool:
             return pathlib.Path(
                 TestUtils.abs_path(
-                    f"../../sql/shared/view_definition/{tmpl_name}.sql.jinja"
+                    f"../../sql/templates/view_definition/{tmpl_name}.sql.jinja"
                 )
             ).exists()
 

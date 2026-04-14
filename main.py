@@ -198,14 +198,14 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 "initPipeTables",
                 InitPipeTables(
                     [
-                        "./sql/shared/pipe_tables",
+                        "./sql/templates/pipe_tables",
                     ]
                 ),
                 "Initiate and define pipe tables",
             ),
             StepDefinition(
                 "createViewsFromSQL",
-                CreateViewsFromSQL("./sql/shared/view_definition"),
+                CreateViewsFromSQL("./sql/templates/view_definition"),
                 "Create DB Views from SQL",
             ),
             StepDefinition(
