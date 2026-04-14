@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS [{{ 'pipe_Diffusionsereignisse' | pipe_table_name }}];
+
+SELECT
+    ID,
+    StartDate
+INTO [{{ 'dbo.pipe_Diffusionsereignisse' | pipe_table_name }}]
+FROM [{{ 'dbo.Diffusionsereignisse' | table_name }}];

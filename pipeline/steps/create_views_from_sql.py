@@ -1,13 +1,12 @@
-import os
 import time
 
-from ..base import Step, Environment
+from database import BaseSQLStep
+from ..base import Environment
 
 
-class CreateViewsFromSQL(Step):
+class CreateViewsFromSQL(BaseSQLStep):
     def __init__(self, sql_folder):
-        super().__init__()
-        self._sql_folder = sql_folder
+        super().__init__(sql_folder)
 
     def run(self, environment: Environment):
         self.logger.info("Starting to create views from SQL files...")
@@ -29,43 +28,38 @@ class CreateViewsFromSQL(Step):
         with environment.get_db_connection() as connection:
             with connection.cursor() as cursor:
                 # Alle SQL-Dateien im Ordner durchgehen
-                for filename in sorted(os.listdir(self._sql_folder)):
-                    if not filename.lower().endswith(".sql"):
-                        continue
-
-                    self._execute_sql_file(filename, cursor)
+                for sql_file in self._get_sql_files():
+                    self._execute_sql_file(sql_file, cursor, environment)
 
                 connection.commit()
 
-    def _execute_sql_file(self, filename, cursor):
-        file_path = os.path.join(self._sql_folder, filename)
-        self.logger.debug(f"Executing SQL file: {filename}")
+    def _execute_sql_file(self, sql_file, cursor, environment: Environment):
+        self.logger.debug(f"Executing SQL file: {sql_file}")
 
-        with open(file_path, "r", encoding="utf-8") as file:
-            sql_script = file.read()
+        sql_script = self.render_sql_file(environment, sql_file)
 
-            # SQL-Script anhand von "GO" in Batches aufteilen (Groß-/Kleinschreibung beachten, Zeilenweise!)
-            batches = []
-            current_batch = []
+        # SQL-Script anhand von "GO" in Batches aufteilen (Groß-/Kleinschreibung beachten, Zeilenweise!)
+        batches = []
+        current_batch = []
 
-            for line in sql_script.splitlines():
-                if line.strip().upper() == "GO":
-                    if current_batch:
-                        batches.append("\n".join(current_batch))
-                        current_batch = []
-                else:
-                    current_batch.append(line)
+        for line in sql_script.splitlines():
+            if line.strip().upper() == "GO":
+                if current_batch:
+                    batches.append("\n".join(current_batch))
+                    current_batch = []
+            else:
+                current_batch.append(line)
 
-            # Letzter Batch (falls vorhanden)
-            if current_batch:
-                batches.append("\n".join(current_batch))
+        # Letzter Batch (falls vorhanden)
+        if current_batch:
+            batches.append("\n".join(current_batch))
 
-            # Alle Batches einzeln ausführen
-            try:
-                for batch in batches:
-                    if batch.strip():  # Nur ausführen, wenn nicht leer
-                        cursor.execute(batch)
-                self.logger.info(f"{filename} executed successfully.")
-            except Exception as e:
-                self.logger.error(f"Failed to execute {filename}: {e}")
-                raise
+        # Alle Batches einzeln ausführen
+        try:
+            for batch in batches:
+                if batch.strip():  # Nur ausführen, wenn nicht leer
+                    cursor.execute(batch)
+            self.logger.info(f"{sql_file} executed successfully.")
+        except Exception as e:
+            self.logger.error(f"Failed to execute {sql_file}: {e}")
+            raise

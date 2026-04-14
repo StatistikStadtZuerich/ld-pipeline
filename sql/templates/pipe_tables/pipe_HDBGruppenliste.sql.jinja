@@ -1,0 +1,19 @@
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}];
+
+GO
+
+SELECT
+    GRUPPENCODE,
+    GRUPPENCODENAME,
+    BESCHREIBUNG,
+    GRUPPE,
+    GRUPPENNAME,
+    PARENTCODE,
+    GRUPPENCODESORT,
+    GLOSSARID,
+    LINK,
+    HIERARCHIE,
+    ORIGIN,
+    SAMEAS
+INTO [{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBGruppenliste' | table_name }}];
