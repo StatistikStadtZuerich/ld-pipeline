@@ -210,18 +210,18 @@ class TestSqlScriptTemplating:
     def test_sql_rendering(self):
         expected = "SELECT * FROM [dbo].[view_observation_int]"
         template = "SELECT * FROM [{{ 'view_observation' | view_name }}]"
-        rendered = CreateViewsFromSQL.render_sql(
-            Environment(Env.int), template
+        rendered = CreateViewsFromSQL.render_sql(Environment(Env.int), template)
+        assert expected == rendered, (
+            "render_sql with plain string does not work as expected"
         )
-        assert expected == rendered
 
         view_name = "view_room"
         expected = f"SELECT * FROM [dbo].[{view_name}]"
         template = f"SELECT * FROM [{{{{ '{view_name}' | view_name }}}}]"
-        rendered = CreateViewsFromSQL.render_sql(
-            Environment(Env.prod), template
+        rendered = CreateViewsFromSQL.render_sql(Environment(Env.prod), template)
+        assert expected == rendered, (
+            "render_sql with format-string does not work as expected"
         )
-        assert expected == rendered
 
     @staticmethod
     def assert_sql_equal(expected, actual, msg=""):
