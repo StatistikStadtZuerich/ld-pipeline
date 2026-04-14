@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS [{{ 'pipe_HDBRaumHistorisch' | pipe_table_name }}];
+
+SELECT
+    LDID,
+    Code,
+    GueltigVon,
+    GueltigBis
+INTO [{{ 'dbo.pipe_HDBRaumHistorisch' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBRaumHistorisch' | table_name }}];

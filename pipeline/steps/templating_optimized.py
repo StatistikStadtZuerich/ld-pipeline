@@ -1,11 +1,13 @@
 import os
-import re
+import pathlib
 from datetime import datetime
 import uuid
 import gzip
 import shutil
 import time
+from typing import Dict, Any
 
+from database import BaseSQLStep
 from ..base import Step, Environment, Utils
 
 
@@ -14,15 +16,29 @@ class TemplatingOptimized(Step):
         self,
         template_filename: str,
         output_filename: str,
-        sql_filepath: str,
-        options={},
+        sql_view_name: str,
+        sql_filepath: str | None = None,
+        options: Dict[str, Any] | None = None,
     ):
         super().__init__()
         self._template_filename = template_filename
         self._output_filename = output_filename
+        self._sql_view_name = sql_view_name
         self._sql_filepath = sql_filepath
-        self._options = options
+        self._options = options or {}
         self._utils = Utils()
+
+    def _load_sql_query(self, enviroment: Environment):
+        if self._sql_filepath is None:
+            return BaseSQLStep.render_sql(
+                enviroment,
+                f"SELECT * FROM [{{{{ '{self._sql_view_name}' | view_name }}}}]",
+            )
+        else:
+            return BaseSQLStep.render_sql_file(
+                enviroment,
+                pathlib.Path(self._sql_filepath),
+            )
 
     def process_triples(self, tablename, cursor, template, output_folder):
         db_batch_size = 100000
@@ -142,57 +158,47 @@ class TemplatingOptimized(Step):
         output_folder = os.path.dirname(output_filepath)
 
         with environment.get_db_connection() as connection:
-            with open(self._sql_filepath) as sql_file:
-                query = sql_file.read()
-                match = re.search(r"FROM\s+([^\s^;]+)", query, re.IGNORECASE)
-                tablename = None
-                if match:
-                    tablename = match.group(1)
-                if not tablename:
-                    self.logger.error(f"Invalid query in {self._sql_filepath}")
-                    return
+            tablename = self._sql_view_name
+            query = self._load_sql_query(environment)
 
-                with connection.cursor() as cursor:
-                    like_conditions = ""
+            with connection.cursor() as cursor:
+                like_conditions = ""
 
-                    if (
-                        only_vb_cubes == "true"
-                        and tablename == f"view_observation_{env}"
-                    ):
-                        cursor.execute(
-                            f"SELECT DISTINCT t.cube_id FROM view_vb_source_{env} t"
-                        )
-                        rows = cursor.fetchall()
-                        if len(rows) > 0:
-                            like_conditions = " OR ".join(
-                                [f"cube_ids LIKE '%{row['cube_id']}%'" for row in rows]
-                            )
-                            like_conditions = f"( {like_conditions} )"
-                            self.logger.info(
-                                "Considering only cubes from the view builder."
-                            )
-
-                    if len(like_conditions) == 0:
-                        query_tmp_table = (
-                            f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename} "
-                            f" FROM ({query}) AS original_query"
-                        )
-                    else:
-                        query_tmp_table = (
-                            f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename}"
-                            f" FROM ({query} WHERE ({like_conditions})) AS original_query"
-                        )
-
-                    self.logger.info(f"Creating temporary table #{tablename} ...")
-                    cursor.execute(query_tmp_table)
-                    self.logger.info("Creating an index on the _sort_order column ...")
+                if only_vb_cubes == "true" and tablename == f"view_observation_{env}":
                     cursor.execute(
-                        f"CREATE INDEX idx_sort_order ON #{tablename} (_sort_order)"
+                        f"SELECT DISTINCT t.cube_id FROM view_vb_source_{env} t"
                     )
-                    self.logger.info("done")
+                    rows = cursor.fetchall()
+                    if len(rows) > 0:
+                        like_conditions = " OR ".join(
+                            [f"cube_ids LIKE '%{row['cube_id']}%'" for row in rows]
+                        )
+                        like_conditions = f"( {like_conditions} )"
+                        self.logger.info(
+                            "Considering only cubes from the view builder."
+                        )
 
-                    with environment.get_template_engine(
-                        self._template_filename, output_filepath
-                    ) as template_engine:
-                        template = template_engine.get_template()
-                        self.process_triples(tablename, cursor, template, output_folder)
+                if len(like_conditions) == 0:
+                    query_tmp_table = (
+                        f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename} "
+                        f" FROM ({query}) AS original_query"
+                    )
+                else:
+                    query_tmp_table = (
+                        f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename}"
+                        f" FROM ({query} WHERE ({like_conditions})) AS original_query"
+                    )
+
+                self.logger.info(f"Creating temporary table #{tablename} ...")
+                cursor.execute(query_tmp_table)
+                self.logger.info("Creating an index on the _sort_order column ...")
+                cursor.execute(
+                    f"CREATE INDEX idx_sort_order ON #{tablename} (_sort_order)"
+                )
+                self.logger.info("done")
+
+                with environment.get_template_engine(
+                    self._template_filename, output_filepath
+                ) as template_engine:
+                    template = template_engine.get_template()
+                    self.process_triples(tablename, cursor, template, output_folder)

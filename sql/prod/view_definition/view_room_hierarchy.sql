@@ -1,8 +1,10 @@
-DROP VIEW IF EXISTS dbo.view_room_hierarchy;
+DROP VIEW IF EXISTS [dbo].[view_room_hierarchy];
+GO
+DROP VIEW IF EXISTS [dbo].[view_room_hierarchy_int_old];
 
 GO
 
-CREATE VIEW dbo.view_room_hierarchy AS
+CREATE VIEW [dbo].[view_room_hierarchy] AS
 SELECT
 	c0."Raum" as r0,
 	c0.RaumHierarchie as f0,
@@ -12,17 +14,17 @@ SELECT
 	c2.RaumHierarchie as f2,
 	c3."Raum" as r3
 FROM
-	pipe_HDBRaum c0
+	[dbo].[pipe_HDBRaum_prod] c0
 JOIN
-	pipe_HDBRaum c1
+	[dbo].[pipe_HDBRaum_prod] c1
 ON
 	c1."RaumParent" = c0."Raum"
 LEFT JOIN
-	pipe_HDBRaum c2
+	[dbo].[pipe_HDBRaum_prod] c2
 ON
 	c2."RaumParent" = c1."Raum"
 LEFT JOIN
-	pipe_HDBRaum c3
+	[dbo].[pipe_HDBRaum_prod] c3
 ON
 	c3."RaumParent" = c2."Raum"
 WHERE

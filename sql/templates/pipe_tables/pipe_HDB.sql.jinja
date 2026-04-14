@@ -1,0 +1,19 @@
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDB' | pipe_table_name }}];
+
+SELECT
+    GESAMTCODE,
+    ZEIT,
+    JAHR,
+    CUBEID,
+    KENNZAHL,
+    WERT,
+    DATENSTATUS,
+    ANZ_GRUPPEN,
+    REFERENZNUMMER,
+    RECORDSTATUS,
+    CAST(NULL AS VARBINARY) as hash,
+    DATENSTAND,
+    PUBLIKATIONSSTATUS,
+    DIFFUSIONSID
+INTO [{{ 'dbo.pipe_HDB' | pipe_table_name }}]
+FROM [{{ 'dbo.HDB' | table_name }}];
