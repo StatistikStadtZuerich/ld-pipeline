@@ -207,9 +207,26 @@ class TestSqlScriptTemplating:
             ):
                 pytest.fail(f"Missing template for {sql_file.name}")
 
+    def test_sql_rendering(self):
+        expected = "SELECT * FROM [dbo].[view_observation_int]"
+        template = "SELECT * FROM [{{ 'view_observation' | view_name }}]"
+        rendered = CreateViewsFromSQL.render_sql(
+            Environment(Env.int), template
+        )
+        assert expected == rendered
+
+        view_name = "view_room"
+        expected = f"SELECT * FROM [dbo].[{view_name}]"
+        template = f"SELECT * FROM [{{{{ '{view_name}' | view_name }}}}]"
+        rendered = CreateViewsFromSQL.render_sql(
+            Environment(Env.prod), template
+        )
+        assert expected == rendered
+
     @staticmethod
     def assert_sql_equal(expected, actual, msg=""):
         def normalize(sql: str) -> str:
+            sql = sql + "\n"
             sql = sql.replace("\r\n", "\n")  # Windows line endings
             sql = sql.replace("\r", "\n")  # alte Mac line endings
             sql = sql.strip("\ufeff")  # BOM

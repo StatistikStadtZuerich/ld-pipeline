@@ -51,12 +51,12 @@ class WritePublicationStatiToHDB(Step):
                 query = BaseSQLStep.render_sql(
                     environment,
                     f"""
-                    INSERT INTO [{{ '#hash_HDB' | pipe_table_name }}] (GESAMTCODE, hash)
+                    INSERT INTO [{{{{ '#hash_HDB' | pipe_table_name }}}}] (GESAMTCODE, hash)
                     SELECT 
                         GESAMTCODE,
                         HASHBYTES('MD5', CONVERT(VARBINARY(MAX), {concat_expression}))
                     FROM
-                        [{{ 'HDB' | table_name }}] h
+                        [{{{{ 'HDB' | table_name }}}}] h
                     WHERE
                         h.RECORDSTATUS = '0'
                     AND
@@ -131,7 +131,7 @@ class WritePublicationStatiToHDB(Step):
                     environment,
                     f"""
                 UPDATE
-                    [{{ 'pipe_HDB' | pipe_table_name }}]
+                    [{{{{ 'pipe_HDB' | pipe_table_name }}}}]
                 SET
                     hash = HASHBYTES('MD5', CONVERT(VARBINARY(MAX), {concat_expression}))
                 """,
