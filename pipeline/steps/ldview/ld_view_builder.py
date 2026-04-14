@@ -76,7 +76,9 @@ class LdViewBuilder(Base):
                     continue
 
                 view.dimensions.extend(
-                    self._create_dimensions_from_hierarchy_dict(hierarchy_dict, parent_dimension)
+                    self._create_dimensions_from_hierarchy_dict(
+                        hierarchy_dict, parent_dimension
+                    )
                 )
             view.sort_and_numerate_dimensions()
 
