@@ -1,24 +1,27 @@
 import os
+import tempfile
 from datetime import datetime, timezone
 
-from ..base import Step, Environment
+from ..base import Environment
+from .copy import Copy
 
 
-class BuildInfo(Step):
+class BuildInfo(Copy):
     def __init__(self, options={}):
         """
         Adds build information to output
         """
-        super().__init__()
-        self._options = options
+        super().__init__(source=None, target="info.ttl", options=options)
 
     def run(self, environment: Environment):
-        out_dir = environment.config.get("output_path")
-        os.makedirs(out_dir, exist_ok=True)
-        out_file = os.path.join(out_dir, "info.ttl")
-
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
-        with open(out_file, "w") as f:
-            f.write(
-                f'<https://ld.stadt-zuerich.ch/.well-known/void> <http://purl.org/dc/terms/created> "{now}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n'
-            )
+        content = f'<https://ld.stadt-zuerich.ch/.well-known/void> <http://purl.org/dc/terms/created> "{now}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n'
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".ttl", delete=False) as tmp:
+            tmp.write(content)
+            self._source = tmp.name
+
+        try:
+            super().run(environment)
+        finally:
+            os.unlink(self._source)
