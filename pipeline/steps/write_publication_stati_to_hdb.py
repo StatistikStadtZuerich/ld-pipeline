@@ -92,7 +92,7 @@ class WritePublicationStatiToHDB(Step):
                         AND
                             c.CUBEID <> ''
                         JOIN 
-                            [{{ 'Diffusionsereignisse' | pipe_tble_name }}] d 
+                            [{{ 'pipe_Diffusionsereignisse' | pipe_table_name }}] d 
                         ON 
                             c.DiffusionsID = d.id
                         WHERE 
