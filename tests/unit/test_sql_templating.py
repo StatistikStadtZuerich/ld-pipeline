@@ -1,6 +1,5 @@
-import difflib
 import pathlib
-import re
+
 import pytest
 
 from database import InitPipeTables
