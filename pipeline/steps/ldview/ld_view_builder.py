@@ -31,17 +31,18 @@ class LdViewBuilder(Base):
                 for source_dict in source_dict_list
             ]
 
-            basic_dimension_plus_dzeit_and_draum = self._get_static_dimensions(
-                view, sources
-            )
-            view.dimensions.extend(basic_dimension_plus_dzeit_and_draum[0])
-            dimension_raum = basic_dimension_plus_dzeit_and_draum[2]
+            dimensions, dz, dr = self._get_static_dimensions(view, sources)
+            view.dimensions.extend(dimensions)
 
             dimension_dict_list = self._list_dimensions_by_view_id(view.id)
             for dimension_dict in dimension_dict_list:
                 view.dimensions.extend(
                     self._create_dimensions_from_dimension_dict(dimension_dict, sources)
                 )
+
+            dimensions_by_name = {
+                d.name: d for d in view.dimensions if isinstance(d, BasicDimension)
+            }
 
             filter_dict_list = self._list_filters_by_view_id(view.id)
             for filter_dict in filter_dict_list:
@@ -65,9 +66,18 @@ class LdViewBuilder(Base):
 
             hierarchy_dict_list = self._list_hierarchies_by_view_id(view.id)
             for hierarchy_dict in hierarchy_dict_list:
+                dim_name = hierarchy_dict["dimension"]
+                parent_dimension = dimensions_by_name.get(dim_name)
+
+                if parent_dimension is None:
+                    self.logger.warn(
+                        f"Hierarchy references unknown dimension '{dim_name}', skipping."
+                    )
+                    continue
+
                 view.dimensions.extend(
                     self._create_dimensions_from_hierarchy_dict(
-                        hierarchy_dict, dimension_raum
+                        hierarchy_dict, parent_dimension
                     )
                 )
             view.sort_and_numerate_dimensions()
@@ -359,7 +369,7 @@ class LdViewBuilder(Base):
 
         return dimension
 
-    def _create_dimensions_from_hierarchy_dict(self, hierarchy_dict, raum_dimension):
+    def _create_dimensions_from_hierarchy_dict(self, hierarchy_dict, parent_dimension):
         alang = Attribute(
             name=f"{hierarchy_dict['termset']} (lang)",
             alternate_name=f"{hierarchy_dict['termset'].upper()}_LANG",
@@ -378,11 +388,6 @@ class LdViewBuilder(Base):
             description=f"Sortierungshilfe der Hierarchiestufe '{hierarchy_dict['termset']}', auf den sich der Datenpunkt bezieht.",
         )
 
-        if hierarchy_dict["dimension"] != "RAUM":
-            self.logger.warn(
-                f"View contains hierarchy type {hierarchy_dict['dimension']}, currently only 'RAUM' supported"
-            )
-
         dlang = LookupDimension(
             f"{hierarchy_dict['termset'].upper()}_LANG",
             None,
@@ -391,7 +396,7 @@ class LdViewBuilder(Base):
                 "https://schema.org/name",
             ],
             alang,
-            raum_dimension,
+            parent_dimension,
         )
         dcode = LookupDimension(
             f"{hierarchy_dict['termset'].upper()}_CODE",
@@ -401,7 +406,7 @@ class LdViewBuilder(Base):
                 "https://schema.org/termCode",
             ],
             acode,
-            raum_dimension,
+            parent_dimension,
         )
         dsort = LookupDimension(
             f"{hierarchy_dict['termset'].upper()}_SORT",
@@ -411,7 +416,7 @@ class LdViewBuilder(Base):
                 "https://schema.org/position",
             ],
             asort,
-            raum_dimension,
+            parent_dimension,
         )
 
         return [dlang, dcode, dsort]
