@@ -1,11 +1,12 @@
 import time
+from typing import List
 
 from database import BaseSQLStep
 from ..base import Environment
 
 
 class CreateViewsFromSQL(BaseSQLStep):
-    def __init__(self, sql_folder):
+    def __init__(self, sql_folder: List[str]):
         super().__init__(sql_folder)
 
     def run(self, environment: Environment):

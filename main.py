@@ -184,28 +184,14 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 Compressing(),
                 "Compresses all triple files to gzip files",
             ),
-            # StepDefinition(
-            #     "uploadToFuseki",
-            #     create_fuseki_uploader(env),
-            #     "Uploads all compressed gzip files to a configured fuseki server",
-            # ),
-            # StepDefinition(
-            #    "copyHDBToPipeTables",
-            #    CopyHDBToPipeTables(),
-            #    "Copy HDB to pipe tables",
-            # ),
             StepDefinition(
                 "initPipeTables",
-                InitPipeTables(
-                    [
-                        "./sql/templates/pipe_tables",
-                    ]
-                ),
+                InitPipeTables(["./sql/templates/pipe_tables"]),
                 "Initiate and define pipe tables",
             ),
             StepDefinition(
                 "createViewsFromSQL",
-                CreateViewsFromSQL("./sql/templates/view_definition"),
+                CreateViewsFromSQL(["./sql/templates/view_definition"]),
                 "Create DB Views from SQL",
             ),
             StepDefinition(
