@@ -25,7 +25,7 @@ SELECT DISTINCT
         WHEN ag.gruppe IS NOT NULL THEN REPLACE(t.PARENTCODE, ag.gruppe, ag.origin)
         ELSE t.PARENTCODE
     END AS part_of,
-    t.sameAs,
+    t.SAMEAS AS sameAs,
 
     REPLACE(t.HIERARCHIE, ' ', '') AS term_sets_name,
     UPPER(REPLACE(REPLACE(t.HIERARCHIE, ' ', ''), '-', '')) AS term_sets
