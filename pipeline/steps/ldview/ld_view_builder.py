@@ -70,7 +70,7 @@ class LdViewBuilder(Base):
                 parent_dimension = dimensions_by_name.get(dim_name)
 
                 if parent_dimension is None:
-                    self.logger.warn(
+                    self.logger.warning(
                         f"Hierarchy references unknown dimension '{dim_name}', skipping."
                     )
                     continue
@@ -271,7 +271,7 @@ class LdViewBuilder(Base):
         )
 
         if basic_dimension is None:
-            self.logger.warn(
+            self.logger.warning(
                 f"View contains filter dimension {filter_dict['dimension']}, which is not in the list of dimensions"
             )
             return None, None
