@@ -28,7 +28,7 @@ python-test:
   before_script:
     - mkdir -p reports
     - python -c "import sys; print(sys.version)"
-    - python -m pip install --upgrade pip
+    - python -m pip install --root-user-action ignore --upgrade pip
     - pip install --root-user-action ignore -r requirements.txt
   script:
     - ruff check --output-format=gitlab > reports/code-quality-report.json
