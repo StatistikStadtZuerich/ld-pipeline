@@ -29,11 +29,11 @@ python-test:
     - mkdir -p reports
     - python -c "import sys; print(sys.version)"
     - python -m pip install --upgrade pip
-    - pip install -r requirements.txt
+    - pip install --root-user-action ignore -r requirements.txt
   script:
-    - ruff format --check
     - ruff check --output-format=gitlab > reports/code-quality-report.json
     - SSZ_DB_TYPE=mock python -m pytest --doctest-modules --junitxml=reports/unittest-results.xml tests/unit
+    - ruff format --check
   variables:
     HTTP_PROXY: "${DEV_PROXY}"
     HTTPS_PROXY: "${DEV_PROXY}"
