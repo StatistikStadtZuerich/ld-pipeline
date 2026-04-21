@@ -71,7 +71,9 @@ def generate_triple_files(pipeline: Pipeline):
         pipeline.execute(name)
 
 
-def configure_logging(env: Environment, log_file_name: pathlib.Path = pathlib.Path("./pipeline.log")):
+def configure_logging(
+    env: Environment, log_file_name: pathlib.Path = pathlib.Path("./pipeline.log")
+):
     loggers = []
     if env.config.get("log.stdout", bool, True):
         loggers.append("console")
