@@ -133,7 +133,7 @@ if __name__ == "__main__":
         "--targetEnv",
         help="target environment for the fuseki-index",
         choices=[e.name for e in Env],
-        default=Env.test
+        default=Env.test,
     )
     __parser.add_argument(
         "-r",

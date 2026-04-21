@@ -81,7 +81,9 @@ class Utils(Base):
             shutil.move(file, os.path.join(done_folder, filename))
             break
 
-    def set_start_signal_fuseki_index(self, environment: Environment, target_env: str = None):
+    def set_start_signal_fuseki_index(
+        self, environment: Environment, target_env: str = None
+    ):
         """
         Create a start-signal for the 'create_fuseki_index'-script
         """
@@ -95,9 +97,11 @@ class Utils(Base):
                     [
                         f"Created: {datetime.now()}",
                         f"Run-Id: {environment.run_id}",
-                        f"Target-Env: {target_env or ""}",
+                        f"Target-Env: {target_env or ''}",
                     ]
                 )
                 + "\n"
             )
-        self.logger.debug(f"Start signal '{file_name}' for '{target_env}' has been created.")
+        self.logger.debug(
+            f"Start signal '{file_name}' for '{target_env}' has been created."
+        )
