@@ -10,7 +10,7 @@ from pipeline import Pipeline
 from pipeline.base import Utils, Env, Environment
 
 
-def run_pipeline(env: Environment):
+def run_pipeline(env: Environment, target_env: str = None):
     utils = Utils()
 
     options_batching = {
@@ -31,7 +31,7 @@ def run_pipeline(env: Environment):
 
     # Create the start signal to generate the Fuseki index
     logging.info("Create start signal to generate the Fuseki index")
-    utils.set_start_signal_fuseki_index(env)
+    utils.set_start_signal_fuseki_index(env, target_env)
 
     # Write back the publication status to the HDB
     logging.info("Write back the publication status to the HDB")
@@ -129,6 +129,13 @@ if __name__ == "__main__":
         default=Env.test,
     )
     __parser.add_argument(
+        "-t",
+        "--targetEnv",
+        help="target environment for the fuseki-index",
+        choices=[e.name for e in Env],
+        default=Env.test
+    )
+    __parser.add_argument(
         "-r",
         "--runId",
         help="the unique run id (for logging)",
@@ -161,7 +168,7 @@ if __name__ == "__main__":
     configure_logging(__config, __log_file)
     try:
         logging.info("Starting pipeline with runId %s", __args.runId)
-        run_pipeline(__config)
+        run_pipeline(__config, __args.targetEnv)
     except Exception as e:
         logging.fatal("Unexpected Error while running pipeline", exc_info=e)
         exit(1)
