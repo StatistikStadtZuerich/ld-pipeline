@@ -144,8 +144,10 @@ if __name__ == "__main__":
     __config = Environment(Env(__args.env), __args.config)
 
     # Determine log-target
-    __log_file: pathlib.Path = __config.config.get("log.file.name", pathlib.Path, None)
-    if __log_file is not None:
+    __log_file_name: pathlib.Path = __config.config.get("log.file.name", str, None)
+    __log_file = None
+    if __log_file_name is not None:
+        __log_file = pathlib.Path(__log_file_name)
         if __log_file.is_dir():
             _log_dir = __log_file
         elif __log_file.parent.is_dir():
