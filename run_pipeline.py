@@ -143,7 +143,7 @@ if __name__ == "__main__":
         default=["config.ini"],
     )
     __args = __parser.parse_args()
-    __config = Environment(Env(__args.env), __args.config)
+    __config = Environment(Env(__args.env), __args.config, __args.runId)
 
     # Determine log-target
     __log_file_name: pathlib.Path = __config.config.get("log.file.name", str, None)

@@ -90,5 +90,8 @@ class Utils(Base):
         file_name = f"start_fuseki_index_{current_datetime}.txt"
         file_path = os.path.join(output_path, file_name)
         with open(file_path, "w") as file:
-            file.write(f"{datetime.now()}")
+            file.write("\n".join([
+                f"Created: {datetime.now()}",
+                f"Run-Id: {environment.run_id}",
+            ])+"\n")
         self.logger.debug(f"Start signal '{file_name}' has been created.")
