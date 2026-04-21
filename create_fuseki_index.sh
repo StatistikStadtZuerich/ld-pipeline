@@ -7,6 +7,7 @@ SCRIPT="$(readlink -f "$0")"
 SCRIPT_HOME="$(dirname "$SCRIPT")"
 
 function load_env() {
+  # shellcheck source=sample.env disable=SC2015
   [ -r "$1" ] && . "$1" || true
 }
 
