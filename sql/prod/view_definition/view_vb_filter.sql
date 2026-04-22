@@ -7,7 +7,7 @@ SELECT
     value AS termset,
     SUBSTRING(value, 2, 3) AS dimension
 FROM
-    [dbo].[pipe_HDBDatenobjekte_int] t
+    [dbo].[pipe_HDBDatenobjekte_prod] t
 CROSS APPLY STRING_SPLIT(t.DimensionFilterID, ';')
 
 UNION ALL
