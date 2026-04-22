@@ -9,7 +9,6 @@ SELECT
 FROM
     [dbo].[pipe_HDBDatenobjekte_int] t
 CROSS APPLY STRING_SPLIT(t.DimensionFilterID, ';')
-WHERE CHARINDEX('|', value) > 0 
 
 UNION ALL
 

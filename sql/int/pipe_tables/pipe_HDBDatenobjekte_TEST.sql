@@ -20,6 +20,7 @@ SELECT
     Kennzahl_GGH_STK_BEB,
     Raum_Hierarchie,
     Zeit_Hierarchie,
+    Dimension_Hierarchie,
     HierarchieID_List,
     CubeIDs,
     RaumFilter,

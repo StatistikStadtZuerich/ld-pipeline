@@ -14,5 +14,5 @@ CROSS APPLY
 JOIN 
     [dbo].[pipe_HDBGruppenliste_int] h
 ON 
-    h.GRUPPE = LEFT(split_values.value, 3)
+    h.GRUPPE = substring(split_values.value,2, 3)
 ;
