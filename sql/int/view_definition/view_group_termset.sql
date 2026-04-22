@@ -15,7 +15,6 @@ SELECT DISTINCT
  
 FROM [dbo].[pipe_HDBGruppenliste_int] t
 CROSS APPLY STRING_SPLIT(t.HIERARCHIE, ';')
-
 LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
     ON LEFT(t.GRUPPENCODE, 3) = ag.gruppe
     OR LEFT(t.GRUPPE, 3) = ag.gruppe

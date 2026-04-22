@@ -16,7 +16,7 @@ UNION ALL
 SELECT
 	t.SASA_Job_Output_Id AS view_id,
 	value as termset,
-	'Raum' as dimension
+	'RAUM' as dimension
 FROM
 	[dbo].[pipe_HDBDatenobjekte_prod] t
 CROSS APPLY STRING_SPLIT(t.Raum_Hierarchie, ';')
