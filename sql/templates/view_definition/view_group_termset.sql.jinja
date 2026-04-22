@@ -11,11 +11,14 @@ SELECT DISTINCT
     END AS term_code,
   
     REPLACE(value, ' ', '') AS term_set_name,
-    UPPER(REPLACE(REPLACE(value, ' ', ''), '-', '')) AS term_set
+    h.HierarchieID AS term_set
  
 FROM [{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}] t
+CROSS APPLY STRING_SPLIT(t.HIERARCHIE, ';')
 LEFT JOIN [{{ 'dbo.pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] ag
     ON LEFT(t.GRUPPENCODE, 3) = ag.gruppe
     OR LEFT(t.GRUPPE, 3) = ag.gruppe
     OR LEFT(t.PARENTCODE, 3) = ag.gruppe
-    CROSS APPLY STRING_SPLIT(t.HIERARCHIE, ';');
+LEFT JOIN [{{ 'dbo.pipe_HDBHierarchien' | pipe_table_name }}] h
+	on value = h.HIERARCHIE
+    ;

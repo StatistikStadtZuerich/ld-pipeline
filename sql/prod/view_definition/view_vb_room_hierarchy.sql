@@ -5,12 +5,11 @@ CREATE VIEW [dbo].[view_vb_room_hierarchy] AS
 
 SELECT
     SASA_Job_Output_Id AS view_id,
-    SUBSTRING(value, CHARINDEX('|', value) + 1, LEN(value)) AS termset,
-    SUBSTRING(value, 1, CHARINDEX('|', value) - 1) AS dimension
+    value AS termset,
+    SUBSTRING(value, 2, 3) AS dimension
 FROM
     [dbo].[pipe_HDBDatenobjekte_prod]
-CROSS APPLY STRING_SPLIT(Dimension_Hierarchie, ';')
-WHERE CHARINDEX('|', value) > 0
+CROSS APPLY STRING_SPLIT(HierarchieID_List, ';')
 
 UNION ALL
 

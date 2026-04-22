@@ -11,11 +11,15 @@ SELECT DISTINCT
     END AS term_code,
   
     REPLACE(value, ' ', '') AS term_set_name,
-    UPPER(REPLACE(REPLACE(value, ' ', ''), '-', '')) AS term_set
+    h.HierarchieID AS term_set
  
 FROM [dbo].[pipe_HDBGruppenliste_int] t
+CROSS APPLY STRING_SPLIT(t.HIERARCHIE, ';')
+
 LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
     ON LEFT(t.GRUPPENCODE, 3) = ag.gruppe
     OR LEFT(t.GRUPPE, 3) = ag.gruppe
     OR LEFT(t.PARENTCODE, 3) = ag.gruppe
-    CROSS APPLY STRING_SPLIT(t.HIERARCHIE, ';');
+LEFT JOIN [dbo.pipe_HDBHierarchien_int] h
+	on value = h.HIERARCHIE
+    ;

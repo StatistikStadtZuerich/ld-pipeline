@@ -10,7 +10,7 @@ SELECT DISTINCT
 FROM 
     [dbo].[pipe_HDBDatenobjekte_int] t
 CROSS APPLY 
-    STRING_SPLIT(t.DIMENSION_Hierarchie, ';') AS split_values
+    STRING_SPLIT(t.HierarchieID_List, ';') AS split_values
 JOIN 
     [dbo].[pipe_HDBGruppenliste_int] h
 ON 

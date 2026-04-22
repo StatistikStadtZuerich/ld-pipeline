@@ -4,19 +4,18 @@ GO
 CREATE VIEW [dbo].[view_vb_filter] AS
 SELECT
     t.SASA_Job_Output_Id AS view_id,
-    SUBSTRING(value, CHARINDEX('|', value) + 1, LEN(value)) AS termset,
-    SUBSTRING(value, 1, CHARINDEX('|', value) - 1) AS dimension
+    value AS termset,
+    SUBSTRING(value, 2, 3) AS dimension
 FROM
-    [dbo].[pipe_HDBDatenobjekte_prod] t
-CROSS APPLY STRING_SPLIT(t.DimensionFilter, ';')
-WHERE CHARINDEX('|', value) > 0 
+    [dbo].[pipe_HDBDatenobjekte_int] t
+CROSS APPLY STRING_SPLIT(t.DimensionFilterID, ';')
 
 UNION ALL
 
 SELECT
     t.SASA_Job_Output_Id AS view_id,
     t.RaumFilter AS termset,
-    'Raum' AS dimension
+    'RAUM' AS dimension
 FROM
     [dbo].[pipe_HDBDatenobjekte_prod] t
 
