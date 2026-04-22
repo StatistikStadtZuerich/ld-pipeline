@@ -19,6 +19,6 @@ LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] ag
     ON LEFT(t.GRUPPENCODE, 3) = ag.gruppe
     OR LEFT(t.GRUPPE, 3) = ag.gruppe
     OR LEFT(t.PARENTCODE, 3) = ag.gruppe
-LEFT JOIN [dbo.pipe_HDBHierarchien_prod] h
+LEFT JOIN [dbo].[pipe_HDBHierarchien_prod] h
 	on value = h.HIERARCHIE
     ;
