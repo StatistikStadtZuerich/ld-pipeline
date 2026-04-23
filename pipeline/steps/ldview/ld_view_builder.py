@@ -35,11 +35,13 @@ class LdViewBuilder(Base):
                 {
                     "identifier": "ZEIT",
                     "name": "Key Zeit",
+                    "label": "Zeit",
                     "description": "Zeitdimension",
                 },
                 {
                     "identifier": "RAUM",
                     "name": "Key Raum",
+                    "label": "Raum",
                     "description": "Raumdimension",
                 },
             ]
@@ -275,14 +277,15 @@ class LdViewBuilder(Base):
         if skip_lookups:
             return [dimension]
 
+        label = dimension_dict.get("label") or dimension_dict["name"]
         alang = Attribute(
-            name=f"{dimension_dict['name']} (lang)",
+            name=f"{label} (lang)",
             alternate_name=f"{dimension_dict['identifier']}_LANG",
             description=dimension_dict["description"],
         )
 
         acode = Attribute(
-            name=f"{dimension_dict['name']} (code)",
+            name=f"{label} (code)",
             alternate_name=f"{dimension_dict['identifier']}_CODE",
             description=dimension_dict[
                 "description"
@@ -290,7 +293,7 @@ class LdViewBuilder(Base):
         )
 
         asort = Attribute(
-            name=f"{dimension_dict['name']} (sort)",
+            name=f"{label} (sort)",
             alternate_name=f"{dimension_dict['identifier']}_SORT",
             description=dimension_dict[
                 "description"
