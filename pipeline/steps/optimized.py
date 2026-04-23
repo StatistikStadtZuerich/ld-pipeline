@@ -19,11 +19,15 @@ def create_templating(
     sql_filepath: str | None = None,
     options: Dict[str, Any] | None = None,
 ) -> Step:
-    options = options or {} 
-    
+    options = options or {}
+
     if options.get("grouped", False):
         return GroupedTemplatingOptimized(
-            template_filename, output_filename, view_or_table_name, sql_filepath, options
+            template_filename,
+            output_filename,
+            view_or_table_name,
+            sql_filepath,
+            options,
         )
     elif _is_optimized(environment):
         return TemplatingOptimized(
