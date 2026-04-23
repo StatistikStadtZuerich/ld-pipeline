@@ -20,5 +20,5 @@ LEFT JOIN [{{ 'dbo.pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] ag
     OR LEFT(t.GRUPPE, 3) = ag.gruppe
     OR LEFT(t.PARENTCODE, 3) = ag.gruppe
 LEFT JOIN [{{ 'dbo.pipe_HDBHierarchien' | pipe_table_name }}] h
-	on value = h.HIERARCHIE
+	on value = h.HIERARCHIE and left(t.Gruppencode,3) = SUBSTRING(h.HierarchieID, 2, 3)
     ;
