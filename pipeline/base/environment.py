@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from .config import Config, Env
 from .mmsql_service import MSSQLDbConnection
@@ -8,10 +9,17 @@ from ..interfaces.services import DbConnection
 
 
 class Environment(Base):
-    def __init__(self, env: Env, config_files: list[os.PathLike] = None):
+    def __init__(
+        self, env: Env, config_files: list[os.PathLike] = None, run_id: str = None
+    ):
         super().__init__()
         self._env = env
         self._config = Config(env, config_files)
+        self._run_id = run_id or datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+    @property
+    def run_id(self) -> str:
+        return self._run_id
 
     @property
     def config(self) -> Config:
