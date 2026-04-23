@@ -15,8 +15,9 @@ def create_templating(
     environment: Environment,
     template_filename: str,
     output_filename: str,
-    sql_filepath: str,
-    options: Dict[str, Any],
+    view_or_table_name: str,
+    sql_filepath: str | None = None,
+    options: Dict[str, Any] | None = None,
 ) -> Step:
     if options.get("grouped", False):
         return GroupedTemplatingOptimized(
@@ -24,10 +25,20 @@ def create_templating(
         )
     elif _is_optimized(environment):
         return TemplatingOptimized(
-            template_filename, output_filename, sql_filepath, options
+            template_filename,
+            output_filename,
+            view_or_table_name,
+            sql_filepath,
+            options,
         )
     else:
-        return Templating(template_filename, output_filename, sql_filepath, options)
+        return Templating(
+            template_filename,
+            output_filename,
+            view_or_table_name,
+            sql_filepath,
+            options,
+        )
 
 
 def create_fuseki_uploader(environment: Environment) -> Step:

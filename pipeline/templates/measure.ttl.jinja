@@ -2,5 +2,6 @@
     <https://schema.org/name> {{ title|literal_encode }} ;
     <https://schema.org/identifier> {{ measure_code|literal_encode }} ;
     <http://qudt.org/schema/qudt/unit> <https://ld.stadt-zuerich.ch/statistics/unit/{{ unit|uri_encode }}> ;
+    {% if equivalentProperty %}<http://www.w3.org/2002/07/owl#equivalentProperty> <{{ equivalentProperty }}>; {% endif %}
     <https://schema.org/description> {{ description|literal_encode }} ; {# description instead of title #}
     <https://schema.org/disambiguatingDescription> {{ method|literal_encode }} . {# method instead of description #}

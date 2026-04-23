@@ -3,8 +3,13 @@
 SCRIPT="$(readlink -f "$0")"
 SCRIPT_HOME="$(dirname "$SCRIPT")"
 (
+  function debug() {
+    if [ "$DEBUG" = "true" ]; then
+      echo "$(date +"%FT%H:%M:%S%Z") [DEBUG] $*"
+    fi
+  }
   # Acquire READ-lock on the current directory
-  flock -sn 999 || { exit 0; }
+  flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
 
   export PYENV_VERSION=3.12.1
   PY_VENV="${PY_VENV:-/home/lod_pipeline/venv-ld-pipeline-2024/}"
@@ -16,7 +21,7 @@ SCRIPT_HOME="$(dirname "$SCRIPT")"
   cd "${SCRIPT_HOME}" || exit 2
   if [ "$GIT_AUTO_UPDATE" == "true" ]; then
     # Acquire WRITE-lock on the current directory
-    flock -xn 999 || { exit 0; }
+    flock -xn 999 || { debug "Could not acquire write-lock"; exit 0; }
 
     git pull -q --ff-only || {
       echo "Failed to update git from remote"
@@ -24,7 +29,7 @@ SCRIPT_HOME="$(dirname "$SCRIPT")"
     }
 
     # Re-acquire READ-lock on the current directory
-    flock -sn 999 || { exit 0; }
+    flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
   fi
 
   ENV="${1:-local}"

@@ -1,3 +1,4 @@
+from .buildInfo import BuildInfo
 from .build_termset_hierarchy import BuildTermsetHierarchy
 from .compressing import Compressing
 from .copy import Copy
@@ -15,6 +16,7 @@ from .write_publication_stati_to_hdb import WritePublicationStatiToHDB
 __all__ = [
     "Copy",
     "Compressing",
+    "BuildInfo",
     "BuildTermsetHierarchy",
     "CreateViewsFromSQL",
     "WritePublicationStatiToHDB",

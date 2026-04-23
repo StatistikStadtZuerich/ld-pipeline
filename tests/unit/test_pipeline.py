@@ -1,4 +1,3 @@
-import unittest
 from pipeline import Pipeline
 from pipeline.base import Environment, Env, Step, StepDefinition
 
@@ -19,20 +18,14 @@ class TestStep(Step):
         return self._count
 
 
-class TestPipeline(unittest.TestCase):
+def test_run():
     """
     The TestPipeline runs a TestStep 3 times in a row anc tests, if the execution is done correctly
     """
-
-    def test_run(self):
-        step = StepDefinition(
-            "test",
-            TestStep(),
-        )
-        pipeline = Pipeline(Environment(Env.test), {})
-        pipeline.run(step, step, step)
-        self.assertEqual(3, step.step.count)
-
-
-if __name__ == "__main__":
-    unittest.main()
+    step = StepDefinition(
+        "test",
+        TestStep(),
+    )
+    pipeline = Pipeline(Environment(Env.test), {})
+    pipeline.run(step, step, step)
+    assert 3 == step.step.count

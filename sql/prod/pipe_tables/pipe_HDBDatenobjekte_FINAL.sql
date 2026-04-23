@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS dbo.pipe_HDBDatenobjekte_FINAL;
+DROP TABLE IF EXISTS [dbo].[pipe_HDBDatenobjekte_prod];
 
 SELECT
     ID,
@@ -22,8 +22,9 @@ SELECT
     Zeit_Hierarchie,
     Dimension_Hierarchie,
     CubeIDs,
-    Filter,
+    RaumFilter,
+    DimensionFilter,
     Datenowner,
     Datenqualitaet
-INTO dbo.pipe_HDBDatenobjekte_FINAL
-FROM dbo.HDBDatenobjekte_FINAL;
+INTO [dbo].[pipe_HDBDatenobjekte_prod]
+FROM [dbo].[HDBDatenobjekte_FINAL];

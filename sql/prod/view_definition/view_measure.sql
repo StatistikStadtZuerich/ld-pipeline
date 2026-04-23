@@ -1,13 +1,13 @@
-DROP VIEW IF EXISTS dbo.view_measure;
+DROP VIEW IF EXISTS [dbo].[view_measure];
 
 GO
 
-CREATE VIEW dbo.view_measure AS
+CREATE VIEW [dbo].[view_measure] AS
 SELECT
 	t.KennzahlCode AS measure_code,
 	t.Kennzahlname AS title,
-	t.Einheit AS name,
-	t.Einheit_Kurz AS identifier,
+	--t.Einheit AS name,
+	--t.Einheit_Kurz AS identifier,
 	t.Methode AS method,
 	REPLACE(t.Einheit_URI, ' ', '_') AS unit,
 	REPLACE(REPLACE(
@@ -16,6 +16,7 @@ SELECT
             CHAR(13), ' '
         ), 
         CHAR(10), ' '
-    ), '"', '') AS description
+    ), '"', '') AS description,
+	equivalentProperty
 FROM
-	dbo.pipe_HDBKennzahlen t;
+	[dbo].[pipe_HDBKennzahlen_prod] t;

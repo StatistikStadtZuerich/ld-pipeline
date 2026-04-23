@@ -6,14 +6,16 @@ from pipeline import Pipeline
 from pipeline.base import Env, StepDefinition, Environment
 from pipeline.steps import (
     Copy,
+    BuildInfo,
     Compressing,
     BuildTermsetHierarchy,
     WritePublicationStatiToHDB,
     CreateViewsFromSQL,
     create_templating,
 )
+
 from pipeline.steps.views import ViewsStep
-from pipe_tables import InitPipeTables
+from database import InitPipeTables
 
 app = typer.Typer()
 logger = logging.getLogger(__name__)
@@ -33,12 +35,17 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 "Copies static.ttl files from /static to defined output folder",
             ),
             StepDefinition(
+                "buildInfo",
+                BuildInfo(options=options),
+                "Builds the info.ttl file with the current build date and time",
+            ),
+            StepDefinition(
                 "codeTemplating",
                 create_templating(
                     env,
                     "code.ttl.jinja",
                     "code.ttl",
-                    f"./sql/{env_name}/view_access/view_code.sql",
+                    "view_code",
                     options=options,
                 ),
                 "Creates triples from the view_code data with the code.ttl template",
@@ -49,7 +56,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "cube.ttl.jinja",
                     "cube.ttl",
-                    f"./sql/{env_name}/view_access/view_cube.sql",
+                    "view_cube",
                     options=options,
                 ),
                 "Creates triples from the view_cube data with the cube.ttl template",
@@ -60,7 +67,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "group_code.ttl.jinja",
                     "group_code.ttl",
-                    f"./sql/{env_name}/view_access/view_group_code.sql",
+                    "view_group_code",
                     options=options,
                 ),
             ),
@@ -70,7 +77,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "group_termset.ttl.jinja",
                     "group_termset.ttl",
-                    f"./sql/{env_name}/view_access/view_group_termset.sql",
+                    "view_group_termset",
                     options=options,
                 ),
             ),
@@ -80,7 +87,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "hierarchy.ttl.jinja",
                     "hierarchy.ttl",
-                    f"./sql/{env_name}/view_access/view_hierarchy.sql",
+                    "view_hierarchy",
                     options=options,
                 ),
                 "Creates triples from the view_hierarchy data with the hierarchy.ttl template",
@@ -91,7 +98,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "measure_unit.ttl.jinja",
                     "measure_unit.ttl",
-                    f"./sql/{env_name}/view_access/view_measure_unit.sql",
+                    "view_measure_unit",
                     options=options,
                 ),
             ),
@@ -101,7 +108,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "measure.ttl.jinja",
                     "measure.ttl",
-                    f"./sql/{env_name}/view_access/view_measure.sql",
+                    "view_measure",
                     options=options,
                 ),
                 "Creates triples from the view_measure data with the measure.ttl template",
@@ -112,7 +119,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "observation.ttl.jinja",
                     "observation.ttl",
-                    f"./sql/{env_name}/view_access/view_observation.sql",
+                    "view_observation",
                     options=options,
                 ),
                 "Creates triples from the view_observation data with the observation.ttl template",
@@ -123,7 +130,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "property.ttl.jinja",
                     "property.ttl",
-                    f"./sql/{env_name}/view_access/view_property.sql",
+                    "view_property",
                     options=options,
                 ),
                 "Creates triples from the view_property data with the property.ttl template",
@@ -134,7 +141,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "room.ttl.jinja",
                     "room.ttl",
-                    f"./sql/{env_name}/view_access/view_room.sql",
+                    "view_room",
                     options=options,
                 ),
                 "Creates triples from the view_room data with the room.ttl template",
@@ -145,7 +152,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "time.ttl.jinja",
                     "time.ttl",
-                    f"./sql/{env_name}/view_access/view_time.sql",
+                    "view_time",
                     options=options,
                 ),
                 "Creates triples from the view_time data with the time.ttl template",
@@ -167,7 +174,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "time_termset.ttl.jinja",
                     "time_termset.ttl",
-                    f"./sql/{env_name}/view_access/view_time_termset_relation.sql",
+                    "view_time_termset_relation",
                     options={**options, "grouped": True, "group_by": "termset_code"},
                 ),
                 "Creates triples for time termset relations",
@@ -178,7 +185,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "dimension_hierarchy.ttl.jinja",
                     "termset_dimension_hierarchy.ttl",
-                    f"./sql/{env_name}/view_access/view_dimension_hierarchy.sql",
+                    "view_dimension_hierarchy",
                     options=options,
                 ),
                 "Creates triples from the view_dimension_hierarchy data with the dimension_hierarchy.ttl template",
@@ -188,29 +195,14 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 Compressing(),
                 "Compresses all triple files to gzip files",
             ),
-            # StepDefinition(
-            #     "uploadToFuseki",
-            #     create_fuseki_uploader(env),
-            #     "Uploads all compressed gzip files to a configured fuseki server",
-            # ),
-            # StepDefinition(
-            #    "copyHDBToPipeTables",
-            #    CopyHDBToPipeTables(),
-            #    "Copy HDB to pipe tables",
-            # ),
             StepDefinition(
                 "initPipeTables",
-                InitPipeTables(
-                    [
-                        "./sql/shared/pipe_tables",
-                        f"./sql/{env_name}/pipe_tables",
-                    ]
-                ),
+                InitPipeTables(["./sql/templates/pipe_tables"]),
                 "Initiate and define pipe tables",
             ),
             StepDefinition(
                 "createViewsFromSQL",
-                CreateViewsFromSQL(f"./sql/{env_name}/view_definition"),
+                CreateViewsFromSQL(["./sql/templates/view_definition"]),
                 "Create DB Views from SQL",
             ),
             StepDefinition(
@@ -223,7 +215,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                 BuildTermsetHierarchy(
                     "raum_hierarchy.ttl.jinja",
                     "termset_hierarchy.ttl",
-                    f"./sql/{env_name}/view_access/view_room_hierarchy.sql",
+                    "view_room_hierarchy",
                     options=options,
                 ),
                 "Creates triples from the view_room_hierarchy data with the raum_hierarchy.ttl template",
@@ -242,6 +234,7 @@ def run(environment: Environment):
     steps = get_step_definitions(environment)
     Pipeline(environment).run(
         steps["copyStatic"].step,
+        steps["buildInfo"].step,
         steps["codeTemplating"].step,
         steps["cubeTemplating"].step,
         steps["groupCodeTemplating"].step,
@@ -258,7 +251,7 @@ def run(environment: Environment):
         steps["dimensionTermsetTemplating"].step,
         steps["compressing"].step,
         steps["initPipeTables"].step,
-        steps["copyHDBToPipeTables"].step,
+        # steps["copyHDBToPipeTables"].step,
         steps["InitPipeTables"].step,
         steps["createViewsFromSQL"].step,
         # steps["uploadToFuseki"].step,

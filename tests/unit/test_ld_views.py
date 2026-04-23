@@ -1,6 +1,5 @@
 import os
 import shutil
-import unittest
 from unittest.mock import Mock, MagicMock
 
 from pipeline.base import Environment, Env
@@ -8,7 +7,7 @@ from pipeline.steps.ldview import LdViewBuilder, LdViewSerializer
 from tests.unit.utils import TestUtils
 
 
-class TestLdViews(unittest.TestCase):
+class TestLdViews:
     def _mock_view_props(self, view_id=None):
         return {
             "id": view_id,
@@ -93,7 +92,6 @@ class TestLdViews(unittest.TestCase):
             raise AssertionError(f"query {query_name} not properly mocked for test")
 
     def test_view_building(self):
-        self.maxDiff = None
         tmp_dir = TestUtils.abs_path("tmp")
         os.makedirs(tmp_dir, exist_ok=True)
 
@@ -112,7 +110,7 @@ class TestLdViews(unittest.TestCase):
             )
 
             views = view_builder.build_all()
-            self.assertEqual(2, len(views))
+            assert len(views) == 2
 
             serializer = LdViewSerializer(env)
             serializer.serialize(views[0])
@@ -130,12 +128,9 @@ class TestLdViews(unittest.TestCase):
             ).read()
             expected_content2 = expected_content.replace("WIR100OD100A", "WIR100OD100B")
 
-            self.assertEqual(expected_content, content)
-            self.assertEqual(expected_content2, content2)
-
+            TestUtils.assert_text_equals(expected_content, content, "View WIR100OD100A")
+            TestUtils.assert_text_equals(
+                expected_content2, content2, "View WIR100OD100B"
+            )
         finally:
             shutil.rmtree(tmp_dir)
-
-
-if __name__ == "__main__":
-    unittest.main()
