@@ -202,7 +202,7 @@ class TemplatingOptimized(Step):
                 )
                 self.logger.info("done")
 
-                    with environment.get_template_engine(
+                with environment.get_template_engine(
                         self._template_filename, output_filepath
                     ) as template_engine:
                         template = template_engine.get_template()
