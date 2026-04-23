@@ -32,34 +32,53 @@ class LdViewBuilder(Base):
             ]
 
             static_dimension_dicts = [
-                {"identifier": "ZEIT", "name": "Key Zeit", "description": "Zeitdimension"},
-                {"identifier": "RAUM", "name": "Key Raum", "description": "Raumdimension"},
+                {
+                    "identifier": "ZEIT",
+                    "name": "Key Zeit",
+                    "description": "Zeitdimension",
+                },
+                {
+                    "identifier": "RAUM",
+                    "name": "Key Raum",
+                    "description": "Raumdimension",
+                },
             ]
 
             if view.include_datenstatus:
-                static_dimension_dicts.append({
-                    "identifier": "DATENSTATUS",
-                    "name": "Datenstatus",
-                    "description": "Datenstatus des Datenpunktes",
-                    "path": [
-                        "https://ld.stadt-zuerich.ch/statistics/property/STATUS",
-                        "https://schema.org/name",
-                    ],
-                    "column": Attribute("Datenstatus (lang)", "DATENSTATUS", "Datenstatus des Datenpunktes"),
-                    "skip_lookups": True,
-                })
+                static_dimension_dicts.append(
+                    {
+                        "identifier": "DATENSTATUS",
+                        "name": "Datenstatus",
+                        "description": "Datenstatus des Datenpunktes",
+                        "path": [
+                            "https://ld.stadt-zuerich.ch/statistics/property/STATUS",
+                            "https://schema.org/name",
+                        ],
+                        "column": Attribute(
+                            "Datenstatus (lang)",
+                            "DATENSTATUS",
+                            "Datenstatus des Datenpunktes",
+                        ),
+                        "skip_lookups": True,
+                    }
+                )
 
             hierarchy_dict_list = self._list_hierarchies_by_view_id(view.id)
-            dimension_identifiers_with_hierarchy = {h["dimension"] for h in hierarchy_dict_list}
+            dimension_identifiers_with_hierarchy = {
+                h["dimension"] for h in hierarchy_dict_list
+            }
 
-            dimension_dict_list = static_dimension_dicts + self._list_dimensions_by_view_id(view.id)
+            dimension_dict_list = (
+                static_dimension_dicts + self._list_dimensions_by_view_id(view.id)
+            )
             for dimension_dict in dimension_dict_list:
                 view.dimensions.extend(
                     self._create_dimensions_from_dimension_dict(
                         dimension_dict,
                         sources,
-                        skip_lookups=dimension_dict.get("skip_lookups", False) or
-                                    dimension_dict["identifier"] in dimension_identifiers_with_hierarchy
+                        skip_lookups=dimension_dict.get("skip_lookups", False)
+                        or dimension_dict["identifier"]
+                        in dimension_identifiers_with_hierarchy,
                     )
                 )
 
@@ -84,7 +103,9 @@ class LdViewBuilder(Base):
                 )
 
             dimensions_by_name = {
-                d.identifier: d for d in view.dimensions if isinstance(d, BasicDimension)
+                d.identifier: d
+                for d in view.dimensions
+                if isinstance(d, BasicDimension)
             }
 
             hierarchies_by_dimension = {}
@@ -238,11 +259,14 @@ class LdViewBuilder(Base):
         )
         return filter_value, filter_dimension
 
-    def _create_dimensions_from_dimension_dict(self, dimension_dict, sources, skip_lookups=False) -> List:
+    def _create_dimensions_from_dimension_dict(
+        self, dimension_dict, sources, skip_lookups=False
+    ) -> List:
         dimension = BasicDimension(
             identifier=dimension_dict["identifier"],
             name=dimension_dict["name"],
-            path=dimension_dict.get("path") or [
+            path=dimension_dict.get("path")
+            or [
                 f"https://ld.stadt-zuerich.ch/statistics/property/{dimension_dict['identifier']}"
             ],
             column=dimension_dict.get("column"),
