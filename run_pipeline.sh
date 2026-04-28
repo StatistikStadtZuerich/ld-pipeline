@@ -23,8 +23,30 @@ findRunningSignal() {
 findStartSignal() {
   findSignal "$_start_signal_prefix"
 }
+loadSetting() {
+  # $1 setting
+  # $2 fallback
+  # $3 input
+  local value
+  value=$(grep -i "^$1[:=]" "$3" | sed -r 's/^[^:=]+[:=]//; s/ //g' | head -1)
+  if [ -z "${value:-}" ]; then
+    echo "$2"
+  else
+    echo "$value"
+  fi
+}
 ##############################################
 ENV="${1:-local}"
+
+# Determine default settings
+case "$ENV" in
+  prod)
+    branch=main
+    ;;
+  *)
+    branch=develop
+    ;;
+esac
 
 runningSignal="$(findRunningSignal)"
 [ -z "$runningSignal" ] || { debug "Detected running pipeline: '$runningSignal'; STOP"; exit 0; }
@@ -34,10 +56,12 @@ startSignal="$(findStartSignal)"
 [ -r "$startSignal" ] || { debug "Could not read start-signal '$startSignal'"; exit 1; }
 # Extract the run-id
 RUN_ID="$(basename "$startSignal" .txt | sed "s/$_start_signal_prefix//")"
+# Extract further run-parameters for the pipeline
+branch="$(loadSetting branch "$branch" "$startSignal")"
+target_env="$(loadSetting target-env "$ENV" "$startSignal")"
 ( # Lock the start-signal for execution
   flock -xn 1001 || { debug "Could not acquire exclusive lock on '$startSignal'"; exit 0; }
   debug "Starting ($ENV) Pipeline with runID $RUN_ID"
-  # TODO(future work): Read settings from the start-signal
 
   # Create Running-Signal
   _runFile="$START_SIGNAL_FOLDER/${_running_signal_prefix}${RUN_ID}.txt"
@@ -45,6 +69,8 @@ RUN_ID="$(basename "$startSignal" .txt | sed "s/$_start_signal_prefix//")"
 Started: $(date -u +%FT%TZ)
   Run ID: $RUN_ID
   Env: $ENV
+  Branch: $branch
+  Target-Env: $target_env
 EOF
   # Move start-signal out of the way
   mkdir -p "$START_SIGNAL_FOLDER/done"
@@ -67,7 +93,7 @@ EOF
     # Acquire WRITE-lock on the current directory
     flock -xn 999 || { debug "Could not acquire write-lock"; exit 0; }
 
-    git pull -q --ff-only || {
+    (git fetch -qf && git checkout -qf "$branch") || {
       echo "Failed to update git from remote"
       exit 9
     }
@@ -79,6 +105,7 @@ EOF
   ARGS=(
     --env "$ENV"
     --runId "$RUN_ID"
+    --targetEnv "$target_env"
     --config "$SCRIPT_HOME/config.ini"
   )
   if [ -f "$SCRIPT_HOME/$ENV.ini" ]; then

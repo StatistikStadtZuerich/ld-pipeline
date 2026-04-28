@@ -43,6 +43,9 @@ DONE_DIR="$INPUT_DIR/done"
   RUN_ID="$(grep -i "^Run-Id:" "$startSignal" | cut -d: -f 2 | sed 's/ //g')"
   RUN_ID="${RUN_ID:-$(date -u +"%FT%H-%M-%SZ")}"
 
+  TARGET_ENV="$(grep -i "^Target-Env:" "$startSignal" | cut -d: -f 2 | sed 's/ //g')"
+  TARGET_ENV="${TARGET_ENV:-test}"
+
   # Move start signal files to done directory
   mkdir -p "$DONE_DIR"
   mv "$startSignal" "$DONE_DIR/"
@@ -50,5 +53,5 @@ DONE_DIR="$INPUT_DIR/done"
   mkdir -p "$LOG_DIR"
   LOG_FILE="$LOG_DIR/fuseki_index_${ENV_NAME}_${RUN_ID}.log"
 
-  "${SCRIPT_HOME}/create_fuseki_index.sh" "$ENV_NAME" "$RUN_ID" >> "$LOG_FILE" 2>&1
+  "${SCRIPT_HOME}/create_fuseki_index.sh" "$ENV_NAME" "$RUN_ID" "$TARGET_ENV" >> "$LOG_FILE" 2>&1
 ) 999<"$SCRIPT_HOME" 1001<"$INPUT_DIR"
