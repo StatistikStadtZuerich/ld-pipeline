@@ -157,7 +157,6 @@ class TemplatingOptimized(Step):
             environment.config.get("template_output_path"), self._output_filename
         )
         output_table = self._output_filename
-        env = self._options["env"]
         only_vb_cubes = environment.config.get("only_vb_cubes")
 
         output_folder = os.path.dirname(output_filepath)
