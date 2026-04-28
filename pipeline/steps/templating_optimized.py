@@ -112,7 +112,7 @@ class TemplatingOptimized(Step):
                 counter_rows += 1
                 triples = template.render(row)
                 batch.append(triples)
-            self.logger.info("done")
+            self.logger.info(f"Done with {counter_rows} rows")
 
             end_time = time.time()
             iteration_time = end_time - start_time
@@ -146,6 +146,7 @@ class TemplatingOptimized(Step):
                 )
                 time.sleep(delay)
             self.logger.info(f"{counter}. iteration is finished.")
+        self.logger.info(f"Total number of rows processed: {number_rows_total}")
 
         if batch:
             self._write_batch(
@@ -163,15 +164,21 @@ class TemplatingOptimized(Step):
         output_folder = os.path.dirname(output_filepath)
 
         with environment.get_db_connection() as connection:
-            tablename = self._sql_view_name
+            tablename = environment.view_name(self._sql_view_name)
             query = self._load_sql_query(environment)
 
             with connection.cursor() as cursor:
                 like_conditions = ""
 
-                if only_vb_cubes == "true" and tablename == f"view_observation_{env}":
+                if (
+                    only_vb_cubes == "true"
+                    and self._sql_view_name == "view_observation"
+                ):
                     cursor.execute(
-                        f"SELECT DISTINCT t.cube_id FROM view_vb_source_{env} t"
+                        BaseSQLStep.render_sql(
+                            environment,
+                            "SELECT DISTINCT t.cube_id FROM [{{ 'view_vb_source' | view_name }}] t",
+                        )
                     )
                     rows = cursor.fetchall()
                     if len(rows) > 0:
