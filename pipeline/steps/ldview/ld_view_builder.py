@@ -31,18 +31,58 @@ class LdViewBuilder(Base):
                 for source_dict in source_dict_list
             ]
 
-            dimensions, dz, dr = self._get_static_dimensions(view, sources)
-            view.dimensions.extend(dimensions)
+            static_dimension_dicts = [
+                {
+                    "identifier": "ZEIT",
+                    "name": "Key Zeit",
+                    "label": "Zeit",
+                    "description": "Zeitdimension",
+                },
+                {
+                    "identifier": "RAUM",
+                    "name": "Key Raum",
+                    "label": "Raum",
+                    "description": "Raumdimension",
+                },
+            ]
 
-            dimension_dict_list = self._list_dimensions_by_view_id(view.id)
-            for dimension_dict in dimension_dict_list:
-                view.dimensions.extend(
-                    self._create_dimensions_from_dimension_dict(dimension_dict, sources)
+            if view.include_datenstatus:
+                static_dimension_dicts.append(
+                    {
+                        "identifier": "DATENSTATUS",
+                        "name": "Datenstatus",
+                        "description": "Datenstatus des Datenpunktes",
+                        "path": [
+                            "https://ld.stadt-zuerich.ch/statistics/property/STATUS",
+                            "https://schema.org/name",
+                        ],
+                        "column": Attribute(
+                            "Datenstatus (lang)",
+                            "DATENSTATUS",
+                            "Datenstatus des Datenpunktes",
+                        ),
+                        "skip_lookups": True,
+                    }
                 )
 
-            dimensions_by_name = {
-                d.name: d for d in view.dimensions if isinstance(d, BasicDimension)
+            hierarchy_dict_list = self._list_hierarchies_by_view_id(view.id)
+            dimension_identifiers_with_hierarchy = {
+                h["dimension"] for h in hierarchy_dict_list
             }
+
+            dimension_dict_list = (
+                static_dimension_dicts + self._list_dimensions_by_view_id(view.id)
+            )
+            for dimension_dict in dimension_dict_list:
+                view.dimensions.extend(
+                    self._create_dimensions_from_dimension_dict(
+                        dimension_dict,
+                        sources,
+                        skip_lookups=dimension_dict.get("skip_lookups", False)
+                        or dimension_dict["identifier"]
+                        in dimension_identifiers_with_hierarchy,
+                    )
+                )
 
             filter_dict_list = self._list_filters_by_view_id(view.id)
             for filter_dict in filter_dict_list:
@@ -64,103 +104,33 @@ class LdViewBuilder(Base):
                     )
                 )
 
-            hierarchy_dict_list = self._list_hierarchies_by_view_id(view.id)
-            for hierarchy_dict in hierarchy_dict_list:
-                dim_name = hierarchy_dict["dimension"]
-                parent_dimension = dimensions_by_name.get(dim_name)
+            dimensions_by_name = {
+                d.identifier: d
+                for d in view.dimensions
+                if isinstance(d, BasicDimension)
+            }
 
+            hierarchies_by_dimension = {}
+            for h in hierarchy_dict_list:
+                hierarchies_by_dimension.setdefault(h["dimension"], []).append(h)
+
+            for dim_name, hierarchies in hierarchies_by_dimension.items():
+                parent_dimension = dimensions_by_name.get(dim_name)
                 if parent_dimension is None:
-                    self.logger.warn(
+                    self.logger.warning(
                         f"Hierarchy references unknown dimension '{dim_name}', skipping."
                     )
                     continue
-
-                view.dimensions.extend(
-                    self._create_dimensions_from_hierarchy_dict(
-                        hierarchy_dict, parent_dimension
+                for hierarchy_dict in hierarchies:
+                    view.dimensions.extend(
+                        self._create_dimensions_from_hierarchy_dict(
+                            hierarchy_dict, parent_dimension
+                        )
                     )
-                )
             view.sort_and_numerate_dimensions()
-
-            # view.sort_and_numerate_dimensions()
             views.append(view)
 
         return views
-
-    ###### STATIC ########
-    def _get_static_dimensions(self, view, sources):
-        dz = BasicDimension(
-            "ZEIT",
-            "Key Zeit",
-            ["https://ld.stadt-zuerich.ch/statistics/property/ZEIT"],
-            None,
-            sources,
-        )
-        dr = BasicDimension(
-            "RAUM",
-            "Key Raum",
-            ["https://ld.stadt-zuerich.ch/statistics/property/RAUM"],
-            None,
-            sources,
-        )
-
-        azl = Attribute(
-            "Zeit (lang)",
-            "ZEIT_LANG",
-            "Name des Zeitpunkts / der Periode, auf den sich der Datenpunkt bezieht.",
-        )
-        azc = Attribute(
-            "Zeit (code)",
-            "ZEIT_CODE",
-            "Code des Zeitpunkts / der Periode, auf den sich der Datenpunkt bezieht.",
-        )
-        arl = Attribute(
-            "Raum (lang)",
-            "RAUM_LANG",
-            "Name der administrativen räumlichen Einheit, auf die sich der Datenpunkt bezieht",
-        )
-        arc = Attribute(
-            "Raum (code)",
-            "RAUM_CODE",
-            "Code der administrativen räumlichen Einheit, auf die sich der Datenpunkt bezieht",
-        )
-        ars = Attribute(
-            "Raum (sort)",
-            "RAUM_SORT",
-            "Hilfswert zur Sortierung nach der administrativen räumlichen Einheit, auf die sich der Datenpunkt bezieht",
-        )
-
-        dzl = LookupDimension("ZEIT_LANG", None, ["https://schema.org/name"], azl, dz)
-        dzc = LookupDimension(
-            "ZEIT_CODE", None, ["https://schema.org/termCode"], azc, dz
-        )
-        drl = LookupDimension("RAUM_LANG", None, ["https://schema.org/name"], arl, dr)
-        drc = LookupDimension(
-            "RAUM_CODE", None, ["https://schema.org/termCode"], arc, dr
-        )
-        drs = LookupDimension(
-            "RAUM_SORT", None, ["https://schema.org/position"], ars, dr
-        )
-
-        dimensions = [dz, dr, dzl, dzc, drl, drc, drs]
-
-        if view.include_datenstatus:
-            ads = Attribute(
-                "Datenstatus (lang)", "DATENSTATUS", "Datenstatus des Datenpunktes"
-            )
-            dds = BasicDimension(
-                "DATENSTATUS",
-                "Datenstatus",
-                [
-                    "https://ld.stadt-zuerich.ch/statistics/property/STATUS",
-                    "https://schema.org/name",
-                ],
-                ads,
-                sources,
-            )
-            dimensions.append(dds)
-
-        return dimensions, dz, dr
 
     def _get_view_data(self, view_name, view_id=None):
         cache_ident = view_name + "_" + str(view_id)
@@ -271,7 +241,7 @@ class LdViewBuilder(Base):
         )
 
         if basic_dimension is None:
-            self.logger.warn(
+            self.logger.warning(
                 f"View contains filter dimension {filter_dict['dimension']}, which is not in the list of dimensions"
             )
             return None, None
@@ -291,25 +261,31 @@ class LdViewBuilder(Base):
         )
         return filter_value, filter_dimension
 
-    def _create_dimensions_from_dimension_dict(self, dimension_dict, sources) -> List:
+    def _create_dimensions_from_dimension_dict(
+        self, dimension_dict, sources, skip_lookups=False
+    ) -> List:
         dimension = BasicDimension(
             identifier=dimension_dict["identifier"],
             name=dimension_dict["name"],
-            path=[
+            path=dimension_dict.get("path")
+            or [
                 f"https://ld.stadt-zuerich.ch/statistics/property/{dimension_dict['identifier']}"
             ],
-            column=None,
+            column=dimension_dict.get("column"),
             sources=sources,
         )
+        if skip_lookups:
+            return [dimension]
 
+        label = dimension_dict.get("label") or dimension_dict["name"]
         alang = Attribute(
-            name=f"{dimension_dict['name']} (lang)",
+            name=f"{label} (lang)",
             alternate_name=f"{dimension_dict['identifier']}_LANG",
             description=dimension_dict["description"],
         )
 
         acode = Attribute(
-            name=f"{dimension_dict['name']} (code)",
+            name=f"{label} (code)",
             alternate_name=f"{dimension_dict['identifier']}_CODE",
             description=dimension_dict[
                 "description"
@@ -317,7 +293,7 @@ class LdViewBuilder(Base):
         )
 
         asort = Attribute(
-            name=f"{dimension_dict['name']} (sort)",
+            name=f"{label} (sort)",
             alternate_name=f"{dimension_dict['identifier']}_SORT",
             description=dimension_dict[
                 "description"
@@ -370,26 +346,27 @@ class LdViewBuilder(Base):
         return dimension
 
     def _create_dimensions_from_hierarchy_dict(self, hierarchy_dict, parent_dimension):
+        prefix = f"{parent_dimension.identifier}_{hierarchy_dict['termset'].upper()}"
         alang = Attribute(
             name=f"{hierarchy_dict['termset']} (lang)",
-            alternate_name=f"{hierarchy_dict['termset'].upper()}_LANG",
+            alternate_name=f"{prefix}_LANG",
             description=f"Name der Hierarchiestufe '{hierarchy_dict['termset']}', auf den sich der Datenpunkt bezieht.",
         )
 
         acode = Attribute(
             name=f"{hierarchy_dict['termset']} (code)",
-            alternate_name=f"{hierarchy_dict['termset'].upper()}_CODE",
+            alternate_name=f"{prefix}_CODE",
             description=f"Code der Hierarchiestufe '{hierarchy_dict['termset']}', auf den sich der Datenpunkt bezieht.",
         )
 
         asort = Attribute(
             name=f"{hierarchy_dict['termset']} (sort)",
-            alternate_name=f"{hierarchy_dict['termset'].upper()}_SORT",
+            alternate_name=f"{prefix}_SORT",
             description=f"Sortierungshilfe der Hierarchiestufe '{hierarchy_dict['termset']}', auf den sich der Datenpunkt bezieht.",
         )
 
         dlang = LookupDimension(
-            f"{hierarchy_dict['termset'].upper()}_LANG",
+            f"{prefix}_LANG",
             None,
             [
                 f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}",
@@ -399,7 +376,7 @@ class LdViewBuilder(Base):
             parent_dimension,
         )
         dcode = LookupDimension(
-            f"{hierarchy_dict['termset'].upper()}_CODE",
+            f"{prefix}_CODE",
             None,
             [
                 f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}",
@@ -409,7 +386,7 @@ class LdViewBuilder(Base):
             parent_dimension,
         )
         dsort = LookupDimension(
-            f"{hierarchy_dict['termset'].upper()}_SORT",
+            f"{prefix}_SORT",
             None,
             [
                 f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}",

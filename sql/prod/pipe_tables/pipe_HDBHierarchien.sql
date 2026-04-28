@@ -9,6 +9,7 @@ SELECT
     DWHName,
     Beschreibung,
     SprechenderFeldname,
-    Reihenfolge
+    Reihenfolge,
+    HierarchieID
 INTO [dbo].[pipe_HDBHierarchien_prod]
 FROM [dbo].[HDBHierarchien];
