@@ -12,4 +12,3 @@ CREATE VIEW [dbo].[view_dimension_hierarchy] AS
         ON p.GRUPPENCODE = h.PARENTCODE
         CROSS APPLY STRING_SPLIT(p.HIERARCHIEIDLIST, ';')
 ;
-;
