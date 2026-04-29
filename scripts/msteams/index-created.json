@@ -1,0 +1,56 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "https://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "ColumnSet",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "auto",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "❇️",
+              "style": "heading"
+            }
+          ],
+          "verticalContentAlignment": "Top"
+        },
+        {
+          "type": "Column",
+          "width": "stretch",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "${targetEnv} Fuseki-Index erstellt",
+              "wrap": true,
+              "style": "heading"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        {
+          "title": "Archiv",
+          "value": "$archive"
+        },
+        {
+          "title": "Environment",
+          "value": "$sourceEnv"
+        },
+        {
+          "title": "Target",
+          "value": "$targetEnv"
+        }
+      ]
+    }
+  ],
+  "msteams": {
+    "width": "full"
+  }
+}

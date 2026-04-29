@@ -115,9 +115,17 @@ EOF
     ARGS+=(--config "$SCRIPT_HOME/config-$ENV.ini")
   fi
 
+  NOTIFY_ARGS=(
+    --environment "$(echo "$ENV" | tr '[:lower:]' '[:upper:]')"
+    --runId "$RUN_ID"
+    --branch "$branch"
+    --targetEnv "$(echo "$target_env" | tr '[:lower:]' '[:upper:]')"
+  )
+  "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" pipeline-status --status started --icon "🚀" "${NOTIFY_ARGS[@]}"
   "${PY_VENV%/}/bin/python" "${SCRIPT_HOME}/run_pipeline.py" "${ARGS[@]}"
 
   echo "Completed: $(date -u +%FT%TZ)" >>"$_runFile"
   mv -f "$_runFile" "$(dirname "$_runFile")/$(basename "$_runFile" | sed "s/^$_running_signal_prefix/$_done_signal_prefix/")"
+  "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" pipeline-status --status finished --icon "🏁" "${NOTIFY_ARGS[@]}"
   debug "Pipeline run $RUN_ID completed."
 ) 999<"$SCRIPT_HOME" 1001<>"$startSignal"
