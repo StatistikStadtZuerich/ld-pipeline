@@ -65,6 +65,6 @@ done
 # shellcheck disable=SC2016
 FILTER_EXPR='walk(if type == "string" then reduce ($ARGS.named | keys_unsorted[]) as $k (.; gsub("\\$" + $k + "|\\$\\{" + $k + "\\}"; $ARGS.named[$k])) else . end)'
 
-PAYLOAD=$(jq "${JQ_ARGS[@]}" "$FILTER_EXPR" "$TEMPLATE")
+PAYLOAD="$(jq "${JQ_ARGS[@]}" "$FILTER_EXPR" "$TEMPLATE")"
 
 curl -s -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$TEAMS_HOOK_URL"
