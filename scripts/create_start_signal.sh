@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-ENV_NAME="${1:-local}"
-
+ENV_NAME=""
 CONTENT=""
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -11,6 +10,15 @@ while [ $# -gt 0 ]; do
     --target)
       CONTENT="${CONTENT}target-env=$2\n"
       shift ;;
+    -*)
+      echo "Unknown parameter '$1'" >&2
+      exit 1 ;;
+    *)
+      if [ -n "$ENV_NAME" ]; then
+        echo "Env already set to '$ENV_NAME', ignoring '$1'" >&2
+        exit 1
+      fi
+      ENV_NAME="$1" ;;
     esac
     shift
 done
