@@ -102,6 +102,6 @@ class Utils(Base):
                 )
                 + "\n"
             )
-        self.logger.debug(
-            f"Start signal '{file_name}' for '{target_env}' has been created."
+        self.logger.info(
+            f"Start signal '{file_path}' for '{target_env}' has been created."
         )

@@ -11,7 +11,7 @@ _done_signal_prefix="Finished_pipeline_"
 ##############################################
 debug() {
   if [ "${DEBUG:-false}" = "true" ]; then
-    echo "$(date -u +%FT%TZ) [DEBUG] $*"
+    echo "$(date -u +%FT%TZ) ($$) [DEBUG] $*"
   fi
 }
 findSignal() {
@@ -63,6 +63,13 @@ target_env="$(loadSetting target-env "$ENV" "$startSignal")"
   flock -xn 1001 || { debug "Could not acquire exclusive lock on '$startSignal'"; exit 0; }
   debug "Starting ($ENV) Pipeline with runID $RUN_ID"
 
+  # Acquire lock on the current directory
+  if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
+    flock -xn 999 || { debug "Could not acquire write-lock"; exit 0; }
+  else
+    flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
+  fi
+
   # Create Running-Signal
   _runFile="$START_SIGNAL_FOLDER/${_running_signal_prefix}${RUN_ID}.txt"
   cat >"$_runFile" <<EOF
@@ -77,10 +84,6 @@ EOF
   mv "$startSignal" "$START_SIGNAL_FOLDER/done/"
   echo "Started: $(date -u +%FT%TZ)" >&1001
 
-  # Launch the Pipeline-Execution
-  # Acquire READ-lock on the current directory
-  flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
-
   export PYENV_VERSION=3.12.1
   PY_VENV="${PY_VENV:-/home/lod_pipeline/venv-ld-pipeline-2024/}"
 
@@ -90,7 +93,7 @@ EOF
 
   cd "${SCRIPT_HOME}" || exit 2
   if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
-    # Acquire WRITE-lock on the current directory
+    # Make sure we have a write-lock before updating the codebase
     flock -xn 999 || { debug "Could not acquire write-lock"; exit 0; }
 
     (git fetch -qf && git checkout -qf "$branch") || {
@@ -98,9 +101,9 @@ EOF
       exit 9
     }
 
-    # Re-acquire READ-lock on the current directory
-    flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
   fi
+  # Whatever we did before, from now on we only need a read-lock
+  flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
 
   ARGS=(
     --env "$ENV"
@@ -118,6 +121,6 @@ EOF
   "${PY_VENV%/}/bin/python" "${SCRIPT_HOME}/run_pipeline.py" "${ARGS[@]}"
 
   echo "Completed: $(date -u +%FT%TZ)" >>"$_runFile"
-  mv -f "$_runFile" "$(dirname "$_runFile")/$(basename "$_runFile" | sed "s/^$_running_signal_prefix/$_done_signal_prefix/")"
+  mv -f "$_runFile" "$START_SIGNAL_FOLDER/${_done_signal_prefix}${RUN_ID}.txt"
   debug "Pipeline run $RUN_ID completed."
 ) 999<"$SCRIPT_HOME" 1001<>"$startSignal"
