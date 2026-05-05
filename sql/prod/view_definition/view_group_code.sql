@@ -28,7 +28,7 @@ SELECT DISTINCT
     t.SAMEAS AS sameAs,
 
     REPLACE(t.HIERARCHIE, ' ', '') AS term_sets_name,
-    UPPER(REPLACE(REPLACE(t.HIERARCHIE, ' ', ''), '-', '')) AS term_sets
+    t.HIERARCHIEIDLIST AS term_sets
  
 FROM [dbo].[pipe_HDBGruppenliste_prod] t
 LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] ag
