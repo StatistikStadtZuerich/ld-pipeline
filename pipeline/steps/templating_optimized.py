@@ -6,6 +6,7 @@ import gzip
 import shutil
 import time
 from typing import Dict, Any
+from itertools import groupby as itertools_groupby
 
 from database import BaseSQLStep
 from ..base import Step, Environment, Utils
@@ -40,7 +41,21 @@ class TemplatingOptimized(Step):
                 pathlib.Path(self._sql_filepath),
             )
 
-    def process_triples(self, tablename, cursor, template, output_folder):
+    def _write_batch(
+        self, batch, output_folder, output_folder_tmp, env, output_table, timestamp
+    ):
+        """Writes a batch of triples to a gzipped file."""
+        uniqid = str(uuid.uuid4())
+        filename = f"{env}_{output_table}_{timestamp}_{uniqid}.ttl.gz"
+        dest_file = f"{output_folder}/{filename}"
+        dest_file_tmp = f"{output_folder_tmp}/{filename}"
+        self.logger.info(f"Writing batch data to {os.path.basename(dest_file_tmp)} ...")
+        with gzip.open(dest_file_tmp, "at") as f_out:
+            f_out.write("\n".join(batch) + "\n")
+        shutil.move(dest_file_tmp, dest_file)
+        self.logger.info("File is created.")
+
+    def process_triples(self, tablename, cursor, template, output_folder, output_table):
         db_batch_size = 100000
         write_batch_size = 500000
         max_iteration = None
@@ -104,18 +119,15 @@ class TemplatingOptimized(Step):
             iteration_durations.append(iteration_time)
 
             if len(batch) >= write_batch_size:
-                uniqid = str(uuid.uuid4())
-                filename = f"{env}_{tablename}_{timestamp}_{uniqid}.ttl.gz"
-                dest_file = f"{output_folder}/{filename}"
-                dest_file_tmp = f"{output_folder_tmp}/{filename}"
-                self.logger.info(
-                    f"Writing batch data to {os.path.basename(dest_file_tmp)} ..."
+                self._write_batch(
+                    batch,
+                    output_folder,
+                    output_folder_tmp,
+                    env,
+                    output_table,
+                    timestamp,
                 )
-                with gzip.open(dest_file_tmp, "at") as f_out:
-                    f_out.write("\n".join(batch) + "\n")
                 batch.clear()
-                shutil.move(dest_file_tmp, dest_file)
-                self.logger.info("File is created.")
             offset += db_batch_size
 
             if len(iteration_durations) > 10:
@@ -137,22 +149,15 @@ class TemplatingOptimized(Step):
         self.logger.info(f"Total number of rows processed: {number_rows_total}")
 
         if batch:
-            uniqid = str(uuid.uuid4())
-            filename = f"{env}_{tablename}_{timestamp}_{uniqid}.ttl.gz"
-            dest_file = f"{output_folder}/{filename}"
-            dest_file_tmp = f"{output_folder_tmp}/{filename}"
-            self.logger.info(
-                f"Writing remaining batch data to {os.path.basename(dest_file_tmp)} ..."
+            self._write_batch(
+                batch, output_folder, output_folder_tmp, env, output_table, timestamp
             )
-            with gzip.open(dest_file_tmp, "at") as f_out:
-                f_out.write("\n".join(batch) + "\n")
-            shutil.move(dest_file_tmp, dest_file)
-            self.logger.info("File is created.")
 
     def run(self, environment: Environment):
         output_filepath = os.path.join(
             environment.config.get("template_output_path"), self._output_filename
         )
+        output_table = self._output_filename
         only_vb_cubes = environment.config.get("only_vb_cubes")
 
         output_folder = os.path.dirname(output_filepath)
@@ -207,4 +212,87 @@ class TemplatingOptimized(Step):
                     self._template_filename, output_filepath
                 ) as template_engine:
                     template = template_engine.get_template()
-                    self.process_triples(tablename, cursor, template, output_folder)
+                    self.process_triples(
+                        tablename, cursor, template, output_folder, output_table
+                    )
+
+
+class GroupedTemplatingOptimized(TemplatingOptimized):
+    """
+    Wie TemplatingOptimized, aber gruppiert Rows nach einem Key (z.B. termset_code)
+    bevor sie ans Template übergeben werden.
+
+    Benötigt options["group_by"]: der Spaltenname nach dem gruppiert wird.
+    Die SQL Query muss nach diesem Spaltenname sortiert sein (ORDER BY termset_code).
+    """
+
+    def process_triples(self, tablename, cursor, template, output_folder, output_table):
+        db_batch_size = 100000
+        write_batch_size = 500000
+        env = self._options["env"]
+        group_by = self._options["group_by"]  # z.B. "termset_code"
+
+        if "db_batch_size" in self._options:
+            db_batch_size = self._options["db_batch_size"]
+        if "write_batch_size" in self._options:
+            write_batch_size = self._options["write_batch_size"]
+
+        output_folder_tmp = output_folder + "/tmp"
+        os.makedirs(output_folder_tmp, exist_ok=True)
+
+        now = datetime.now()
+        timestamp = now.strftime("%Y%m%d%H%M%S")
+        batch = []
+
+        # Wichtig: ORDER BY group_by damit Gruppen nicht über Batches aufgeteilt werden
+        query = f"SELECT * FROM #{tablename} ORDER BY {group_by}, _sort_order"
+        offset = 0
+        running = True
+        leftover_rows = []  # letzte Gruppe des vorherigen Batches
+
+        while running:
+            cursor.execute(
+                f"{query} OFFSET {offset} ROWS FETCH NEXT {db_batch_size} ROWS ONLY"
+            )
+            rows = cursor.fetchall()
+
+            if not rows:
+                self.logger.info("No rows left.")
+                running = False
+                # letzte Gruppe noch rendern
+                if leftover_rows:
+                    triples = template.render({"rows": leftover_rows})
+                    batch.append(triples)
+                break
+
+            # Rows vom letzten Batch vorne anhängen
+            rows = leftover_rows + list(rows)
+            leftover_rows = []
+
+            # Letzte Gruppe zurückhalten — könnte im nächsten Batch weitergehen
+            last_group_key = rows[-1][group_by]
+            safe_rows = [r for r in rows if r[group_by] != last_group_key]
+            leftover_rows = [r for r in rows if r[group_by] == last_group_key]
+
+            # Gruppieren und pro Gruppe rendern
+            for _, group in itertools_groupby(safe_rows, key=lambda r: r[group_by]):
+                triples = template.render({"rows": list(group)})
+                batch.append(triples)
+
+            offset += db_batch_size
+
+            if len(batch) >= write_batch_size:
+                self._write_batch(
+                    batch,
+                    output_folder,
+                    output_folder_tmp,
+                    env,
+                    output_table,
+                    timestamp,
+                )
+                batch.clear()
+
+        if batch:
+            self._write_batch(
+                batch, output_folder, output_folder_tmp, env, output_table, timestamp
+            )
