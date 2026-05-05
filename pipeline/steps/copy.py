@@ -13,7 +13,7 @@ class Copy(Step):
     creating it if it doesn’t exist, and overwriting it if it does.
     """
 
-    def __init__(self, source, target, options={}):
+    def __init__(self, source, target, options = None):
         """
         Copy file from source to target
         :param source absolute filepath (or relative to runner file)
@@ -22,7 +22,7 @@ class Copy(Step):
         super().__init__()
         self._source = source
         self._target = target
-        self._options = options
+        self._options = options or {}
 
     def run(self, environment: Environment):
         out_dir = environment.config.get("output_path")
