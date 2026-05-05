@@ -27,31 +27,31 @@ export PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-/home/lod_pipeline/hdb_dropzone/p
 export LOG_DIR="${LOG_DIR:-/home/lod_pipeline/logs}"
 DONE_DIR="$INPUT_DIR/done"
 
-(
-  # Acquire READ-lock on the current directory
-  flock -sn 999 || { exit 0; }
+exec 999<"$SCRIPT_HOME" 1001<"$INPUT_DIR"
 
-  # Check for a start signal file
-  startSignal="$(findSignal "start_fuseki_index_")"
-  [ -n "$startSignal" ] || exit 0 # No start signal found
-  [ -r "$startSignal" ] || { echo "Could not read '$startSignal'; ERROR"; exit 1; }
+# Acquire READ-lock on the current directory
+flock -sn 999 || { exit 0; }
 
-  # Get an exclusive lock on the input dir to avoid parallel execution
-  flock -xn 1001 || exit 0
+# Check for a start signal file
+startSignal="$(findSignal "start_fuseki_index_")"
+[ -n "$startSignal" ] || exit 0 # No start signal found
+[ -r "$startSignal" ] || { echo "Could not read '$startSignal'; ERROR"; exit 1; }
 
-  # Parse the run-id from the start-file
-  RUN_ID="$(grep -i "^Run-Id:" "$startSignal" | cut -d: -f 2 | sed 's/ //g')"
-  RUN_ID="${RUN_ID:-$(date -u +"%FT%H-%M-%SZ")}"
+# Get an exclusive lock on the input dir to avoid parallel execution
+flock -xn 1001 || exit 0
 
-  TARGET_ENV="$(grep -i "^Target-Env:" "$startSignal" | cut -d: -f 2 | sed 's/ //g')"
-  TARGET_ENV="${TARGET_ENV:-test}"
+# Parse the run-id from the start-file
+RUN_ID="$(grep -i "^Run-Id:" "$startSignal" | cut -d: -f 2 | sed 's/ //g')"
+RUN_ID="${RUN_ID:-$(date -u +"%FT%H-%M-%SZ")}"
 
-  # Move start signal files to done directory
-  mkdir -p "$DONE_DIR"
-  mv "$startSignal" "$DONE_DIR/"
+TARGET_ENV="$(grep -i "^Target-Env:" "$startSignal" | cut -d: -f 2 | sed 's/ //g')"
+TARGET_ENV="${TARGET_ENV:-test}"
 
-  mkdir -p "$LOG_DIR"
-  LOG_FILE="$LOG_DIR/fuseki_index_${ENV_NAME}_${RUN_ID}.log"
+# Move start signal files to done directory
+mkdir -p "$DONE_DIR"
+mv "$startSignal" "$DONE_DIR/"
 
-  "${SCRIPT_HOME}/create_fuseki_index.sh" "$ENV_NAME" "$RUN_ID" "$TARGET_ENV" >> "$LOG_FILE" 2>&1
-) 999<"$SCRIPT_HOME" 1001<"$INPUT_DIR"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/fuseki_index_${ENV_NAME}_${RUN_ID}.log"
+
+"${SCRIPT_HOME}/create_fuseki_index.sh" "$ENV_NAME" "$RUN_ID" "$TARGET_ENV" >> "$LOG_FILE" 2>&1
