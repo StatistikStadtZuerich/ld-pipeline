@@ -7,7 +7,7 @@ from .copy import Copy
 
 
 class BuildInfo(Copy):
-    def __init__(self, options = None):
+    def __init__(self, options=None):
         """
         Adds build information to output
         """
