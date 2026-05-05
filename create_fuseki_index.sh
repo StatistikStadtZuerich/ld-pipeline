@@ -35,6 +35,7 @@ log "Loading all .gz files in $INPUT_DIR"
 # Move all .gz files from the input to the temporary directory
 rm -rf "$TMP_DIR" && mkdir -p "$TMP_DIR"
 for FILE in "$INPUT_DIR"/*.gz; do
+    [ -e "$FILE" ] || continue
     if [ -r "$FILE" ]; then
         log "Moving $FILE to $TMP_DIR"
         mv "$FILE" "$TMP_DIR/"

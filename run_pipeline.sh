@@ -29,7 +29,7 @@ loadSetting() {
   # $2 fallback
   # $3 input
   local value
-  value=$(grep -i "^$1[:=]" "$3" | sed -r 's/^[^:=]+[:=]//; s/ //g' | head -1)
+  value=$(grep -i "^$1[:=]" "$3" | sed -E 's/^[^:=]+[:=]//; s/ //g' | head -1)
   if [ -z "${value:-}" ]; then
     echo "$2"
   else
@@ -76,7 +76,7 @@ if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
 
   # Update the codebase
   _before="$(git rev-parse HEAD)"
-  (git fetch -qf && git checkout -qf "$branch") || {
+  (git fetch -qf && git checkout -qf "$branch" && git pull -qf origin "$branch") || {
     echo "Failed to update git from remote"
     exit 9
   }

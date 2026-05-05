@@ -41,10 +41,10 @@ startSignal="$(findSignal "start_fuseki_index_")"
 flock -xn 1001 || exit 0
 
 # Parse the run-id from the start-file
-RUN_ID="$(grep -i "^Run-Id:" "$startSignal" | cut -d: -f 2 | sed 's/ //g')"
+RUN_ID="$(grep -i "^Run-Id:" "$startSignal" | cut -d: -f 2- | sed 's/ //g')"
 RUN_ID="${RUN_ID:-$(date -u +"%FT%H-%M-%SZ")}"
 
-TARGET_ENV="$(grep -i "^Target-Env:" "$startSignal" | cut -d: -f 2 | sed 's/ //g')"
+TARGET_ENV="$(grep -i "^Target-Env:" "$startSignal" | cut -d: -f 2- | sed 's/ //g')"
 TARGET_ENV="${TARGET_ENV:-test}"
 
 # Move start signal files to done directory
