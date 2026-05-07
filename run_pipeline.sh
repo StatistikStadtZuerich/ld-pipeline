@@ -68,6 +68,7 @@ branch="$(loadSetting branch "$branch" "$startSignal")"
 target_env="$(loadSetting target-env "$ENV" "$startSignal")"
 
 debug "Starting ($ENV) Pipeline with runID $RUN_ID"
+GIT_REV=""
 if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
   # Acquire write-lock on the current directory
   flock -xn 999 || { debug "Could not acquire write-lock"; exit 0; }
@@ -76,7 +77,7 @@ if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
 
   # Update the codebase
   _before="$(git rev-parse HEAD)"
-  (git fetch -qf && git checkout -qf "$branch" && git pull -qf origin "$branch") || {
+  (git reset -q --hard HEAD && git fetch -q -f && git checkout -q -f "$branch" && git pull -q -f "$branch") || {
     echo "Failed to update git from remote"
     exit 9
   }
@@ -86,9 +87,12 @@ if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
     # Disable auto-update to avoid an endless cycle
     export GIT_AUTO_UPDATE=false
     debug "git pull/checkout changed the codebase, restarting $0"
-    # Relaunch the script, FDs and locks should be keept
+    # Relaunch the script, FDs and locks should be kept
     exec "$0" "${SCRIPT_ARGS[@]}"
   fi
+  GIT_REV="$_after"
+else
+  GIT_REV="$(cd "$SCRIPT_HOME" && git rev-parse HEAD)"
 fi
 # From now on, a read-lock is sufficient
 flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
@@ -100,6 +104,7 @@ Started: $(date -u +%FT%TZ)
   Run ID: $RUN_ID
   Env: $ENV
   Branch: $branch
+  Git-Rev: $GIT_REV
   Target-Env: $target_env
 EOF
 # Move start-signal out of the way
@@ -134,7 +139,14 @@ NOTIFY_ARGS=(
   --targetEnv "$(echo "$target_env" | tr '[:lower:]' '[:upper:]')"
 )
 "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" pipeline-status --status started --icon "🚀" "${NOTIFY_ARGS[@]}"
-"${PY_VENV%/}/bin/python" "${SCRIPT_HOME}/run_pipeline.py" "${ARGS[@]}"
+(
+  cd "$SCRIPT_HOME" || { debug "Could not change to '$SCRIPT_HOME'"; exit 2; }
+  "${PY_VENV%/}/bin/python" "${SCRIPT_HOME}/run_pipeline.py" "${ARGS[@]}"
+) || {
+  exit_code="$?"
+  "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" pipeline-error --exitCode "$exit_code" "${NOTIFY_ARGS[@]}"
+  exit "${exit_code}"
+}
 
 echo "Completed: $(date -u +%FT%TZ)" >>"$_runFile"
 mv -f "$_runFile" "$START_SIGNAL_FOLDER/${_done_signal_prefix}${RUN_ID}.txt"
