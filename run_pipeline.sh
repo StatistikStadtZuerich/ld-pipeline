@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT="$(readlink -f "$0")"
+SCRIPT_ARGS=("$@")
 SCRIPT_HOME="$(dirname "$SCRIPT")"
 START_SIGNAL_FOLDER="${START_SIGNAL_FOLDER:-.}"
 ##############################################
@@ -28,7 +29,7 @@ loadSetting() {
   # $2 fallback
   # $3 input
   local value
-  value=$(grep -i "^$1[:=]" "$3" | sed -r 's/^[^:=]+[:=]//; s/ //g' | head -1)
+  value=$(grep -i "^$1[:=]" "$3" | sed -E 's/^[^:=]+[:=]//; s/ //g' | head -1)
   if [ -z "${value:-}" ]; then
     echo "$2"
   else
@@ -54,73 +55,88 @@ runningSignal="$(findRunningSignal)"
 startSignal="$(findStartSignal)"
 [ -z "$startSignal" ] && { debug "No start-signal found in '$(readlink -f "$START_SIGNAL_FOLDER")'"; exit 0; }
 [ -r "$startSignal" ] || { debug "Could not read start-signal '$startSignal'"; exit 1; }
+
+exec 999<"$SCRIPT_HOME" 1001>>"$startSignal"
+
+# Lock the start-signal for execution
+flock -xn 1001 || { debug "Could not acquire exclusive lock on '$startSignal'"; exit 0; }
+
 # Extract the run-id
 RUN_ID="$(basename "$startSignal" .txt | sed "s/$_start_signal_prefix//")"
 # Extract further run-parameters for the pipeline
 branch="$(loadSetting branch "$branch" "$startSignal")"
 target_env="$(loadSetting target-env "$ENV" "$startSignal")"
-( # Lock the start-signal for execution
-  flock -xn 1001 || { debug "Could not acquire exclusive lock on '$startSignal'"; exit 0; }
-  debug "Starting ($ENV) Pipeline with runID $RUN_ID"
 
-  # Acquire lock on the current directory
-  if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
-    flock -xn 999 || { debug "Could not acquire write-lock"; exit 0; }
-  else
-    flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
+debug "Starting ($ENV) Pipeline with runID $RUN_ID"
+if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
+  # Acquire write-lock on the current directory
+  flock -xn 999 || { debug "Could not acquire write-lock"; exit 0; }
+  _cwd="$(pwd)"
+  cd "${SCRIPT_HOME}" || exit 2
+
+  # Update the codebase
+  _before="$(git rev-parse HEAD)"
+  (git fetch -qf && git checkout -qf "$branch" && git pull -qf origin "$branch") || {
+    echo "Failed to update git from remote"
+    exit 9
+  }
+  _after="$(git rev-parse HEAD)"
+  cd "$_cwd"
+  if [[ "$_before" != "$_after" ]]; then
+    # Disable auto-update to avoid an endless cycle
+    export GIT_AUTO_UPDATE=false
+    debug "git pull/checkout changed the codebase, restarting $0"
+    # Relaunch the script, FDs and locks should be keept
+    exec "$0" "${SCRIPT_ARGS[@]}"
   fi
+fi
+# From now on, a read-lock is sufficient
+flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
 
-  # Create Running-Signal
-  _runFile="$START_SIGNAL_FOLDER/${_running_signal_prefix}${RUN_ID}.txt"
-  cat >"$_runFile" <<EOF
+# Create Running-Signal
+_runFile="$START_SIGNAL_FOLDER/${_running_signal_prefix}${RUN_ID}.txt"
+cat >"$_runFile" <<EOF
 Started: $(date -u +%FT%TZ)
   Run ID: $RUN_ID
   Env: $ENV
   Branch: $branch
   Target-Env: $target_env
 EOF
-  # Move start-signal out of the way
-  mkdir -p "$START_SIGNAL_FOLDER/done"
-  mv "$startSignal" "$START_SIGNAL_FOLDER/done/"
-  echo "Started: $(date -u +%FT%TZ)" >&1001
+# Move start-signal out of the way
+mkdir -p "$START_SIGNAL_FOLDER/done"
+mv "$startSignal" "$START_SIGNAL_FOLDER/done/"
+echo "Started: $(date -u +%FT%TZ)" >&1001
 
-  export PYENV_VERSION=3.12.1
-  PY_VENV="${PY_VENV:-/home/lod_pipeline/venv-ld-pipeline-2024/}"
+export PYENV_VERSION=3.12.1
+PY_VENV="${PY_VENV:-/home/lod_pipeline/venv-ld-pipeline-2024/}"
 
-  if [ -n "${LD_LIBRARY_PATH:-}" ] && [[ ":$LD_LIBRARY_PATH:" != *":/home/lod_pipeline/openssl_1_1_1/lib:"* ]]; then
-    export LD_LIBRARY_PATH="/home/lod_pipeline/openssl_1_1_1/lib:$LD_LIBRARY_PATH"
-  fi
+if [ -n "${LD_LIBRARY_PATH:-}" ] && [[ ":$LD_LIBRARY_PATH:" != *":/home/lod_pipeline/openssl_1_1_1/lib:"* ]]; then
+  export LD_LIBRARY_PATH="/home/lod_pipeline/openssl_1_1_1/lib:$LD_LIBRARY_PATH"
+fi
 
-  cd "${SCRIPT_HOME}" || exit 2
-  if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
-    # Make sure we have a write-lock before updating the codebase
-    flock -xn 999 || { debug "Could not acquire write-lock"; exit 0; }
+ARGS=(
+  --env "$ENV"
+  --runId "$RUN_ID"
+  --targetEnv "$target_env"
+  --config "$SCRIPT_HOME/config.ini"
+)
+if [ -f "$SCRIPT_HOME/$ENV.ini" ]; then
+  ARGS+=(--config "$SCRIPT_HOME/$ENV.ini")
+fi
+if [ -f "$SCRIPT_HOME/config-$ENV.ini" ]; then
+  ARGS+=(--config "$SCRIPT_HOME/config-$ENV.ini")
+fi
 
-    (git fetch -qf && git checkout -qf "$branch") || {
-      echo "Failed to update git from remote"
-      exit 9
-    }
+NOTIFY_ARGS=(
+  --environment "$(echo "$ENV" | tr '[:lower:]' '[:upper:]')"
+  --runId "$RUN_ID"
+  --branch "$branch"
+  --targetEnv "$(echo "$target_env" | tr '[:lower:]' '[:upper:]')"
+)
+"${SCRIPT_HOME:-.}/scripts/teams-notify.sh" pipeline-status --status started --icon "🚀" "${NOTIFY_ARGS[@]}"
+"${PY_VENV%/}/bin/python" "${SCRIPT_HOME}/run_pipeline.py" "${ARGS[@]}"
 
-  fi
-  # Whatever we did before, from now on we only need a read-lock
-  flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
-
-  ARGS=(
-    --env "$ENV"
-    --runId "$RUN_ID"
-    --targetEnv "$target_env"
-    --config "$SCRIPT_HOME/config.ini"
-  )
-  if [ -f "$SCRIPT_HOME/$ENV.ini" ]; then
-    ARGS+=(--config "$SCRIPT_HOME/$ENV.ini")
-  fi
-  if [ -f "$SCRIPT_HOME/config-$ENV.ini" ]; then
-    ARGS+=(--config "$SCRIPT_HOME/config-$ENV.ini")
-  fi
-
-  "${PY_VENV%/}/bin/python" "${SCRIPT_HOME}/run_pipeline.py" "${ARGS[@]}"
-
-  echo "Completed: $(date -u +%FT%TZ)" >>"$_runFile"
-  mv -f "$_runFile" "$START_SIGNAL_FOLDER/${_done_signal_prefix}${RUN_ID}.txt"
-  debug "Pipeline run $RUN_ID completed."
-) 999<"$SCRIPT_HOME" 1001<>"$startSignal"
+echo "Completed: $(date -u +%FT%TZ)" >>"$_runFile"
+mv -f "$_runFile" "$START_SIGNAL_FOLDER/${_done_signal_prefix}${RUN_ID}.txt"
+"${SCRIPT_HOME:-.}/scripts/teams-notify.sh" pipeline-status --status finished --icon "🏁" "${NOTIFY_ARGS[@]}"
+debug "Pipeline run $RUN_ID completed."

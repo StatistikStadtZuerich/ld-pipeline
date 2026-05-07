@@ -35,6 +35,7 @@ log "Loading all .gz files in $INPUT_DIR"
 # Move all .gz files from the input to the temporary directory
 rm -rf "$TMP_DIR" && mkdir -p "$TMP_DIR"
 for FILE in "$INPUT_DIR"/*.gz; do
+    [ -e "$FILE" ] || continue
     if [ -r "$FILE" ]; then
         log "Moving $FILE to $TMP_DIR"
         mv "$FILE" "$TMP_DIR/"
@@ -116,4 +117,8 @@ log "Copying $TAR_FILE to $PIPELINE_DATA_DIR"
 cp "$TAR_FILE" "$PIPELINE_DATA_DIR" || { log "Failed to copy $TAR_FILE to $PIPELINE_DATA_DIR" >&2; exit 2; }
 log "File successfully copied to $PIPELINE_DATA_DIR"
 
+"${SCRIPT_HOME:-.}/scripts/teams-notify.sh" index-created \
+  --sourceEnv "$(echo "${ENV_NAME}" | tr '[:lower:]' '[:upper:]')" \
+  --targetEnv "$(echo "${TARGET_ENV}" | tr '[:lower:]' '[:upper:]')" \
+  --archive "$(basename "$TAR_FILE")"
 log "All files processed and import complete"
