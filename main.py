@@ -163,7 +163,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     env,
                     "time_relation_termset.ttl.jinja",
                     "time_relation_termset.ttl",
-                    f"./sql/{env_name}/view_access/view_time_termset_relation.sql",
+                    "view_time_termset_relation",
                     options=options,
                 ),
                 "Creates triples for time termset relations",
@@ -177,7 +177,7 @@ def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefini
                     "view_time_termset_relation",
                     options={**options, "grouped": True, "group_by": "termset_code"},
                 ),
-                "Creates triples for time termset relations",
+                "Creates triples for grouped time termset relations",
             ),
             StepDefinition(
                 "dimensionTermsetTemplating",
