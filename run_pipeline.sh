@@ -77,7 +77,7 @@ if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
 
   # Update the codebase
   _before="$(git rev-parse HEAD)"
-  (git reset -q --hard HEAD && git fetch -q -f && git checkout -q -f "$branch" && git pull -q -f "$branch") || {
+  (git reset -q --hard HEAD && git fetch -q -f && git checkout -q -f "$branch" && git pull -q --ff-only -f) || {
     echo "Failed to update git from remote"
     exit 9
   }
