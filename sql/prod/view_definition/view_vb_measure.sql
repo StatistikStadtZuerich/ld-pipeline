@@ -18,7 +18,7 @@ WITH cleaned_source AS (
             ),
             'XXX'
         ) + '|' AS Cleaned_Dimension_Hierarchie
-    FROM [dbo].[pipe_HDBDatenobjekte_prod] t
+    FROM [dbo].[pipe_HDBDatenobjekte] t
     CROSS APPLY OPENJSON(
         '["' + REPLACE(REPLACE(t.Kennzahl_GGH_STK_BEB, '"','\"'), ';','","') + '"]'
     ) AS j
@@ -43,7 +43,7 @@ cleaned_lookup AS (
             ),
             'XXX'
         ) + '|' AS Cleaned_CubeLookupDimension
-    FROM [dbo].[pipe_HDBCubeLookup_prod] h
+    FROM [dbo].[pipe_HDBCubeLookup] h
 )
 SELECT
     cs.view_id,
@@ -76,17 +76,17 @@ FROM cleaned_source cs
 JOIN cleaned_lookup cl
     ON cs.raw_value = cl.CubeLookupKennzahlNorm
    AND cs.Cleaned_Dimension_Hierarchie = cl.Cleaned_CubeLookupDimension
-JOIN [dbo].[pipe_HDBCubeDefinition_prod] c
+JOIN [dbo].[pipe_HDBCubeDefinition] c
     ON c.Kennzahl = LEFT(cs.raw_value, 3)
    AND c.CID = cl.CID
-JOIN [dbo].[view_vb_source_prod] s
+JOIN [dbo].[view_vb_source] s
     ON s.view_id = cs.view_id
    AND s.cube_id = REPLACE(cl.CID, 'CID_', '')
-LEFT JOIN [dbo].[pipe_HDBKennzahlen_prod] h
+LEFT JOIN [dbo].[pipe_HDBKennzahlen] h
     ON h.KennzahlCode = LEFT(cs.raw_value, 3)
-LEFT JOIN [dbo].[pipe_HDBGruppenliste_prod] g1
+LEFT JOIN [dbo].[pipe_HDBGruppenliste] g1
     ON LEN(cs.identifier_full) >= 11
    AND g1.Gruppencode = SUBSTRING(cs.identifier_full, 5, 7)
-LEFT JOIN [dbo].[pipe_HDBGruppenliste_prod] g2
+LEFT JOIN [dbo].[pipe_HDBGruppenliste] g2
     ON LEN(cs.identifier_full) >= 19
    AND g2.Gruppencode = SUBSTRING(cs.identifier_full, 13, 7);
