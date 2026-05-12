@@ -65,14 +65,6 @@ _:ZEIT_CODE_WIR100OD100A
        <https://cube.link/view/path> (<https://schema.org/termCode>);
        <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
    ].
-<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:ZEIT_SORT_WIR100OD100A .
-_:ZEIT_SORT_WIR100OD100A
-    <https://schema.org/identifier> "ZEIT_SORT";
-<https://cube.link/view/as> <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A#column3>;    <https://cube.link/view/from> [
-       <https://cube.link/view/join> _:ZEIT_WIR100OD100A;
-       <https://cube.link/view/path> (<https://schema.org/position>);
-       <https://cube.link/view/source> [ a <https://cube.link/view/LookupSource> ; ]
-   ].
 <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/dimension> _:RAUM_WIR100OD100A .
 _:RAUM_WIR100OD100A a <https://cube.link/view/Dimension>;
      <https://schema.org/identifier> "RAUM";
