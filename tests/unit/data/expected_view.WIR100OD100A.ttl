@@ -190,7 +190,7 @@ _:RAUM_QUARTIEREZH_SORT_WIR100OD100A
    ].
 
 <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://cube.link/view/projection> [
-        <https://cube.link/view/columns> (_:ZEIT_LANG_WIR100OD100A _:ZEIT_CODE_WIR100OD100A _:ZEIT_SORT_WIR100OD100A _:DATENSTATUS_WIR100OD100A _:HTY_LANG_WIR100OD100A _:HTY_CODE_WIR100OD100A _:HTY_SORT_WIR100OD100A _:HAE_GGH1400_STK1025_WIR100OD100A _:HAE_GGH1400_STK1050_WIR100OD100A _:RAUM_KREISEZH_LANG_WIR100OD100A _:RAUM_KREISEZH_CODE_WIR100OD100A _:RAUM_KREISEZH_SORT_WIR100OD100A _:RAUM_QUARTIEREZH_LANG_WIR100OD100A _:RAUM_QUARTIEREZH_CODE_WIR100OD100A _:RAUM_QUARTIEREZH_SORT_WIR100OD100A)
+        <https://cube.link/view/columns> (_:ZEIT_LANG_WIR100OD100A _:ZEIT_CODE_WIR100OD100A _:DATENSTATUS_WIR100OD100A _:HTY_LANG_WIR100OD100A _:HTY_CODE_WIR100OD100A _:HTY_SORT_WIR100OD100A _:HAE_GGH1400_STK1025_WIR100OD100A _:HAE_GGH1400_STK1050_WIR100OD100A _:RAUM_KREISEZH_LANG_WIR100OD100A _:RAUM_KREISEZH_CODE_WIR100OD100A _:RAUM_KREISEZH_SORT_WIR100OD100A _:RAUM_QUARTIEREZH_LANG_WIR100OD100A _:RAUM_QUARTIEREZH_CODE_WIR100OD100A _:RAUM_QUARTIEREZH_SORT_WIR100OD100A)
     ] .
 <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://ld.stadt-zuerich.ch/schema/dataAttribute> [
        a "https://ld.stadt-zuerich.ch/schema/Attribute";
@@ -205,13 +205,6 @@ _:RAUM_QUARTIEREZH_SORT_WIR100OD100A
        <https://schema.org/description> "Zeitdimension";
        <https://schema.org/name> "Zeit (code)";
        <https://schema.org/position> 2
-     ] .
-<https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://ld.stadt-zuerich.ch/schema/dataAttribute> [
-       a "https://ld.stadt-zuerich.ch/schema/Attribute";
-       <https://schema.org/alternateName> "ZEIT_SORT";
-       <https://schema.org/description> "Zeitdimension";
-       <https://schema.org/name> "Zeit (sort)";
-       <https://schema.org/position> 3
      ] .
 <https://ld.stadt-zuerich.ch/statistics/view/WIR100OD100A> <https://ld.stadt-zuerich.ch/schema/dataAttribute> [
        a "https://ld.stadt-zuerich.ch/schema/Attribute";
