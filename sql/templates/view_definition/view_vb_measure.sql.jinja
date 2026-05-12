@@ -6,6 +6,7 @@ WITH cleaned_source AS (
     SELECT DISTINCT
         t.SASA_Job_Output_Id AS view_id,
         TRIM(j.[value]) + '|' AS raw_value,
+        REPLACE(REPLACE(REPLACE(REPLACE(TRIM(j.[value]) + '|', '||||', ''), '|||', ''), '||', ''), '|', '_') AS identifier_full,
         COALESCE(
             (
                 SELECT STRING_AGG(val, '|' ) WITHIN GROUP (ORDER BY val)
@@ -47,10 +48,30 @@ cleaned_lookup AS (
 SELECT
     cs.view_id,
     LEFT(cs.raw_value, 3) AS identifier,
-    REPLACE(REPLACE(REPLACE(REPLACE(cs.raw_value, '||||', ''), '|||', ''), '||', ''), '|', '_') AS identifier_full,
+    cs.identifier_full,
     REPLACE(cl.CID,'CID_','') AS cube_id,
-    c.Titel AS name,
-    h.Beschreibung AS description
+    CASE
+        WHEN LEN(cs.identifier_full) = 3
+            THEN h.Kennzahlname
+        ELSE
+            CONCAT_WS(
+                ' / ',
+                h.Kennzahlname,
+                g1.Gruppencodename,
+                g2.Gruppencodename
+            )
+    END AS name,
+    CASE
+        WHEN LEN(cs.identifier_full) = 3
+            THEN h.Beschreibung
+        ELSE
+            CONCAT_WS(
+                ' / ',
+                h.Beschreibung,
+                g1.Beschreibung,
+                g2.Beschreibung
+            )
+    END AS description
 FROM cleaned_source cs
 JOIN cleaned_lookup cl
     ON cs.raw_value = cl.CubeLookupKennzahlNorm
@@ -58,8 +79,14 @@ JOIN cleaned_lookup cl
 JOIN [{{ 'dbo.pipe_HDBCubeDefinition' | pipe_table_name }}] c
     ON c.Kennzahl = LEFT(cs.raw_value, 3)
    AND c.CID = cl.CID
-JOIN [{{ 'dbo.pipe_HDBKennzahlen' | pipe_table_name }}] h
-    ON h.KennzahlCode = LEFT(cs.raw_value, 3)
 JOIN [{{ 'dbo.view_vb_source' | view_name }}] s
     ON s.view_id = cs.view_id
-   AND s.cube_id = REPLACE(cl.CID,'CID_','');
+   AND s.cube_id = REPLACE(cl.CID,'CID_','')
+LEFT JOIN [{{ 'dbo.pipe_HDBKennzahlen' | pipe_table_name }}] h
+    ON h.KennzahlCode = LEFT(cs.raw_value, 3)
+LEFT JOIN [{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}] g1
+    ON LEN(cs.identifier_full) >= 11
+   AND g1.Gruppencode = SUBSTRING(cs.identifier_full, 5, 7)
+LEFT JOIN [{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}] g2
+    ON LEN(cs.identifier_full) >= 19
+   AND g2.Gruppencode = SUBSTRING(cs.identifier_full, 13, 7);
