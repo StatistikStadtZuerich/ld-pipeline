@@ -81,7 +81,7 @@ JOIN [{{ 'dbo.pipe_HDBCubeDefinition' | pipe_table_name }}] c
    AND c.CID = cl.CID
 JOIN [{{ 'dbo.view_vb_source' | view_name }}] s
     ON s.view_id = cs.view_id
-   AND s.cube_id = REPLACE(cl.CID,'CID_','')
+   AND s.cube_id = REPLACE(cl.CID,'CID_', '')
 LEFT JOIN [{{ 'dbo.pipe_HDBKennzahlen' | pipe_table_name }}] h
     ON h.KennzahlCode = LEFT(cs.raw_value, 3)
 LEFT JOIN [{{ 'dbo.pipe_HDBGruppenliste' | pipe_table_name }}] g1
