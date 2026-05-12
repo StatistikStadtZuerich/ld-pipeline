@@ -1,7 +1,7 @@
-DROP VIEW IF EXISTS [dbo].[view_vb_measure_prod];
+DROP VIEW IF EXISTS [dbo].[view_vb_measure];
 GO
 
-CREATE VIEW [dbo].[view_vb_measure_prod] AS
+CREATE VIEW [dbo].[view_vb_measure] AS
 WITH cleaned_source AS (
     SELECT DISTINCT
         t.SASA_Job_Output_Id AS view_id,
@@ -79,7 +79,7 @@ JOIN cleaned_lookup cl
 JOIN [dbo].[pipe_HDBCubeDefinition_prod] c
     ON c.Kennzahl = LEFT(cs.raw_value, 3)
    AND c.CID = cl.CID
-JOIN [dbo].[view_vb_source_prod] s
+JOIN [dbo].[view_vb_source] s
     ON s.view_id = cs.view_id
    AND s.cube_id = REPLACE(cl.CID, 'CID_', '')
 LEFT JOIN [dbo].[pipe_HDBKennzahlen_prod] h
