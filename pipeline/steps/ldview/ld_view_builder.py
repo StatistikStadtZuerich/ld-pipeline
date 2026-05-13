@@ -322,6 +322,9 @@ class LdViewBuilder(Base):
             dimension,
         )
 
+        if dimension_dict["identifier"] == "ZEIT":
+            return [dimension, dlang, dcode]
+
         return [dimension, dlang, dcode, dsort]
 
     def _create_measurement_from_dimension_dict(self, measurement_dict, sources):
