@@ -198,8 +198,21 @@ class LdViewBuilder(Base):
             {"termset": "QuartiereZH", "dimension": "RAUM"},
         ]
         """
-        return self._get_view_data("view_vb_room_hierarchy", view_id)
+        hierarchies = self._get_view_data("view_vb_room_hierarchy", view_id)
+        existing_relations = self._get_existing_hierarchy_relations()
+        filtered = [h for h in hierarchies if h["termset"] in existing_relations]
+        if len(filtered) < len(hierarchies):
+            skipped = [h["termset"] for h in hierarchies if h not in filtered]
+            self.logger.warning(f"Skipping hierarchies with no data: {skipped}")
+        return filtered
 
+    def _get_existing_hierarchy_relations(self):
+        with self._environment.get_db_connection() as connection:
+            view = self._environment.view_name("view_dimension_hierarchy")
+            with connection.cursor() as cursor:
+                cursor.execute(f"SELECT DISTINCT hierarchie_relation FROM {view}")
+                return {row["hierarchie_relation"] for row in cursor.fetchall()}
+            
     ###### LOGIC ##########
     def _create_view_from_dict(self, view_dict) -> View:
         view = View(
@@ -349,6 +362,8 @@ class LdViewBuilder(Base):
         return dimension
 
     def _create_dimensions_from_hierarchy_dict(self, hierarchy_dict, parent_dimension):
+        existing_relations = self._get_existing_hierarchy_relations()
+        has_data = hierarchy_dict["termset"] in existing_relations
         prefix = f"{parent_dimension.identifier}_{hierarchy_dict['termset'].upper()}"
         alang = Attribute(
             name=f"{hierarchy_dict['termset']} (lang)",
@@ -368,35 +383,19 @@ class LdViewBuilder(Base):
             description=f"Sortierungshilfe der Hierarchiestufe '{hierarchy_dict['termset']}', auf den sich der Datenpunkt bezieht.",
         )
 
-        dlang = LookupDimension(
-            f"{prefix}_LANG",
-            None,
-            [
-                f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}",
-                "https://schema.org/name",
-            ],
-            alang,
-            parent_dimension,
-        )
-        dcode = LookupDimension(
-            f"{prefix}_CODE",
-            None,
-            [
-                f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}",
-                "https://schema.org/termCode",
-            ],
-            acode,
-            parent_dimension,
-        )
-        dsort = LookupDimension(
-            f"{prefix}_SORT",
-            None,
-            [
-                f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}",
-                "https://schema.org/position",
-            ],
-            asort,
-            parent_dimension,
-        )
+        if has_data:
+            dlang = LookupDimension(f"{prefix}_LANG", None,
+                [f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}", "https://schema.org/name"],
+                alang, parent_dimension)
+            dcode = LookupDimension(f"{prefix}_CODE", None,
+                [f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}", "https://schema.org/termCode"],
+                acode, parent_dimension)
+            dsort = LookupDimension(f"{prefix}_SORT", None,
+                [f"https://ld.stadt-zuerich.ch/schema/hierarchy/has{hierarchy_dict['termset']}", "https://schema.org/position"],
+                asort, parent_dimension)
+        else:
+            dlang = LookupDimension(f"{prefix}_LANG", None, ["https://schema.org/name"],        alang, parent_dimension)
+            dcode = LookupDimension(f"{prefix}_CODE", None, ["https://schema.org/termCode"],     acode, parent_dimension)
+            dsort = LookupDimension(f"{prefix}_SORT", None, ["https://schema.org/position"],     asort, parent_dimension)
 
         return [dlang, dcode, dsort]
