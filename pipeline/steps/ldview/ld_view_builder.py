@@ -200,7 +200,11 @@ class LdViewBuilder(Base):
         """
         hierarchies = self._get_view_data("view_vb_room_hierarchy", view_id)
         existing_relations = self._get_existing_hierarchy_relations()
-        filtered = [h for h in hierarchies if h["termset"] in existing_relations]
+        filtered = [
+            h
+            for h in hierarchies
+            if h["dimension"] == "RAUM" or h["termset"] in existing_relations
+        ]
         if len(filtered) < len(hierarchies):
             skipped = [h["termset"] for h in hierarchies if h not in filtered]
             self.logger.warning(f"Skipping hierarchies with no data: {skipped}")
@@ -363,7 +367,10 @@ class LdViewBuilder(Base):
 
     def _create_dimensions_from_hierarchy_dict(self, hierarchy_dict, parent_dimension):
         existing_relations = self._get_existing_hierarchy_relations()
-        has_data = hierarchy_dict["termset"] in existing_relations
+        has_data = (
+            parent_dimension.identifier == "RAUM"
+            or hierarchy_dict["termset"] in existing_relations
+        )
         prefix = f"{parent_dimension.identifier}_{hierarchy_dict['termset'].upper()}"
         alang = Attribute(
             name=f"{hierarchy_dict['termset']} (lang)",
