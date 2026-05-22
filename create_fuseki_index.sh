@@ -106,7 +106,8 @@ rm -f "$TMP_DIR"/*.gz "$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl"
 # Compress the current directory to a tar.gz file
 log "Compressing the current directory to a tar.gz file"
 CURRENT_DIR="${FUSEKI_INDEX_DIR}/${CURRENT}"
-TAR_FILE="${FUSEKI_INDEX_DIR}/${TARGET_ENV}_${CURRENT_DATETIME}.tar.gz"
+ARCHIVE_FILE_NAME="${TARGET_ENV}_${CURRENT_DATETIME}.tar.gz"
+TAR_FILE="${FUSEKI_INDEX_DIR}/${ARCHIVE_FILE_NAME}"
 
 tar -czf "$TAR_FILE" -C "$FUSEKI_INDEX_DIR" "$VERSION" \
   || { log "Failed to create tar file for $CURRENT_DIR" >&2; exit 2; }
@@ -114,7 +115,10 @@ log "Compressed tar file created: $TAR_FILE"
 
 # Copy the .tar.gz file to the target directory
 log "Copying $TAR_FILE to $PIPELINE_DATA_DIR"
-cp "$TAR_FILE" "$PIPELINE_DATA_DIR" || { log "Failed to copy $TAR_FILE to $PIPELINE_DATA_DIR" >&2; exit 2; }
+(
+  cp "$TAR_FILE" "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}.tmp" \
+    && mv "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}.tmp" "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}"
+) || { log "Failed to copy $TAR_FILE to $PIPELINE_DATA_DIR" >&2; exit 2; }
 log "File successfully copied to $PIPELINE_DATA_DIR"
 
 "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" index-created \
