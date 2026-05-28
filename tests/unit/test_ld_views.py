@@ -108,6 +108,9 @@ class TestLdViews:
             view_builder._get_view_data = MagicMock(
                 side_effect=self._mock_database_query
             )
+            view_builder._get_existing_hierarchy_relations = MagicMock(
+                return_value=[]
+            )  # neu
 
             views = view_builder.build_all()
             assert len(views) == 2
