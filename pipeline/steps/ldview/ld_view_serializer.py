@@ -17,22 +17,22 @@ class LdViewSerializer:
     def serialize(self, view: View):
         # serialize base
         with self._templater(
-            "ldviews/metadata.ttl.jinja", f"view.{view.id}.ttl"
+            "ldviews/metadata.ttl.jinja", f"view.{view.id}.metadata.ttl"
         ) as engine:
             engine.template({"view": view})
 
         with self._templater(
-            "ldviews/filters.ttl.jinja", f"view.{view.id}.ttl"
+            "ldviews/filters.ttl.jinja", f"view.{view.id}.filters.ttl"
         ) as engine:
             engine.template({"id": view.id, "filters": view.filters})
 
         with self._templater(
-            "ldviews/sources.ttl.jinja", f"view.{view.id}.ttl"
+            "ldviews/sources.ttl.jinja", f"view.{view.id}.sources.ttl"
         ) as engine:
             engine.template({"id": view.id, "sources": view.get_sources()})
 
         with self._templater(
-            "ldviews/dimensions.ttl.jinja", f"view.{view.id}.ttl"
+            "ldviews/dimensions.ttl.jinja", f"view.{view.id}.dimensions.ttl"
         ) as engine:
             engine.template({"id": view.id, "dimensions": view.dimensions})
 

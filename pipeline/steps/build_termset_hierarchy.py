@@ -46,4 +46,5 @@ class BuildTermsetHierarchy(Templating):
             self.logger.info("Zipping %s ...", self._output_filename)
             with open(file_path, "rb") as ttl_file:
                 shutil.copyfileobj(ttl_file, gz_file)
+            os.remove(file_path)
         self.logger.info("Created %s", filename_dest)
