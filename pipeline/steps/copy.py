@@ -41,4 +41,5 @@ class Copy(Step):
             self.logger.info(f"Zipping {self._target} ...")
             with open(out_file, "rb") as ttl_file:
                 shutil.copyfileobj(ttl_file, gz_file)
+            os.remove(out_file)
         self.logger.info(f"Created {filename_dest}")
