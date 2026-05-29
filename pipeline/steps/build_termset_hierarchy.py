@@ -1,8 +1,6 @@
 import gzip
 import os
 import shutil
-import uuid
-from datetime import datetime
 
 from .templating import Templating
 from ..base import Environment
