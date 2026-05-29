@@ -72,7 +72,9 @@ def test_termset_hierarchy():
         ) as generated:
             content = generated.read()
 
-        with open(TestUtils.abs_path("data/expected_content_hierarchies.ttl")) as expected:
+        with open(
+            TestUtils.abs_path("data/expected_content_hierarchies.ttl")
+        ) as expected:
             expected_content = expected.read()
         assert expected_content == content
 

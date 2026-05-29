@@ -59,7 +59,10 @@ class MySQLDbConnection(DbConnection):
 
 class JinjaTemplateEngine(TemplateEngine):
     def __init__(
-        self, environment: "Environment", template_filename: str, output_filepath: str = None
+        self,
+        environment: "Environment",
+        template_filename: str,
+        output_filepath: str = None,
     ):
         super().__init__()
 
@@ -135,7 +138,9 @@ class JinjaTemplateEngine(TemplateEngine):
             raise ValueError("Output filepath is not set")
         if not self._output_file:
             os.makedirs(os.path.dirname(self._output_filepath), exist_ok=True)
-            self._output_file = open(file=self._output_filepath, mode="wt", encoding="utf-8")
+            self._output_file = open(
+                file=self._output_filepath, mode="wt", encoding="utf-8"
+            )
 
     def __enter__(self):
         return self

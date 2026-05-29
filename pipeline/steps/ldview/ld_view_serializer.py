@@ -13,7 +13,9 @@ class LdViewSerializer:
 
     def serialize(self, view: View):
         out = os.path.join(
-            self._environment.config.get("template_output_path"), "ldviews", f"view.{view.id}.ttl"
+            self._environment.config.get("template_output_path"),
+            "ldviews",
+            f"view.{view.id}.ttl",
         )
         os.makedirs(os.path.dirname(out), exist_ok=True)
         with open(out, "wt") as ttl_file:
@@ -22,13 +24,19 @@ class LdViewSerializer:
                 ttl_file.write(engine.render({"view": view}) + "\n")
 
             with self._templater("ldviews/filters.ttl.jinja") as engine:
-                ttl_file.write(engine.render({"id": view.id, "filters": view.filters}) + "\n")
+                ttl_file.write(
+                    engine.render({"id": view.id, "filters": view.filters}) + "\n"
+                )
 
             with self._templater("ldviews/sources.ttl.jinja") as engine:
-                ttl_file.write(engine.render({"id": view.id, "sources": view.get_sources()}) + "\n")
+                ttl_file.write(
+                    engine.render({"id": view.id, "sources": view.get_sources()}) + "\n"
+                )
 
             with self._templater("ldviews/dimensions.ttl.jinja") as engine:
-                ttl_file.write(engine.render({"id": view.id, "dimensions": view.dimensions}) + "\n")
+                ttl_file.write(
+                    engine.render({"id": view.id, "dimensions": view.dimensions}) + "\n"
+                )
 
             projected_dimensions = list(
                 filter(lambda d: d.column is not None, view.dimensions)
@@ -41,10 +49,13 @@ class LdViewSerializer:
             ]
 
             with self._templater("ldviews/projection.ttl.jinja") as engine:
-                ttl_file.write(engine.render(
-                    {
-                        "id": view.id,
-                        "attributes": attributes,
-                        "projected_bnodes": projected_bnodes,
-                    }
-                ) + "\n")
+                ttl_file.write(
+                    engine.render(
+                        {
+                            "id": view.id,
+                            "attributes": attributes,
+                            "projected_bnodes": projected_bnodes,
+                        }
+                    )
+                    + "\n"
+                )
