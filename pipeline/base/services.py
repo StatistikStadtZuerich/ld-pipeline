@@ -59,7 +59,7 @@ class MySQLDbConnection(DbConnection):
 
 class JinjaTemplateEngine(TemplateEngine):
     def __init__(
-        self, environment: "Environment", template_filename: str, output_filepath: str
+        self, environment: "Environment", template_filename: str, output_filepath: str = None
     ):
         super().__init__()
 
@@ -118,8 +118,11 @@ class JinjaTemplateEngine(TemplateEngine):
     def get_template(self):
         return self._template
 
+    def render(self, data):
+        return self._template.render(data)
+
     def template(self, data):
-        content = self._template.render(data)
+        content = self.render(data)
         try:
             self._ensure_output_file()
             self._output_file.write(content + "\n")
@@ -128,13 +131,14 @@ class JinjaTemplateEngine(TemplateEngine):
             raise
 
     def _ensure_output_file(self):
+        if not self._output_filepath:
+            raise ValueError("Output filepath is not set")
         if not self._output_file:
             os.makedirs(os.path.dirname(self._output_filepath), exist_ok=True)
             self._output_file = open(file=self._output_filepath, mode="wt", encoding="utf-8")
 
     def __enter__(self):
-        # We create/open the file on the first write in template()
-        pass
+        return self
 
     def __exit__(self, *exc_details):
         if not self._output_file:

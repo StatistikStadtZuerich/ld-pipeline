@@ -71,7 +71,7 @@ class Environment(Base):
             raise NotImplementedError(f"Database '{_db_type}' is not supported")
 
     def get_template_engine(
-        self, template_filename: str, output_filepath: str
+        self, template_filename: str, output_filepath: str = None
     ) -> JinjaTemplateEngine:
         """
         Returns the template engine for the environment, the template file, and the defined output
