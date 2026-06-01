@@ -64,7 +64,8 @@ def test_observation_templating():
             os.path.join(TestUtils.abs_path("tmp"), output_filename), encoding="utf-8"
         ).read()
         expected = open(
-            TestUtils.abs_path("data/expected_content_observation.ttl"), encoding="utf-8"
+            TestUtils.abs_path("data/expected_content_observation.ttl"),
+            encoding="utf-8",
         ).read()
         TestUtils.assert_text_equals(expected, actual)
     finally:
