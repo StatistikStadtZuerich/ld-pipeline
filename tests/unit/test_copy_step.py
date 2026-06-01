@@ -1,3 +1,4 @@
+import gzip
 import os
 import shutil
 from unittest.mock import Mock
@@ -23,7 +24,9 @@ def test_simple_copy():
         copy = Copy(input_file, output_file, {"env": "test"})
         copy.run(env)
 
-        with open(os.path.join(TestUtils.abs_path("tmp"), output_file)) as f:
+        with gzip.open(
+            os.path.join(TestUtils.abs_path("tmp"), output_file + ".gz"), mode="rt"
+        ) as f:
             assert "Hello World\n" == f.read()
 
     finally:
