@@ -7,7 +7,7 @@ AS
 
 WITH base_data AS (
 SELECT
-    CONCAT(h.KENNZAHL,'-',h.Gruppencode1,'-',h.Gruppencode2,'-',h.Gruppencode3,'-',h.Gruppencode4,'-',h.Gruppencode5,'-',h.RAUM,'-',h.Zeit) AS URI,
+    CONCAT(h.KENNZAHL,'-',h.Gruppencode1,'-',h.Gruppencode2,'-',h.Gruppencode3,'-',h.Gruppencode4,'-',h.Gruppencode5,'-',h.RAUM,'-',h.Zeit) AS uri,
     REPLACE(REPLACE(TRIM(h.CUBEID), 'CID_', ''), ' ', ',') AS cube_ids,
     h.KENNZAHL AS measure,
     h.WERT AS value,
