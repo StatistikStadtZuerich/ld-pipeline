@@ -55,7 +55,6 @@ def test_observation_templating():
                 "observation.ttl.jinja",
                 output_filename,
                 "view_observation",
-                sql_filepath,
             ),
         )
         step_def.step.run(env)
