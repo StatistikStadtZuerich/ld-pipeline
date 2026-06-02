@@ -1,3 +1,4 @@
+import gzip
 import os
 import shutil
 from unittest.mock import Mock, MagicMock
@@ -66,10 +67,15 @@ def test_termset_hierarchy():
             open(sql_filepath).read()
         )
 
-        content = open(os.path.join(TestUtils.abs_path("tmp"), output_filename)).read()
-        expected_content = open(
+        with gzip.open(
+            os.path.join(TestUtils.abs_path("tmp"), f"{output_filename}.gz"), "rt"
+        ) as generated:
+            content = generated.read()
+
+        with open(
             TestUtils.abs_path("data/expected_content_hierarchies.ttl")
-        ).read()
+        ) as expected:
+            expected_content = expected.read()
         assert expected_content == content
 
     finally:

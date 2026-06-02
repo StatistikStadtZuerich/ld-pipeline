@@ -1,8 +1,6 @@
 import gzip
 import os
 import shutil
-import uuid
-from datetime import datetime
 
 from .templating import Templating
 from ..base import Environment
@@ -32,18 +30,13 @@ class BuildTermsetHierarchy(Templating):
     def run(self, environment: Environment):
         self.logger.info("Generating termset hierarchies ...")
         super().run(environment)
-        file_path = os.path.join(
-            environment.config.get("template_output_path"), self._output_filename
-        )
-        uniqid = str(uuid.uuid4())
-        now = datetime.now()
-        env = self._options["env"]
-        timestamp = now.strftime("%Y%m%d%H%M%S")
-        filename_dest = f"{env}_termset_hierarchy_{timestamp}_{uniqid}.ttl.gz"
         folderpath = environment.config.get("template_output_path")
+        file_path = os.path.join(folderpath, self._output_filename)
+        filename_dest = f"{self._output_filename}.gz"
         filepath_dest = os.path.join(folderpath, filename_dest)
         with gzip.open(filepath_dest, "wb") as gz_file:
             self.logger.info("Zipping %s ...", self._output_filename)
             with open(file_path, "rb") as ttl_file:
                 shutil.copyfileobj(ttl_file, gz_file)
+            os.remove(file_path)
         self.logger.info("Created %s", filename_dest)
