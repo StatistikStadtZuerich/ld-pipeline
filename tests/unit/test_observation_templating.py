@@ -44,7 +44,6 @@ def test_observation_templating():
         }
     ]
 
-    sql_filepath = TestUtils.abs_path("data/sample_observation.sql")
     output_filename = "test_observation_output.ttl"
 
     try:
