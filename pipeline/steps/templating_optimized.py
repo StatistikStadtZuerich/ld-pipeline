@@ -125,22 +125,9 @@ class TemplatingOptimized(Step):
                 )
                 batch.clear()
             offset += db_batch_size
-
-            if len(iteration_durations) > 10:
-                iteration_durations.pop(0)
-            adaptive_threshold = sum(iteration_durations) / len(iteration_durations)
             self.logger.info(f"{counter}. iteration took {iteration_time:.2f} seconds.")
-            if iteration_time > adaptive_threshold:
-                delay_increase = (iteration_time - adaptive_threshold) * 0.5
-                delay = min(max_delay, delay + delay_increase)
-            else:
-                delay_decrease = (adaptive_threshold - iteration_time) * 0.5
-                delay = max(0, delay - delay_decrease)
-            if delay > 0:
-                self.logger.info(
-                    f"Delaying next iteration by {delay:.2f} seconds to reduce load."
-                )
-                time.sleep(delay)
+
+            delay = self._cooldown(delay, iteration_durations, max_delay)
             self.logger.info(f"{counter}. iteration is finished.")
         self.logger.info(f"Total number of rows processed: {number_rows_total}")
 
@@ -149,6 +136,24 @@ class TemplatingOptimized(Step):
                 counter + 1,
                 batch, output_folder, output_folder_tmp
             )
+
+    def _cooldown(self, delay: float, iteration_durations: list[float], max_delay: float = 0) -> float:
+        if len(iteration_durations) > 10:
+            iteration_durations.pop(0)
+        last_iteration_duration = iteration_durations[-1]
+        adaptive_threshold = sum(iteration_durations) / len(iteration_durations)
+        if last_iteration_duration > adaptive_threshold:
+            delay_increase = (last_iteration_duration - adaptive_threshold) * 0.5
+            delay = min(max_delay, delay + delay_increase)
+        else:
+            delay_decrease = (adaptive_threshold - last_iteration_duration) * 0.5
+            delay = max(0.0, delay - delay_decrease)
+        if delay > 0:
+            self.logger.info(
+                f"Delaying next iteration by {delay:.2f} seconds to reduce load."
+            )
+            time.sleep(delay)
+        return delay
 
     def run(self, environment: Environment):
         output_filepath = os.path.join(
