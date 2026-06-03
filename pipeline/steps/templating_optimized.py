@@ -59,7 +59,7 @@ class TemplatingOptimized(Step):
         db_batch_size = 100000
         write_batch_size = 500000
         max_iteration = None
-        max_delay = 120
+        max_delay = 0
 
         env = self._options["env"]
 
