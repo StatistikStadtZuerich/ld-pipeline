@@ -70,6 +70,10 @@ python-test:
 sync-to-github:
   stage: publish
   needs:
+    - job: ruff-check
+      artifacts: false
+    - job: ruff-format
+      artifacts: false
     - job: python-test
       artifacts: false
   rules:
