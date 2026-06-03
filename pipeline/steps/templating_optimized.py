@@ -50,7 +50,9 @@ class TemplatingOptimized(Step):
 
         dest_file = os.path.join(output_folder, filename)
         dest_file_tmp = os.path.join(output_folder_tmp, filename)
-        self.logger.debug(f"Writing batch {counter} data to {os.path.basename(dest_file_tmp)} ...")
+        self.logger.debug(
+            f"Writing batch {counter} data to {os.path.basename(dest_file_tmp)} ..."
+        )
         with gzip.open(dest_file_tmp, "wt") as f_out:
             f_out.write("\n".join(batch) + "\n")
         shutil.move(dest_file_tmp, dest_file)
@@ -85,7 +87,9 @@ class TemplatingOptimized(Step):
         while running:
             counter += 1
             if max_iteration is not None and counter > max_iteration:
-                self.logger.warning(f"Maximum number of iterations reached ({max_iteration}), stopping.")
+                self.logger.warning(
+                    f"Maximum number of iterations reached ({max_iteration}), stopping."
+                )
                 running = False
                 break
             start_time = time.time()
@@ -132,12 +136,11 @@ class TemplatingOptimized(Step):
         self.logger.info(f"Total number of rows processed: {number_rows_total}")
 
         if batch:
-            self._write_batch(
-                counter + 1,
-                batch, output_folder, output_folder_tmp
-            )
+            self._write_batch(counter + 1, batch, output_folder, output_folder_tmp)
 
-    def _cooldown(self, delay: float, iteration_durations: list[float], max_delay: float = 0) -> float:
+    def _cooldown(
+        self, delay: float, iteration_durations: list[float], max_delay: float = 0
+    ) -> float:
         if len(iteration_durations) > 10:
             iteration_durations.pop(0)
         last_iteration_duration = iteration_durations[-1]
@@ -291,7 +294,4 @@ class GroupedTemplatingOptimized(TemplatingOptimized):
                 batch.clear()
 
         if batch:
-            self._write_batch(
-                counter + 1,
-                batch, output_folder, output_folder_tmp
-            )
+            self._write_batch(counter + 1, batch, output_folder, output_folder_tmp)
