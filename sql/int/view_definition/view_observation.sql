@@ -48,7 +48,7 @@ FROM [dbo].[pipe_HDB_int] h
       )
 )
 SELECT
-    b.URI,
+    b.uri,
     b.cube_ids,
     b.measure,
     b.value,
