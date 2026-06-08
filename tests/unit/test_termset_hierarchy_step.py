@@ -14,24 +14,51 @@ def test_pre_process_room_hierarchy():
     )
 
     row = {
-        "r0": "R30000", "f0": "KantonZH; StadtZH",
-        "r1": "R00200", "f1": "KreiseZH",
-        "r2": "R00023", "f2": "QuartiereZH",
+        "r0": "R30000",
+        "f0": "KantonZH; StadtZH",
+        "r1": "R00200",
+        "f1": "KreiseZH",
+        "r2": "R00023",
+        "f2": "QuartiereZH",
         "r3": "R3Z030",
     }
 
     result = step.pre_process(row)
 
     assert result == [
-        {"child_code": "R00200", "parent_code": "R30000", "relation_filter": "KantonZH"},
+        {
+            "child_code": "R00200",
+            "parent_code": "R30000",
+            "relation_filter": "KantonZH",
+        },
         {"child_code": "R00200", "parent_code": "R30000", "relation_filter": "StadtZH"},
-        {"child_code": "R00023", "parent_code": "R30000", "relation_filter": "KantonZH"},
+        {
+            "child_code": "R00023",
+            "parent_code": "R30000",
+            "relation_filter": "KantonZH",
+        },
         {"child_code": "R00023", "parent_code": "R30000", "relation_filter": "StadtZH"},
-        {"child_code": "R00023", "parent_code": "R00200", "relation_filter": "KreiseZH"},
-        {"child_code": "R3Z030", "parent_code": "R30000", "relation_filter": "KantonZH"},
+        {
+            "child_code": "R00023",
+            "parent_code": "R00200",
+            "relation_filter": "KreiseZH",
+        },
+        {
+            "child_code": "R3Z030",
+            "parent_code": "R30000",
+            "relation_filter": "KantonZH",
+        },
         {"child_code": "R3Z030", "parent_code": "R30000", "relation_filter": "StadtZH"},
-        {"child_code": "R3Z030", "parent_code": "R00200", "relation_filter": "KreiseZH"},
-        {"child_code": "R3Z030", "parent_code": "R00023", "relation_filter": "QuartiereZH"},
+        {
+            "child_code": "R3Z030",
+            "parent_code": "R00200",
+            "relation_filter": "KreiseZH",
+        },
+        {
+            "child_code": "R3Z030",
+            "parent_code": "R00023",
+            "relation_filter": "QuartiereZH",
+        },
     ]
 
 
