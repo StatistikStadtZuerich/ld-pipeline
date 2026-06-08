@@ -10,8 +10,7 @@ class BuildTermsetHierarchy(Templating):
     def pre_process(self, row):
         rows = []
         for x in range(1, 4):
-            x_value = row.get(f"f{x}")
-            if not x_value:
+            if not row.get(f"r{x}"):
                 break
             for y in range(0, x):
                 value = row.get(f"f{y}")
