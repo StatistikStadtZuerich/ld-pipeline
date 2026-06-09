@@ -8,6 +8,60 @@ from pipeline.steps import BuildTermsetHierarchy
 from tests.unit.utils import TestUtils
 
 
+def test_pre_process_room_hierarchy():
+    step = BuildTermsetHierarchy(
+        "raum_hierarchy.ttl.jinja", "out.ttl", "view_room_hierarchy_int"
+    )
+
+    row = {
+        "r0": "R30000",
+        "f0": "KantonZH; StadtZH",
+        "r1": "R00200",
+        "f1": "KreiseZH",
+        "r2": "R00023",
+        "f2": "QuartiereZH",
+        "r3": "R3Z030",
+    }
+
+    result = step.pre_process(row)
+
+    assert result == [
+        {
+            "child_code": "R00200",
+            "parent_code": "R30000",
+            "relation_filter": "KantonZH",
+        },
+        {"child_code": "R00200", "parent_code": "R30000", "relation_filter": "StadtZH"},
+        {
+            "child_code": "R00023",
+            "parent_code": "R30000",
+            "relation_filter": "KantonZH",
+        },
+        {"child_code": "R00023", "parent_code": "R30000", "relation_filter": "StadtZH"},
+        {
+            "child_code": "R00023",
+            "parent_code": "R00200",
+            "relation_filter": "KreiseZH",
+        },
+        {
+            "child_code": "R3Z030",
+            "parent_code": "R30000",
+            "relation_filter": "KantonZH",
+        },
+        {"child_code": "R3Z030", "parent_code": "R30000", "relation_filter": "StadtZH"},
+        {
+            "child_code": "R3Z030",
+            "parent_code": "R00200",
+            "relation_filter": "KreiseZH",
+        },
+        {
+            "child_code": "R3Z030",
+            "parent_code": "R00023",
+            "relation_filter": "QuartiereZH",
+        },
+    ]
+
+
 def test_termset_hierarchy():
     tmp_dir = TestUtils.abs_path("tmp")
     os.makedirs(tmp_dir, exist_ok=True)
