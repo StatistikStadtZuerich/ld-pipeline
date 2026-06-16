@@ -31,7 +31,7 @@ PREFIX ssz-code: <https://ld.stadt-zuerich.ch/statistics/code/>
 <org/SSZ> a foaf:Organization, schema:GovernmentOrganization;
           schema:name "Statistik Stadt Zürich"@de;
           rdfs:seeAlso wd:Q53630447 ;
-          foaf:homepage <https://www.stadt-zuerich.ch/prd/de/index/statistik.html>
+          foaf:homepage <https://www.stadt-zuerich.ch/statistik>
 .
 
 ##

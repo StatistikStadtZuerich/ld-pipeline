@@ -1,52 +1,27 @@
 #!/usr/bin/env bash
-set -e
-
-ENV_NAME="${1:-local}"
+set -euo pipefail
 
 SCRIPT="$(readlink -f "$0")"
 SCRIPT_HOME="$(dirname "$SCRIPT")"
 
-function load_env() {
-  [ -r "$1" ] && . "$1" || true
-}
+ENV_NAME="${1:-local}"
+RUN_ID="${2:-$(date -u +"%FT%H-%M-%SZ")}"
+TARGET_ENV="${3:-test}"
 
-# load local settings
-load_env "${SCRIPT_HOME}/.env"
-load_env "${SCRIPT_HOME}/${ENV_NAME}.env"
-load_env "./.env"
-load_env "./${ENV_NAME}.env"
-
+# Those ENVs should be passed by the calling script
 JENA_DIR="${JENA_DIR:-/home/lod_pipeline/apache-jena-fuseki-4.9.0/jena}"
-FUSEKI_INDEX_DIR="${FUSEKI_INDEX_DIR:-/home/lod_pipeline/ld-pipeline-2024/fuseki_index/${ENV_NAME}}"
+FUSEKI_INDEX_DIR="${FUSEKI_INDEX_DIR:-/home/lod_pipeline/ld-pipeline-2024/fuseki_index/${TARGET_ENV}}"
 INPUT_DIR="${INPUT_DIR:-/home/lod_pipeline/ld-pipeline-2024/output/${ENV_NAME}}"
+PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-/home/lod_pipeline/hdb_dropzone/prod/test/Pipeline_Data}"
+
 TMP_DIR="$INPUT_DIR/tmp"
 DONE_DIR="$INPUT_DIR/done"
 CURRENT=current
-PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-/home/lod_pipeline/hdb_dropzone/prod/test/Pipeline_Data}"
 
 function log() {
-    echo "$(date +"%FT%H:%M:%S%Z") $*"
+    echo "$(date -u +%FT%TZ) $*"
 }
-
-# Check for start signal files
-START_FILES=("$INPUT_DIR"/start_fuseki_index_*.txt)
-if [ -e "${START_FILES[0]}" ]; then
-    log "Start signal file(s) found. Beginning process for $ENV_NAME."
-else
-    # log "No start signal file(s) found in $INPUT_DIR. Exiting."
-    exit 0
-fi
-
-# Move start signal files to done directory
-for START_FILE in "${START_FILES[@]}"; do
-    if [ -e "$START_FILE" ]; then
-        log "Moving $START_FILE to $DONE_DIR"
-        mkdir -p "$DONE_DIR"
-        mv "$START_FILE" "$DONE_DIR/"
-    fi
-done
-
-log "Starting process for all .gz files in $INPUT_DIR"
+log "Start building Fuseki-Index for '$TARGET_ENV' with Run-ID '$RUN_ID' to '$FUSEKI_INDEX_DIR'"
 
 mkdir -p "$FUSEKI_INDEX_DIR"
 VERSION="$(date +"%F_%H-%M-%S_%Z")"
@@ -54,11 +29,13 @@ DATA_DIR="$FUSEKI_INDEX_DIR/$VERSION"
 
 # Get the current date and time for the filename
 CURRENT_DATETIME=$(date +"%Y%m%d%H%M%S")
-FINAL_COMBINED_FILE="$TMP_DIR/${ENV_NAME}_combined_${CURRENT_DATETIME}.ttl.gz"
+FINAL_COMBINED_FILE="$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl.gz"
 
+log "Loading all .gz files in $INPUT_DIR"
 # Move all .gz files from the input to the temporary directory
 rm -rf "$TMP_DIR" && mkdir -p "$TMP_DIR"
 for FILE in "$INPUT_DIR"/*.gz; do
+    [ -e "$FILE" ] || continue
     if [ -r "$FILE" ]; then
         log "Moving $FILE to $TMP_DIR"
         mv "$FILE" "$TMP_DIR/"
@@ -77,9 +54,9 @@ fi
 
 # Combine all .gz files into a single .ttl file and then compress it into a single .gz file
 log "Combining all .gz files into a single gz file"
-gunzip -c "$TMP_DIR"/*.gz > "$TMP_DIR/${ENV_NAME}_combined_${CURRENT_DATETIME}.ttl" \
+gunzip -c "$TMP_DIR"/*.gz > "$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl" \
   || { log "Failed to combine .gz files" >&2; exit 2; }
-gzip -c "$TMP_DIR/${ENV_NAME}_combined_${CURRENT_DATETIME}.ttl" > "$FINAL_COMBINED_FILE" \
+gzip -c "$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl" > "$FINAL_COMBINED_FILE" \
   || { log "Failed to compress combined .ttl file" >&2; exit 2; }
 log "Final combined file created: $FINAL_COMBINED_FILE"
 
@@ -90,6 +67,7 @@ log "Starting import of $FINAL_COMBINED_FILE into $DATA_DIR"
 log "Import complete for $FINAL_COMBINED_FILE"
 
 # Move processed file to the done directory
+mkdir -p "$DONE_DIR"
 log "Moving $FINAL_COMBINED_FILE to $DONE_DIR"
 mv "$FINAL_COMBINED_FILE" "$DONE_DIR/"
 
@@ -114,7 +92,7 @@ fi
 
 # Clean up temporary directory
 log "Cleaning up temporary directory"
-rm -f "$TMP_DIR"/*.gz "$TMP_DIR/${ENV_NAME}_combined_${CURRENT_DATETIME}.ttl"
+rm -f "$TMP_DIR"/*.gz "$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl"
 
 # Update 'current' symlink after processing all files
 (
@@ -128,7 +106,8 @@ rm -f "$TMP_DIR"/*.gz "$TMP_DIR/${ENV_NAME}_combined_${CURRENT_DATETIME}.ttl"
 # Compress the current directory to a tar.gz file
 log "Compressing the current directory to a tar.gz file"
 CURRENT_DIR="${FUSEKI_INDEX_DIR}/${CURRENT}"
-TAR_FILE="${FUSEKI_INDEX_DIR}/${ENV_NAME}_${CURRENT_DATETIME}.tar.gz"
+ARCHIVE_FILE_NAME="${TARGET_ENV}_${CURRENT_DATETIME}.tar.gz"
+TAR_FILE="${FUSEKI_INDEX_DIR}/${ARCHIVE_FILE_NAME}"
 
 tar -czf "$TAR_FILE" -C "$FUSEKI_INDEX_DIR" "$VERSION" \
   || { log "Failed to create tar file for $CURRENT_DIR" >&2; exit 2; }
@@ -136,7 +115,14 @@ log "Compressed tar file created: $TAR_FILE"
 
 # Copy the .tar.gz file to the target directory
 log "Copying $TAR_FILE to $PIPELINE_DATA_DIR"
-cp "$TAR_FILE" "$PIPELINE_DATA_DIR" || { log "Failed to copy $TAR_FILE to $PIPELINE_DATA_DIR" >&2; exit 2; }
+(
+  cp "$TAR_FILE" "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}.tmp" \
+    && mv "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}.tmp" "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}"
+) || { log "Failed to copy $TAR_FILE to $PIPELINE_DATA_DIR" >&2; exit 2; }
 log "File successfully copied to $PIPELINE_DATA_DIR"
 
+"${SCRIPT_HOME:-.}/scripts/teams-notify.sh" index-created \
+  --sourceEnv "$(echo "${ENV_NAME}" | tr '[:lower:]' '[:upper:]')" \
+  --targetEnv "$(echo "${TARGET_ENV}" | tr '[:lower:]' '[:upper:]')" \
+  --archive "$(basename "$TAR_FILE")"
 log "All files processed and import complete"

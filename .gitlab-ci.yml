@@ -16,24 +16,16 @@ generate-version:
   extends: .determine-build-version
   stage: prepare
 
-python-test:
-  stage: test
+.python-job:
   image: ${DOCKER_HUB_PROXY}library/python:3.12
-  needs:
-    - generate-version
   cache:
     - key: "pip-$CI_JOB_IMAGE"
       paths:
         - .cache/pip/
   before_script:
-    - mkdir -p reports
     - python -c "import sys; print(sys.version)"
-    - python -m pip install --upgrade pip
-    - pip install -r requirements.txt
-  script:
-    - ruff format --check
-    - ruff check --output-format=gitlab > reports/code-quality-report.json
-    - SSZ_DB_TYPE=mock python -m pytest --doctest-modules --junitxml=reports/unittest-results.xml tests/unit
+    - python -m pip install --root-user-action ignore --upgrade pip
+    - pip install --root-user-action ignore -r requirements.txt
   variables:
     HTTP_PROXY: "${DEV_PROXY}"
     HTTPS_PROXY: "${DEV_PROXY}"
@@ -41,6 +33,32 @@ python-test:
     http_proxy: "${DEV_PROXY}"
     https_proxy: "${DEV_PROXY}"
     no_proxy: "${DEV_PROXY_SKIP}"
+
+ruff-check:
+  extends: .python-job
+  stage: test
+  script:
+    - mkdir -p reports
+    - ruff check --output-format=gitlab -o reports/code-quality-report.json
+  artifacts:
+    reports:
+      codequality: reports/code-quality-report.json
+  allow_failure: true
+
+ruff-format:
+  extends: .python-job
+  stage: test
+  script:
+    - ruff format --check
+  allow_failure: true
+
+python-test:
+  extends: .python-job
+  stage: test
+  needs:
+    - generate-version
+  script:
+    - SSZ_DB_TYPE=mock python -m pytest --doctest-modules --junitxml=reports/unittest-results.xml tests/unit
   artifacts:
     when: always
     expire_in: 3 days
@@ -48,11 +66,14 @@ python-test:
       - reports/
     reports:
       junit: reports/unittest-results.xml
-      codequality: reports/code-quality-report.json
 
 sync-to-github:
   stage: publish
   needs:
+    - job: ruff-check
+      artifacts: false
+    - job: ruff-format
+      artifacts: false
     - job: python-test
       artifacts: false
   rules:

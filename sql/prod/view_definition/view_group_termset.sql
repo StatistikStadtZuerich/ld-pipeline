@@ -1,8 +1,8 @@
-DROP VIEW IF EXISTS dbo.view_group_termset;
+DROP VIEW IF EXISTS [dbo].[view_group_termset];
 
 GO
 
-CREATE VIEW dbo.view_group_termset AS
+CREATE VIEW [dbo].[view_group_termset] AS
 
 SELECT DISTINCT
     CASE 
@@ -11,11 +11,14 @@ SELECT DISTINCT
     END AS term_code,
   
     REPLACE(value, ' ', '') AS term_set_name,
-    UPPER(REPLACE(value, ' ', '')) AS term_set
+    h.HierarchieID AS term_set
  
-FROM dbo.pipe_HDBGruppenliste t
-LEFT JOIN dbo.HDBAbgeleiteteGruppen ag
+FROM [dbo].[pipe_HDBGruppenliste_prod] t
+CROSS APPLY STRING_SPLIT(t.HIERARCHIE, ';')
+LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] ag
     ON LEFT(t.GRUPPENCODE, 3) = ag.gruppe
     OR LEFT(t.GRUPPE, 3) = ag.gruppe
     OR LEFT(t.PARENTCODE, 3) = ag.gruppe
-    CROSS APPLY STRING_SPLIT(t.HIERARCHIE, ';');
+LEFT JOIN [dbo].[pipe_HDBHierarchien_prod] h
+	on value = h.HIERARCHIE and left(t.Gruppencode,3) = SUBSTRING(h.HierarchieID, 2, 3)
+    ;

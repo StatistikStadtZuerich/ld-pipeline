@@ -1,11 +1,12 @@
-import os
-import re
-from datetime import datetime
-import uuid
 import gzip
+import os
+import pathlib
 import shutil
 import time
+from itertools import groupby as itertools_groupby
+from typing import Dict, Any
 
+from database import BaseSQLStep
 from ..base import Step, Environment, Utils
 
 
@@ -14,23 +15,54 @@ class TemplatingOptimized(Step):
         self,
         template_filename: str,
         output_filename: str,
-        sql_filepath: str,
-        options={},
+        sql_view_name: str,
+        sql_filepath: str | None = None,
+        options: Dict[str, Any] | None = None,
     ):
         super().__init__()
         self._template_filename = template_filename
         self._output_filename = output_filename
+        self._sql_view_name = sql_view_name
         self._sql_filepath = sql_filepath
-        self._options = options
+        self._options = options or {}
         self._utils = Utils()
 
-    def process_triples(self, tablename, cursor, template, output_folder):
+    def _load_sql_query(self, enviroment: Environment):
+        if self._sql_filepath is None:
+            return BaseSQLStep.render_sql(
+                enviroment,
+                f"SELECT * FROM [{{{{ '{self._sql_view_name}' | view_name }}}}]",
+            )
+        else:
+            return BaseSQLStep.render_sql_file(
+                enviroment,
+                pathlib.Path(self._sql_filepath),
+            )
+
+    def _write_batch(
+        self, counter: int, batch: list[str], output_folder, output_folder_tmp
+    ):
+        """Writes a batch of triples to a gzipped file."""
+        outpath = pathlib.Path(self._output_filename)
+        file_ext = outpath.suffix
+        base_name = outpath.stem
+        filename = f"{base_name}_batch{counter:03d}{file_ext}.gz"
+
+        dest_file = os.path.join(output_folder, filename)
+        dest_file_tmp = os.path.join(output_folder_tmp, filename)
+        self.logger.debug(
+            f"Writing batch {counter} data to {os.path.basename(dest_file_tmp)} ..."
+        )
+        with gzip.open(dest_file_tmp, "wt") as f_out:
+            f_out.write("\n".join(batch) + "\n")
+        shutil.move(dest_file_tmp, dest_file)
+        self.logger.info(f"Batch {counter} written to {dest_file}.")
+
+    def process_triples(self, tablename, cursor, template, output_folder, output_table):
         db_batch_size = 100000
         write_batch_size = 500000
         max_iteration = None
-        max_delay = 120
-
-        env = self._options["env"]
+        max_delay = 0
 
         if "db_batch_size" in self._options:
             db_batch_size = self._options["db_batch_size"]
@@ -42,9 +74,7 @@ class TemplatingOptimized(Step):
         output_folder_tmp = output_folder + "/tmp"
         os.makedirs(output_folder_tmp, exist_ok=True)
 
-        now = datetime.now()
-        timestamp = now.strftime("%Y%m%d%H%M%S")
-        batch = []
+        batch: list[str] = []
 
         query = f"SELECT * FROM #{tablename} ORDER BY _sort_order"
         offset = 0
@@ -57,6 +87,9 @@ class TemplatingOptimized(Step):
         while running:
             counter += 1
             if max_iteration is not None and counter > max_iteration:
+                self.logger.warning(
+                    f"Maximum number of iterations reached ({max_iteration}), stopping."
+                )
                 running = False
                 break
             start_time = time.time()
@@ -81,118 +114,184 @@ class TemplatingOptimized(Step):
                 counter_rows += 1
                 triples = template.render(row)
                 batch.append(triples)
-            self.logger.info("done")
+            self.logger.info(f"Done with {counter_rows} rows")
 
             end_time = time.time()
             iteration_time = end_time - start_time
             iteration_durations.append(iteration_time)
 
             if len(batch) >= write_batch_size:
-                uniqid = str(uuid.uuid4())
-                filename = f"{env}_{tablename}_{timestamp}_{uniqid}.ttl.gz"
-                dest_file = f"{output_folder}/{filename}"
-                dest_file_tmp = f"{output_folder_tmp}/{filename}"
-                self.logger.info(
-                    f"Writing batch data to {os.path.basename(dest_file_tmp)} ..."
+                self._write_batch(
+                    counter,
+                    batch,
+                    output_folder,
+                    output_folder_tmp,
                 )
-                with gzip.open(dest_file_tmp, "at") as f_out:
-                    f_out.write("\n".join(batch) + "\n")
                 batch.clear()
-                shutil.move(dest_file_tmp, dest_file)
-                self.logger.info("File is created.")
             offset += db_batch_size
-
-            if len(iteration_durations) > 10:
-                iteration_durations.pop(0)
-            adaptive_threshold = sum(iteration_durations) / len(iteration_durations)
             self.logger.info(f"{counter}. iteration took {iteration_time:.2f} seconds.")
-            if iteration_time > adaptive_threshold:
-                delay_increase = (iteration_time - adaptive_threshold) * 0.5
-                delay = min(max_delay, delay + delay_increase)
-            else:
-                delay_decrease = (adaptive_threshold - iteration_time) * 0.5
-                delay = max(0, delay - delay_decrease)
-            if delay > 0:
-                self.logger.info(
-                    f"Delaying next iteration by {delay:.2f} seconds to reduce load."
-                )
-                time.sleep(delay)
+
+            delay = self._cooldown(delay, iteration_durations, max_delay)
             self.logger.info(f"{counter}. iteration is finished.")
+        self.logger.info(f"Total number of rows processed: {number_rows_total}")
 
         if batch:
-            uniqid = str(uuid.uuid4())
-            filename = f"{env}_{tablename}_{timestamp}_{uniqid}.ttl.gz"
-            dest_file = f"{output_folder}/{filename}"
-            dest_file_tmp = f"{output_folder_tmp}/{filename}"
+            self._write_batch(counter + 1, batch, output_folder, output_folder_tmp)
+
+    def _cooldown(
+        self, delay: float, iteration_durations: list[float], max_delay: float = 0
+    ) -> float:
+        if len(iteration_durations) > 10:
+            iteration_durations.pop(0)
+        last_iteration_duration = iteration_durations[-1]
+        adaptive_threshold = sum(iteration_durations) / len(iteration_durations)
+        if last_iteration_duration > adaptive_threshold:
+            delay_increase = (last_iteration_duration - adaptive_threshold) * 0.5
+            delay = min(max_delay, delay + delay_increase)
+        else:
+            delay_decrease = (adaptive_threshold - last_iteration_duration) * 0.5
+            delay = max(0.0, delay - delay_decrease)
+        if delay > 0:
             self.logger.info(
-                f"Writing remaining batch data to {os.path.basename(dest_file_tmp)} ..."
+                f"Delaying next iteration by {delay:.2f} seconds to reduce load."
             )
-            with gzip.open(dest_file_tmp, "at") as f_out:
-                f_out.write("\n".join(batch) + "\n")
-            shutil.move(dest_file_tmp, dest_file)
-            self.logger.info("File is created.")
+            time.sleep(delay)
+        return delay
 
     def run(self, environment: Environment):
         output_filepath = os.path.join(
             environment.config.get("template_output_path"), self._output_filename
         )
-        env = self._options["env"]
+        output_table = self._output_filename
         only_vb_cubes = environment.config.get("only_vb_cubes")
 
         output_folder = os.path.dirname(output_filepath)
 
         with environment.get_db_connection() as connection:
-            with open(self._sql_filepath) as sql_file:
-                query = sql_file.read()
-                match = re.search(r"FROM\s+([^\s^;]+)", query, re.IGNORECASE)
-                tablename = None
-                if match:
-                    tablename = match.group(1)
-                if not tablename:
-                    self.logger.error(f"Invalid query in {self._sql_filepath}")
-                    return
+            tablename = environment.view_name(self._sql_view_name)
+            query = self._load_sql_query(environment)
 
-                with connection.cursor() as cursor:
-                    like_conditions = ""
+            with connection.cursor() as cursor:
+                like_conditions = ""
 
-                    if (
-                        only_vb_cubes == "true"
-                        and tablename == f"view_observation_{env}"
-                    ):
-                        cursor.execute(
-                            f"SELECT DISTINCT t.cube_id FROM view_vb_source_{env} t"
-                        )
-                        rows = cursor.fetchall()
-                        if len(rows) > 0:
-                            like_conditions = " OR ".join(
-                                [f"cube_ids LIKE '%{row['cube_id']}%'" for row in rows]
-                            )
-                            like_conditions = f"( {like_conditions} )"
-                            self.logger.info(
-                                "Considering only cubes from the view builder."
-                            )
-
-                    if len(like_conditions) == 0:
-                        query_tmp_table = (
-                            f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename} "
-                            f" FROM ({query}) AS original_query"
-                        )
-                    else:
-                        query_tmp_table = (
-                            f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename}"
-                            f" FROM ({query} WHERE ({like_conditions})) AS original_query"
-                        )
-
-                    self.logger.info(f"Creating temporary table #{tablename} ...")
-                    cursor.execute(query_tmp_table)
-                    self.logger.info("Creating an index on the _sort_order column ...")
+                if (
+                    only_vb_cubes == "true"
+                    and self._sql_view_name == "view_observation"
+                ):
                     cursor.execute(
-                        f"CREATE INDEX idx_sort_order ON #{tablename} (_sort_order)"
+                        BaseSQLStep.render_sql(
+                            environment,
+                            "SELECT DISTINCT t.cube_id FROM [{{ 'view_vb_source' | view_name }}] t",
+                        )
                     )
-                    self.logger.info("done")
+                    rows = cursor.fetchall()
+                    if len(rows) > 0:
+                        like_conditions = " OR ".join(
+                            [f"cube_ids LIKE '%{row['cube_id']}%'" for row in rows]
+                        )
+                        like_conditions = f"( {like_conditions} )"
+                        self.logger.info(
+                            "Considering only cubes from the view builder."
+                        )
 
-                    with environment.get_template_engine(
-                        self._template_filename, output_filepath
-                    ) as template_engine:
-                        template = template_engine.get_template()
-                        self.process_triples(tablename, cursor, template, output_folder)
+                if len(like_conditions) == 0:
+                    query_tmp_table = (
+                        f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename} "
+                        f" FROM ({query}) AS original_query"
+                    )
+                else:
+                    query_tmp_table = (
+                        f"SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS _sort_order INTO #{tablename}"
+                        f" FROM ({query} WHERE ({like_conditions})) AS original_query"
+                    )
+
+                self.logger.info(f"Creating temporary table #{tablename} ...")
+                cursor.execute(query_tmp_table)
+                self.logger.info("Creating an index on the _sort_order column ...")
+                cursor.execute(
+                    f"CREATE INDEX idx_sort_order ON #{tablename} (_sort_order)"
+                )
+                self.logger.info("done")
+
+                with environment.get_template_engine(
+                    self._template_filename, output_filepath
+                ) as template_engine:
+                    template = template_engine.get_template()
+                    self.process_triples(
+                        tablename, cursor, template, output_folder, output_table
+                    )
+
+
+class GroupedTemplatingOptimized(TemplatingOptimized):
+    """
+    Wie TemplatingOptimized, aber gruppiert Rows nach einem Key (z.B. termset_code)
+    bevor sie ans Template übergeben werden.
+
+    Benötigt options["group_by"]: der Spaltenname nach dem gruppiert wird.
+    Die SQL Query muss nach diesem Spaltenname sortiert sein (ORDER BY termset_code).
+    """
+
+    def process_triples(self, tablename, cursor, template, output_folder, output_table):
+        db_batch_size = 100000
+        write_batch_size = 500000
+        group_by = self._options["group_by"]  # z.B. "termset_code"
+
+        if "db_batch_size" in self._options:
+            db_batch_size = self._options["db_batch_size"]
+        if "write_batch_size" in self._options:
+            write_batch_size = self._options["write_batch_size"]
+
+        output_folder_tmp = output_folder + "/tmp"
+        os.makedirs(output_folder_tmp, exist_ok=True)
+
+        batch = []
+
+        # Wichtig: ORDER BY group_by damit Gruppen nicht über Batches aufgeteilt werden
+        query = f"SELECT * FROM #{tablename} ORDER BY {group_by}, _sort_order"
+        offset = 0
+        running = True
+        leftover_rows = []  # letzte Gruppe des vorherigen Batches
+        counter = 0
+        while running:
+            cursor.execute(
+                f"{query} OFFSET {offset} ROWS FETCH NEXT {db_batch_size} ROWS ONLY"
+            )
+            rows = cursor.fetchall()
+
+            if not rows:
+                self.logger.info("No rows left.")
+                running = False
+                # letzte Gruppe noch rendern
+                if leftover_rows:
+                    triples = template.render({"rows": leftover_rows})
+                    batch.append(triples)
+                break
+
+            # Rows vom letzten Batch vorne anhängen
+            rows = leftover_rows + list(rows)
+            leftover_rows = []
+
+            # Letzte Gruppe zurückhalten — könnte im nächsten Batch weitergehen
+            last_group_key = rows[-1][group_by]
+            safe_rows = [r for r in rows if r[group_by] != last_group_key]
+            leftover_rows = [r for r in rows if r[group_by] == last_group_key]
+
+            # Gruppieren und pro Gruppe rendern
+            for _, group in itertools_groupby(safe_rows, key=lambda r: r[group_by]):
+                triples = template.render({"rows": list(group)})
+                batch.append(triples)
+
+            offset += db_batch_size
+
+            if len(batch) >= write_batch_size:
+                counter += 1
+                self._write_batch(
+                    counter,
+                    batch,
+                    output_folder,
+                    output_folder_tmp,
+                )
+                batch.clear()
+
+        if batch:
+            self._write_batch(counter + 1, batch, output_folder, output_folder_tmp)

@@ -1,0 +1,20 @@
+DROP TABLE IF EXISTS [dbo].[pipe_HDBGruppenliste_int];
+
+GO
+
+SELECT
+    GRUPPENCODE,
+    GRUPPENCODENAME,
+    BESCHREIBUNG,
+    GRUPPE,
+    GRUPPENNAME,
+    PARENTCODE,
+    GRUPPENCODESORT,
+    GLOSSARID,
+    LINK,
+    HIERARCHIE,
+    HIERARCHIEIDLIST,
+    ORIGIN,
+    SAMEAS
+INTO [dbo].[pipe_HDBGruppenliste_int]
+FROM [dbo].[HDBGruppenliste];

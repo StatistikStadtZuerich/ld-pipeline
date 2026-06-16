@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBCodeliste' | pipe_table_name }}];
+
+GO
+
+SELECT
+    CODE,
+    CODENAME,
+    REFERENZTABELLE,
+    "Index"
+INTO [{{ 'dbo.pipe_HDBCodeliste' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBCodeliste' | table_name }}];

@@ -1,6 +1,7 @@
 import datetime
 import logging
 import logging.config
+import pathlib
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -9,18 +10,8 @@ from pipeline import Pipeline
 from pipeline.base import Utils, Env, Environment
 
 
-def run_pipeline(env: Environment):
+def run_pipeline(env: Environment, target_env: str = None):
     utils = Utils()
-
-    # Check if start signal has arrived
-    if utils.check_start_signal(env):
-        logging.info("Starting Pipeline for %s", env.name)
-    else:
-        logging.debug(
-            "Start-Signal for pipeline not found in '%s'",
-            utils.start_signal_folder(env),
-        )
-        return
 
     options_batching = {
         "db_batch_size": 100000,
@@ -38,17 +29,14 @@ def run_pipeline(env: Environment):
     # Generate triple files
     generate_triple_files(pipeline=pipeline)
 
-    # Create start signal to generate the Fuseki index
+    # Create the start signal to generate the Fuseki index
     logging.info("Create start signal to generate the Fuseki index")
-    utils.set_start_signal_fuseki_index(env)
+    utils.set_start_signal_fuseki_index(env, target_env)
 
     # Write back the publication status to the HDB
     logging.info("Write back the publication status to the HDB")
     pipeline.execute("writePublicationStatiToHDB")
 
-    # Set finish signal
-    logging.debug("Set Finish-Signal for pipeline")
-    utils.set_finish_signal(env)
     logging.info("Pipeline is finished.")
 
 
@@ -64,11 +52,17 @@ def generate_triple_files(pipeline: Pipeline):
         "property",
         "room",
         "time",
+        "timeRelation",
         "timeTermset",
         "dimensionTermset",
     ]
     triple_types_observations = ["observation"]
-    triple_types_others = ["copyStatic", "buildTermsetHierarchy", "generateViews"]
+    triple_types_others = [
+        "copyStatic",
+        "buildInfo",
+        "buildTermsetHierarchy",
+        "generateViews",
+    ]
 
     for name in triple_types_metadata:
         pipeline.execute(f"{name}Templating")
@@ -78,7 +72,9 @@ def generate_triple_files(pipeline: Pipeline):
         pipeline.execute(name)
 
 
-def configure_logging(env: Environment):
+def configure_logging(
+    env: Environment, log_file_name: pathlib.Path = pathlib.Path("./pipeline.log")
+):
     loggers = []
     if env.config.get("log.stdout", bool, True):
         loggers.append("console")
@@ -94,13 +90,11 @@ def configure_logging(env: Environment):
                 "formatter": "default",
             },
             "file": {
-                "class": "logging.handlers.TimedRotatingFileHandler",
-                "filename": datetime.datetime.now().strftime(
-                    env.config.get("log.file.name", fallback="output.log")
-                ),
-                "when": "MIDNIGHT",
-                "interval": 1,
-                "backupCount": 14,
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": log_file_name.absolute(),
+                "maxBytes": 10 * 1024 * 1024,  # 10 MB
+                "backupCount": 5,
+                "encoding": "utf-8",
                 "formatter": "default",
             },
         },
@@ -136,6 +130,19 @@ if __name__ == "__main__":
         default=Env.test,
     )
     __parser.add_argument(
+        "-t",
+        "--targetEnv",
+        help="target environment for the fuseki-index",
+        choices=[e.name for e in Env],
+        default=Env.test,
+    )
+    __parser.add_argument(
+        "-r",
+        "--runId",
+        help="the unique run id (for logging)",
+        default=datetime.datetime.now().strftime("%Y%m%d_%H%M%S"),
+    )
+    __parser.add_argument(
         "-c",
         "--config",
         action="append",
@@ -144,11 +151,25 @@ if __name__ == "__main__":
         default=["config.ini"],
     )
     __args = __parser.parse_args()
-    __config = Environment(Env(__args.env), __args.config)
+    __config = Environment(Env(__args.env), __args.config, __args.runId)
 
-    configure_logging(__config)
+    # Determine log-target
+    __log_file_name: pathlib.Path = __config.config.get("log.file.name", str, None)
+    __log_file = None
+    if __log_file_name is not None:
+        __log_file = pathlib.Path(__log_file_name)
+        if __log_file.is_dir():
+            _log_dir = __log_file
+        elif __log_file.parent.is_dir():
+            _log_dir = __log_file.parent
+        else:
+            _log_dir = pathlib.Path(".")
+        __log_file = _log_dir / f"pipeline_{__config.name}_{__args.runId}.log"
+
+    configure_logging(__config, __log_file)
     try:
-        run_pipeline(__config)
+        logging.info("Starting pipeline with runId %s", __args.runId)
+        run_pipeline(__config, __args.targetEnv)
     except Exception as e:
         logging.fatal("Unexpected Error while running pipeline", exc_info=e)
         exit(1)

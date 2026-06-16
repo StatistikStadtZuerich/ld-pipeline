@@ -1,0 +1,10 @@
+<https://ld.stadt-zuerich.ch/statistics/observation/BEW001-ABCDEF01-XXX-XXX-XXX-XXX-R30000-Z2022A> a <https://cube.link/Observation> ;
+    <https://ld.stadt-zuerich.ch/statistics/property/ZEIT> <https://ld.stadt-zuerich.ch/statistics/code/Z2022A> ;
+<https://ld.stadt-zuerich.ch/statistics/property/TIME> "2022-12-31"^^<http://www.w3.org/2001/XMLSchema#date> ;     <https://ld.stadt-zuerich.ch/statistics/property/RAUM> <https://ld.stadt-zuerich.ch/statistics/code/R30000> ;
+    <https://ld.stadt-zuerich.ch/statistics/property/GRUPPENANZ> <https://ld.stadt-zuerich.ch/statistics/code/GRUPPENANZ1> ;
+    <https://ld.stadt-zuerich.ch/statistics/property/STATUS> <https://ld.stadt-zuerich.ch/statistics/code/STATUS_DEFINITIV> ;
+    <http://purl.org/dc/terms/modified> "2023-01-15" ;
+    <https://ld.stadt-zuerich.ch/statistics/property/GES> <https://ld.stadt-zuerich.ch/statistics/code/XYDEF0> ;
+    <https://ld.stadt-zuerich.ch/statistics/measure/BEW001> "12345.5"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
+    <https://cube.link/observedBy> <https://ld.stadt-zuerich.ch/org/SSZ> .
+<https://ld.stadt-zuerich.ch/statistics/BEW001OD1003/observation> <https://cube.link/observation> <https://ld.stadt-zuerich.ch/statistics/observation/BEW001-ABCDEF01-XXX-XXX-XXX-XXX-R30000-Z2022A> .

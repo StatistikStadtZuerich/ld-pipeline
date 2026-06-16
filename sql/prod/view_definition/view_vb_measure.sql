@@ -1,11 +1,12 @@
-DROP VIEW IF EXISTS dbo.view_vb_measure;
+DROP VIEW IF EXISTS [dbo].[view_vb_measure];
 GO
 
-CREATE VIEW dbo.view_vb_measure AS
+CREATE VIEW [dbo].[view_vb_measure] AS
 WITH cleaned_source AS (
     SELECT DISTINCT
         t.SASA_Job_Output_Id AS view_id,
         TRIM(j.[value]) + '|' AS raw_value,
+        REPLACE(REPLACE(REPLACE(REPLACE(TRIM(j.[value]) + '|', '||||', ''), '|||', ''), '||', ''), '|', '_') AS identifier_full,
         COALESCE(
             (
                 SELECT STRING_AGG(val, '|' ) WITHIN GROUP (ORDER BY val)
@@ -17,7 +18,7 @@ WITH cleaned_source AS (
             ),
             'XXX'
         ) + '|' AS Cleaned_Dimension_Hierarchie
-    FROM dbo.pipe_HDBDatenobjekte_FINAL t
+    FROM [dbo].[pipe_HDBDatenobjekte_prod] t
     CROSS APPLY OPENJSON(
         '["' + REPLACE(REPLACE(t.Kennzahl_GGH_STK_BEB, '"','\"'), ';','","') + '"]'
     ) AS j
@@ -42,21 +43,50 @@ cleaned_lookup AS (
             ),
             'XXX'
         ) + '|' AS Cleaned_CubeLookupDimension
-    FROM dbo.HDBCubeLookup h
+    FROM [dbo].[pipe_HDBCubeLookup_prod] h
 )
 SELECT
     cs.view_id,
     LEFT(cs.raw_value, 3) AS identifier,
-    REPLACE(REPLACE(REPLACE(REPLACE(cs.raw_value, '||||', ''), '|||', ''), '||', ''), '|', '_') AS identifier_full,
+    cs.identifier_full,
     REPLACE(cl.CID,'CID_','') AS cube_id,
-    c.Titel AS name,
-    h.Beschreibung AS description
+    CASE
+        WHEN LEN(cs.identifier_full) = 3
+            THEN h.Kennzahlname
+        ELSE
+            CONCAT_WS(
+                ' / ',
+                h.Kennzahlname,
+                g1.Gruppencodename,
+                g2.Gruppencodename
+            )
+    END AS name,
+    CASE
+        WHEN LEN(cs.identifier_full) = 3
+            THEN h.Beschreibung
+        ELSE
+            CONCAT_WS(
+                ' / ',
+                h.Beschreibung,
+                g1.Beschreibung,
+                g2.Beschreibung
+            )
+    END AS description
 FROM cleaned_source cs
 JOIN cleaned_lookup cl
     ON cs.raw_value = cl.CubeLookupKennzahlNorm
    AND cs.Cleaned_Dimension_Hierarchie = cl.Cleaned_CubeLookupDimension
-JOIN dbo.pipe_HDBCubeDefinition c
+JOIN [dbo].[pipe_HDBCubeDefinition_prod] c
     ON c.Kennzahl = LEFT(cs.raw_value, 3)
    AND c.CID = cl.CID
-JOIN dbo.pipe_HDBKennzahlen h
-    ON h.KennzahlCode = LEFT(cs.raw_value, 3);
+JOIN [dbo].[view_vb_source] s
+    ON s.view_id = cs.view_id
+   AND s.cube_id = REPLACE(cl.CID, 'CID_', '')
+LEFT JOIN [dbo].[pipe_HDBKennzahlen_prod] h
+    ON h.KennzahlCode = LEFT(cs.raw_value, 3)
+LEFT JOIN [dbo].[pipe_HDBGruppenliste_prod] g1
+    ON LEN(cs.identifier_full) >= 11
+   AND g1.Gruppencode = SUBSTRING(cs.identifier_full, 5, 7)
+LEFT JOIN [dbo].[pipe_HDBGruppenliste_prod] g2
+    ON LEN(cs.identifier_full) >= 19
+   AND g2.Gruppencode = SUBSTRING(cs.identifier_full, 13, 7);

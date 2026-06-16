@@ -1,20 +1,18 @@
-DROP VIEW IF EXISTS dbo.view_vb_dimension;
+DROP VIEW IF EXISTS [dbo].[view_vb_dimension];
 GO
 
-CREATE VIEW dbo.view_vb_dimension AS
+CREATE VIEW [dbo].[view_vb_dimension] AS
 SELECT DISTINCT
     t.SASA_Job_Output_Id AS view_id,
     h.GRUPPE AS identifier,
     h.Gruppenname AS name,
     h.Gruppenname as description
 FROM 
-    pipe_HDBDatenobjekte_FINAL t
+    [dbo].[pipe_HDBDatenobjekte_prod] t
 CROSS APPLY 
-    STRING_SPLIT(t.DIMENSION_Hierarchie, ';') AS split_values
+    STRING_SPLIT(t.HierarchieID_List, ';') AS split_values
 JOIN 
-    pipe_HDBGruppenliste h
+    [dbo].[pipe_HDBGruppenliste_prod] h
 ON 
-    h.GRUPPE = LEFT(split_values.value, 3)
-AND
-    h.HIERARCHIE = SUBSTRING(split_values.value, 5, LEN(split_values.value) - 4)
+    h.GRUPPE = substring(split_values.value,2, 3)
 ;

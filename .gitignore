@@ -1,5 +1,6 @@
 .venv
 .idea
+.vscode
 tmp
 output/
 fuseki_index/
@@ -11,11 +12,13 @@ Pipfile.lock
 Archiv/
 *.log
 config.server.ini
+config-local.ini
 config-dev.ini
 config-test.ini
 config-int.ini
 config-prod.ini
 .env
+local.env
 dev.env
 test.env
 int.env

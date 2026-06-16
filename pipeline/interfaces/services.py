@@ -1,4 +1,4 @@
-from typing import Dict, Self, Any
+from typing import Self, Any
 from abc import abstractmethod
 
 from ..base import Base
@@ -16,7 +16,7 @@ class ContextManager(Base):
 
 class DbConnection(ContextManager):
     @abstractmethod
-    def query(self, data: Dict):
+    def query(self, data: str):
         pass
 
     @abstractmethod
@@ -45,10 +45,11 @@ class TemplateEngine(ContextManager):
 
 class CompressionEngine(Base):
     @abstractmethod
-    def compress(self, filepath: str) -> None:
+    def compress(self, filepath: str, filename: str) -> None:
         """Compress the given file to the output path.
 
         Args:
             filepath (str): The file to be compressed
+            filename (str): The name of the compressed file
         """
         pass

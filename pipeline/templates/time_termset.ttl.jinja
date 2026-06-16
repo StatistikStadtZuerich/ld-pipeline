@@ -1,6 +1,12 @@
-<https://ld.stadt-zuerich.ch/statistics/code/{{ term_code|uri_encode }}> <https://schema.org/inDefinedTermSet> <https://ld.stadt-zuerich.ch/statistics/termset/{{termset_code|uri_encode}}>;
-.
+
+{% for termset_code, code_items in rows | groupby("termset_code") %}
+{% set first = code_items[0] %}
 <https://ld.stadt-zuerich.ch/statistics/termset/{{ termset_code|uri_encode }}> a <https://schema.org/DefinedTermSet> ;
-	<https://schema.org/name> {{ termset_name|literal_encode }} ;
-	<https://schema.org/hasDefinedTerm> <https://ld.stadt-zuerich.ch/statistics/code/{{ term_code|uri_encode }}> 
-.
+    <https://schema.org/name> {{ first.termset_name|literal_encode }} ;
+{% for item in code_items %}
+    <https://schema.org/hasDefinedTerm> <https://ld.stadt-zuerich.ch/statistics/code/{{ item.term_code|uri_encode }}>{% if not loop.last %} ;
+{% else %} .
+{% endif %}
+{% endfor %}
+
+{% endfor %}
