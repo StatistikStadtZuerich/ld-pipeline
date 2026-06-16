@@ -128,13 +128,15 @@ if __name__ == "__main__":
         help="environment name",
         choices=[e.name for e in Env],
         default=Env.test,
+        type=Env,
     )
     __parser.add_argument(
         "-t",
         "--targetEnv",
         help="target environment for the fuseki-index",
         choices=[e.name for e in Env],
-        default=Env.test,
+        default=None,
+        type=Env,
     )
     __parser.add_argument(
         "-r",
@@ -151,7 +153,7 @@ if __name__ == "__main__":
         default=["config.ini"],
     )
     __args = __parser.parse_args()
-    __config = Environment(Env(__args.env), __args.config, __args.runId)
+    __config = Environment(__args.env, __args.config, __args.runId)
 
     # Determine log-target
     __log_file_name: pathlib.Path = __config.config.get("log.file.name", str, None)
@@ -169,7 +171,7 @@ if __name__ == "__main__":
     configure_logging(__config, __log_file)
     try:
         logging.info("Starting pipeline with runId %s", __args.runId)
-        run_pipeline(__config, __args.targetEnv)
+        run_pipeline(__config, (__args.targetEnv or __args.env))
     except Exception as e:
         logging.fatal("Unexpected Error while running pipeline", exc_info=e)
         exit(1)
