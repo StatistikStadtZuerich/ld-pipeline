@@ -7,6 +7,9 @@ from .base import Base
 
 
 class Env(str, Enum):
+    def __str__(self) -> str:
+        return str(self.value)
+
     test = "test"
     local = "local"
     int = "int"
