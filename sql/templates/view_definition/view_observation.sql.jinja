@@ -44,7 +44,7 @@ FROM [{{ 'dbo.pipe_HDB' | pipe_table_name }}] h
     LEFT JOIN [{{ 'pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] g4 ON g4.Gruppe = h.Gruppe4
     LEFT JOIN [{{ 'pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] g5 ON g5.Gruppe = h.Gruppe5
     LEFT JOIN [{{ 'pipe_HDBZeit' | pipe_table_name }}] z ON z.ZEIT = h.ZEIT
-     WHERE h.CUBEID <> ''
+    WHERE h.CUBEID <> ''
       AND h.PUBLIKATIONSSTATUS = 'veröffentlicht'
 ),
 base_data AS (
