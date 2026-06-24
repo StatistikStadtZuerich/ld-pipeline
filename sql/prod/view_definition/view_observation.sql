@@ -5,7 +5,7 @@ GO
 CREATE VIEW [dbo].[view_observation]
 AS
 
-WITH base_data AS (
+WITH enriched_data AS (
 SELECT
     CONCAT(h.KENNZAHL,'-',h.Gruppencode1,'-',h.Gruppencode2,'-',h.Gruppencode3,'-',h.Gruppencode4,'-',h.Gruppencode5,'-',h.RAUM,'-',h.Zeit) AS uri,
     REPLACE(REPLACE(TRIM(h.CUBEID), 'CID_', ''), ' ', ',') AS cube_ids,
@@ -30,7 +30,13 @@ SELECT
         WHEN h.DATENSTATUS LIKE '%veröffentlicht%' THEN 'VEROEFFENTLICHT'
         WHEN h.DATENSTATUS LIKE '%definitiv%'      THEN 'DEFINITIV'
         ELSE 'PROVISORISCH'
-    END AS status
+    END AS status,
+    -- Pro uri nach RECORDSTATUS aufsteigend sortieren.
+    ROW_NUMBER() OVER (
+        PARTITION BY h.KENNZAHL, h.Gruppencode1, h.Gruppencode2, h.Gruppencode3,
+                     h.Gruppencode4, h.Gruppencode5, h.RAUM, h.ZEIT
+        ORDER BY CAST(h.RECORDSTATUS AS INT) ASC
+    ) AS rang_version
 FROM [dbo].[pipe_HDB_prod] h
     LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g1 ON g1.Gruppe = h.Gruppe1
     LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g2 ON g2.Gruppe = h.Gruppe2
@@ -39,13 +45,18 @@ FROM [dbo].[pipe_HDB_prod] h
     LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g5 ON g5.Gruppe = h.Gruppe5
     LEFT JOIN [dbo].[pipe_HDBZeit_prod] z ON z.ZEIT = h.ZEIT
     LEFT JOIN [dbo].[pipe_Diffusionsereignisse_prod] d ON d.id = h.DiffusionsID
-    WHERE h.RECORDSTATUS = '0'
-      AND h.CUBEID <> ''
+    WHERE h.CUBEID <> ''
       AND (
             h.PUBLIKATIONSSTATUS = 'veröffentlicht'
           OR
-            (h.Publikationsstatus <> 'veröffentlicht' AND COALESCE(d.StartDate, '') <= GETDATE())
+            (h.PUBLIKATIONSSTATUS <> 'veröffentlicht' AND d.StartDate <= GETDATE())
       )
+),
+base_data AS (
+    -- Pro uri nur die Zeile mit dem niedrigsten RECORDSTATUS auswählen.
+    SELECT *
+    FROM enriched_data
+    WHERE rang_version = 1
 )
 SELECT
     b.uri,
