@@ -44,8 +44,13 @@ FROM [{{ 'dbo.pipe_HDB' | pipe_table_name }}] h
     LEFT JOIN [{{ 'pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] g4 ON g4.Gruppe = h.Gruppe4
     LEFT JOIN [{{ 'pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] g5 ON g5.Gruppe = h.Gruppe5
     LEFT JOIN [{{ 'pipe_HDBZeit' | pipe_table_name }}] z ON z.ZEIT = h.ZEIT
+    LEFT JOIN [{{ 'pipe_Diffusionsereignisse' | pipe_table_name }}] d ON d.id = h.DiffusionsID
     WHERE h.CUBEID <> ''
-      AND h.PUBLIKATIONSSTATUS = 'veröffentlicht'
+      AND (
+            h.PUBLIKATIONSSTATUS = 'veröffentlicht'
+          OR
+            (h.PUBLIKATIONSSTATUS <> 'veröffentlicht' AND d.StartDate <= GETDATE())
+      )
 ),
 base_data AS (
     -- Pro uri nur die Zeile mit dem niedrigsten RECORDSTATUS auswählen.

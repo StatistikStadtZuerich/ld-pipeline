@@ -44,8 +44,13 @@ FROM [dbo].[pipe_HDB_prod] h
     LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g4 ON g4.Gruppe = h.Gruppe4
     LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g5 ON g5.Gruppe = h.Gruppe5
     LEFT JOIN [dbo].[pipe_HDBZeit_prod] z ON z.ZEIT = h.ZEIT
+    LEFT JOIN [dbo].[pipe_Diffusionsereignisse_prod] d ON d.id = h.DiffusionsID
     WHERE h.CUBEID <> ''
-      AND h.PUBLIKATIONSSTATUS = 'veröffentlicht'
+      AND (
+            h.PUBLIKATIONSSTATUS = 'veröffentlicht'
+          OR
+            (h.PUBLIKATIONSSTATUS <> 'veröffentlicht' AND d.StartDate <= GETDATE())
+      )
 ),
 base_data AS (
     -- Pro uri nur die Zeile mit dem niedrigsten RECORDSTATUS auswählen.
