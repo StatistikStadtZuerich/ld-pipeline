@@ -545,6 +545,13 @@ Artefakte nötig:
    (liefert die Spalten, die das Template erwartet). Bei Bedarf zugrundeliegende
    `pipe_*`-Tabelle in `sql/templates/pipe_tables/` ergänzen (siehe 13.4).
 
+   > ⚠️ **Unit-Test:** Für die Laufzeit reicht das Jinja-Template, für grüne Tests müssen
+   > aber die gerenderten SQL-Dateien `sql/int/view_definition/view_<name>.sql` **und**
+   > `sql/prod/view_definition/view_<name>.sql` committet werden (`test_view_definitions`
+   > in `tests/unit/test_sql_templating.py` vergleicht zeichengenau). Fehlen sie, legt der
+   > Test sie mit `-- FIXME:`-Header an und schlägt fehl: einmal laufen lassen, prüfen,
+   > Header entfernen, erneut testen.
+
 2. **Jinja-Template** in `pipeline/templates/<name>.ttl.jinja` anlegen. Spaltennamen des
    Views als Platzhalter verwenden, Filter `uri_encode`/`literal_encode` einsetzen:
 
@@ -582,6 +589,10 @@ Artefakte nötig:
 
 5. **Verifizieren**: `python main.py step --env test --name myTypeTemplating` und die
    erzeugte `.ttl` prüfen; Unit-Test analog zu `tests/unit/test_templating_step.py`.
+   Wurde ein neuer View hinzugefügt, zusätzlich die SQL-Tests laufen lassen:
+   `SSZ_DB_TYPE=mock python -m pytest tests/unit/test_sql_templating.py` – dieser
+   erzeugt fehlende `int`/`prod`-SQL-Dateien (mit FIXME-Header) und schlägt fehl, bis
+   sie geprüft und committet sind.
 
 ### 13.3 Neue Triples in bestehendem Template ergänzen
 
@@ -610,7 +621,11 @@ Um einem bestehenden Datentyp zusätzliche Aussagen hinzuzufügen:
    `InitPipeTables` über `_get_sql_files()` eingelesen (alle `*.sql`/`*.sql.jinja` im
    Ordner, sortiert).
 2. **View-Template** in `sql/templates/view_definition/` anlegen (siehe 13.2).
-3. Lauf `initPipeTables` → `createViewsFromSQL` ausführen, dann den Templating-Step.
+3. **Gerenderte SQL für `int` und `prod` committen** (analog 13.2, Test `test_pipe_tables`):
+   `sql/int/pipe_tables/<name>.sql` und `sql/prod/pipe_tables/<name>.sql`. Dateiname meist
+   identisch zum Template-Basisnamen, bei `pipe_HDB`/`pipe_HDBDatenobjekte` mit Suffix
+   (`…_TEST.sql` für `int`, `…_FINAL.sql` für `prod`).
+4. Lauf `initPipeTables` → `createViewsFromSQL` ausführen, dann den Templating-Step.
 
 > Reihenfolge beachten: Tabellen vor Views, Views vor Templating. `InitPipeTables` und
 > `CreateViewsFromSQL` verarbeiten **alle** Dateien des jeweiligen Ordners alphabetisch –
