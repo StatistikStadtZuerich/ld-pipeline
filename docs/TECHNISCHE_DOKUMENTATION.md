@@ -62,11 +62,10 @@ Verarbeitung großer Datenmengen) und **Skalierbarkeit**.
 | Sprache | Python 3.10 (lauffähig ab 3.6; CI testet 3.12) |
 | CLI | [Typer](https://typer.tiangolo.com/) (`main.py`) |
 | Templating | [Jinja2](https://jinja.palletsprojects.com/) (`.ttl.jinja`, `.sql.jinja`) |
-| RDF | [rdflib](https://rdflib.readthedocs.io/) (Literal-Encoding), [pystardog](https://pypi.org/project/pystardog/) |
+| RDF | [rdflib](https://rdflib.readthedocs.io/) (Literal-Encoding) |
 | Datenbank | MS SQL Server (`pymssql`) – produktiv; MySQL (`mysql-connector-python`) – lokal/Docker |
-| Triplestore | Apache Jena Fuseki (über HTTP, `requests`) |
+| Triplestore | Apache Jena Fuseki; Index-Aufbau via Jena `tdb2.xloader` (Shell-Skript) |
 | Konfiguration | `configparser` + `extended_configparser` (Env-Interpolation) |
-| Datenhandling | `pandas` |
 | Tests | `pytest`, `pytest-docker` |
 | Linting/Format | `ruff` |
 | Containerisierung | Docker (`Dockerfile`, `compose.yaml`) |
@@ -144,27 +143,38 @@ Der vollständige Lauf (`run_pipeline.py`) verläuft in vier Phasen:
      Publikationsstatus/-datum zurück in die HDB.
 
 ```
-   HDB (MS SQL)
-       │  initPipeTables
-       ▼
-   pipe_* Tabellen
-       │  createViewsFromSQL
-       ▼
-   view_* (DB-Views) ──────────────► LdViewBuilder (generateViews)
-       │  *Templating (Jinja)                       │
-       ▼                                            ▼
-   *.ttl / *.ttl.gz  +  static.ttl  +  info.ttl  +  view.*.ttl
-       │  compressing (nicht-optimiert)
-       ▼
-   *.gz  ── uploadToFuseki / Fuseki-Index-Skript ──► Apache Jena Fuseki
-                                                         │
-                                                         ▼
-                                          ld.stadt-zuerich.ch (Linked Open Data)
+run_pipeline.py
+│
+├─ Phase 1 · DB-Aufbereitung
+│     HDB (MS SQL)
+│       ├─ initPipeTables      ──►  pipe_*-Tabellen
+│       └─ createViewsFromSQL  ──►  view_*-Views (DB-Sichten)
+│
+├─ Phase 2 · Triple-Erzeugung   (liest view_*, rendert Jinja-Templates)
+│     …Templating · observationTemplating · generateViews
+│     copyStatic · buildInfo · buildTermsetHierarchy
+│       └──►  *.ttl.gz  (in output_path; inkl. static.ttl, info.ttl, view.*.ttl)
+│
+├─ Phase 3 · Index-Signal
+│     Utils.set_start_signal_fuseki_index()  ──►  start_fuseki_index_*.txt
+│
+└─ Phase 4 · Rückschreiben
+      writePublicationStatiToHDB  ──►  HDB
+
+
+┄┄ entkoppelt über die Signaldatei · extern getaktet (Cron/Timer, nicht im Repo) ┄┄
+
+run_fuseki_index.sh  ──(findet Signal)──►  create_fuseki_index.sh
+      riot --validate  →  tdb2.xloader (Offline-Index-Bau)
+                                          │
+                                          ▼
+                       Apache Jena Fuseki  ──►  ld.stadt-zuerich.ch (Linked Open Data)
 ```
 
-> Hinweis: Im **optimized**-Modus (`int`/`prod`) schreiben die Templating-Steps bereits
-> gezippte Batch-Dateien; der separate `compressing`-Step entfällt dann praktisch, und
-> der Upload erfolgt über das Fuseki-Index-Skript bzw. `UploadToFusekiOptimized`.
+> Hinweis: Der Index-Aufbau ist von der Python-Pipeline **entkoppelt**. `run_pipeline.py`
+> schreibt nur die Signaldatei (Phase 3); das extern getaktete `run_fuseki_index.sh`
+> erkennt sie und ruft `create_fuseki_index.sh` auf, das den Index per Jena `tdb2.xloader`
+> offline baut (kein HTTP-Upload).
 
 ---
 
@@ -196,6 +206,11 @@ Zentrale Factory und Namens-Logik je Umgebung:
   - `table_name(name)` – hängt z.B. `_FINAL`/`_TEST`-Suffix an HDB-Tabellen an.
   - `pipe_table_name(name)` – hängt den Umgebungsnamen an (`pipe_HDB_int`).
   - `view_name(name)` – in `prod`/`dev` unverändert, sonst `…_<env>` (`view_code_int`).
+
+> ℹ️ **Hinweis:** Die Namens-Helfer (`table_name` / `pipe_table_name` / `view_name`) werden
+> im Zuge von
+> [Issue #467](https://cmp-sdlc.stzh.ch/OE-7035/ssz-taskmanagement/team-projekte/ld-2025/-/issues/467)
+> angepasst – dieser Abschnitt ist entsprechend nachzuführen.
 
 ### `Config` & `Env` (`pipeline/base/config.py`)
 - `Env`: Enum der Umgebungen (`test`, `local`, `int`, `prod`, `dev`).
@@ -343,6 +358,10 @@ Die Jinja-SQL-Filter werden in `BaseSQLStep._init_jinja_env()` registriert:
 - `table_name` → HDB-Tabellen mit `_FINAL`/`_TEST`-Suffix.
 - `view_name` → Views mit Umgebungssuffix (außer `prod`/`dev`).
 
+> ℹ️ **Hinweis:** Diese Namens-/Suffix-Logik wird im Zuge von
+> [Issue #467](https://cmp-sdlc.stzh.ch/OE-7035/ssz-taskmanagement/team-projekte/ld-2025/-/issues/467)
+> angepasst – dieser Abschnitt ist entsprechend nachzuführen.
+
 Jeder Filter unterstützt optionale Parameter `(fqa, square_brackets)` für vollständig
 qualifizierte Namen (`[dbo].[…]`).
 
@@ -398,7 +417,6 @@ Sektionen `[test]`, `[local]`, `[int]`, `[prod]` überschreiben gezielt. Wichtig
 | `optimized` | `true` ⇒ batch-/gzip-optimierte Templating-Steps |
 | `only_vb_cubes` | `true` ⇒ Beobachtungen nur für View-Builder-Cubes |
 | `start_signal_folder` | Verzeichnis für Start/Stopp-Signaldateien |
-| `fuseki_endpoint`, `fuseki_dataset`, `fuseki_graph`, `fuseki_username`, `fuseki_password` | Fuseki-Upload |
 | `log.*` | Logging (Level, Format, stdout/Datei) |
 
 `EnvInterpolation` erlaubt das Einsetzen von Umgebungsvariablen in Werte (z.B. Secrets).
@@ -468,8 +486,8 @@ SSZ_DB_TYPE=mock python -m pytest tests/unit                       # Unit-Tests
 python -m pytest --container-scope=session tests/integration       # Integration (Docker)
 ```
 
-Unit-Tests decken u.a. Templating, Jinja-Filter, SQL-Templating, LD-Views, Kompression,
-Termset-Hierarchie und Fuseki-Upload ab (`tests/unit/`).
+Unit-Tests decken u.a. Templating, Jinja-Filter, SQL-Templating, LD-Views, Kompression
+und Termset-Hierarchie ab (`tests/unit/`).
 
 **Linting/Format**
 
