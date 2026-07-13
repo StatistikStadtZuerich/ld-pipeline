@@ -24,7 +24,9 @@ class TestSqlScriptTemplating:
         _int_rendered = _step.render_sql_file(
             self._int,
             pathlib.Path(
-                TestUtils.abs_path("../../sql/templates/pipe_tables/020_pipe_HDB.sql.jinja")
+                TestUtils.abs_path(
+                    "../../sql/templates/pipe_tables/020_pipe_HDB.sql.jinja"
+                )
             ),
         )
         TestUtils.assert_text_equals(
@@ -40,7 +42,9 @@ class TestSqlScriptTemplating:
         _prod_rendered = _step.render_sql_file(
             self._prod,
             pathlib.Path(
-                TestUtils.abs_path("../../sql/templates/pipe_tables/020_pipe_HDB.sql.jinja")
+                TestUtils.abs_path(
+                    "../../sql/templates/pipe_tables/020_pipe_HDB.sql.jinja"
+                )
             ),
         )
         TestUtils.assert_text_equals(

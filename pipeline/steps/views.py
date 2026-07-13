@@ -8,7 +8,9 @@ class ViewsStep(Step):
         self._utils = Utils()
 
     def run(self, environment: Environment):
-        serializer = LdViewSerializer(environment, environment.config.get("template_output_path"))
+        serializer = LdViewSerializer(
+            environment, environment.config.get("template_output_path")
+        )
 
         self.logger.info("Start building ld-views")
 
@@ -16,4 +18,3 @@ class ViewsStep(Step):
             self.logger.info(f"Start building ld-view {view.id}")
             serializer.serialize(view)
             self.logger.info(f"Written ld-view {view.id}")
-

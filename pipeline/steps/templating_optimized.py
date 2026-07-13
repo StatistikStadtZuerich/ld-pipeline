@@ -138,7 +138,9 @@ class TemplatingOptimized(Step):
         self.logger.info(f"Total number of rows processed: {number_rows_total}")
 
         if batch:
-            self._write_batch(batch_counter + 1, batch, output_folder, output_folder_tmp)
+            self._write_batch(
+                batch_counter + 1, batch, output_folder, output_folder_tmp
+            )
 
     def _cooldown(
         self, delay: float, iteration_durations: list[float], max_delay: float = 0
@@ -296,4 +298,6 @@ class GroupedTemplatingOptimized(TemplatingOptimized):
                 batch.clear()
 
         if batch:
-            self._write_batch(batch_counter + 1, batch, output_folder, output_folder_tmp)
+            self._write_batch(
+                batch_counter + 1, batch, output_folder, output_folder_tmp
+            )
