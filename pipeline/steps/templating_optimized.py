@@ -80,6 +80,7 @@ class TemplatingOptimized(Step):
         offset = 0
         counter = 0
         counter_rows = 0
+        batch_counter = 0
         running = True
         number_rows_total = 0
         delay = 0
@@ -121,8 +122,9 @@ class TemplatingOptimized(Step):
             iteration_durations.append(iteration_time)
 
             if len(batch) >= write_batch_size:
+                batch_counter += 1
                 self._write_batch(
-                    counter,
+                    batch_counter,
                     batch,
                     output_folder,
                     output_folder_tmp,
@@ -136,7 +138,7 @@ class TemplatingOptimized(Step):
         self.logger.info(f"Total number of rows processed: {number_rows_total}")
 
         if batch:
-            self._write_batch(counter + 1, batch, output_folder, output_folder_tmp)
+            self._write_batch(batch_counter + 1, batch, output_folder, output_folder_tmp)
 
     def _cooldown(
         self, delay: float, iteration_durations: list[float], max_delay: float = 0
@@ -251,7 +253,7 @@ class GroupedTemplatingOptimized(TemplatingOptimized):
         offset = 0
         running = True
         leftover_rows = []  # letzte Gruppe des vorherigen Batches
-        counter = 0
+        batch_counter = 0
         while running:
             cursor.execute(
                 f"{query} OFFSET {offset} ROWS FETCH NEXT {db_batch_size} ROWS ONLY"
@@ -284,9 +286,9 @@ class GroupedTemplatingOptimized(TemplatingOptimized):
             offset += db_batch_size
 
             if len(batch) >= write_batch_size:
-                counter += 1
+                batch_counter += 1
                 self._write_batch(
-                    counter,
+                    batch_counter,
                     batch,
                     output_folder,
                     output_folder_tmp,
@@ -294,4 +296,4 @@ class GroupedTemplatingOptimized(TemplatingOptimized):
                 batch.clear()
 
         if batch:
-            self._write_batch(counter + 1, batch, output_folder, output_folder_tmp)
+            self._write_batch(batch_counter + 1, batch, output_folder, output_folder_tmp)
