@@ -94,6 +94,8 @@ if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
 else
   GIT_REV="$(cd "$SCRIPT_HOME" && git rev-parse HEAD)"
 fi
+# Make sure we have the correct branch name
+branch=$(git rev-parse --abbrev-ref HEAD)
 # From now on, a read-lock is sufficient
 flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
 
