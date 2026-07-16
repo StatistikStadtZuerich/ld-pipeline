@@ -1,10 +1,8 @@
 import datetime
 import logging
 import logging.config
+import pathlib
 from argparse import ArgumentParser
-from pathlib import Path
-
-from _pytest import pathlib
 
 import main
 from pipeline import Pipeline
@@ -150,7 +148,7 @@ if __name__ == "__main__":
         "--config",
         action="append",
         help="config file (config.ini)",
-        type=lambda p: Path(p).absolute(),
+        type=lambda p: pathlib.Path(p).absolute(),
         default=["config.ini"],
     )
     __args = __parser.parse_args()
