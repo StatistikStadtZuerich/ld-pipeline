@@ -1,7 +1,6 @@
 import datetime
 import logging
 import logging.config
-import pathlib
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -12,7 +11,7 @@ from pipeline import Pipeline
 from pipeline.base import Utils, Env, Environment
 
 
-def run_pipeline(env: Environment, target_env: str = None):
+def run_pipeline(env: Environment, target_env: str | None = None):
     utils = Utils()
 
     options_batching = {
@@ -180,7 +179,9 @@ if __name__ == "__main__":
 
     configure_logging(__config, __log_file)
     if _log_fallback:
-        logging.warning("No log.dir configured, falling back to log.file.name's directory")
+        logging.warning(
+            "No log.dir configured, falling back to log.file.name's directory"
+        )
 
     try:
         logging.info("Starting pipeline with runId %s", __args.runId)
