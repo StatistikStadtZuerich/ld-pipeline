@@ -20,5 +20,6 @@ LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
     OR LEFT(t.GRUPPE, 3) = ag.gruppe
     OR LEFT(t.PARENTCODE, 3) = ag.gruppe
 LEFT JOIN [dbo].[pipe_HDBHierarchien_int] h
-	on value = h.HIERARCHIE and left(t.Gruppencode,3) = SUBSTRING(h.HierarchieID, 2, 3)
+	on RTRIM(LTRIM(value)) = RTRIM(LTRIM(h.HIERARCHIE))
+    and left(t.Gruppencode,3) = SUBSTRING(h.HierarchieID, 2, 3)
     ;
