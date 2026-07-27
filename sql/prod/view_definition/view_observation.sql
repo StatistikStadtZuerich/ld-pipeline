@@ -50,6 +50,8 @@ FROM [dbo].[pipe_HDB_prod] h
             h.PUBLIKATIONSSTATUS = 'veröffentlicht'
           OR
             (h.PUBLIKATIONSSTATUS <> 'veröffentlicht' AND d.StartDate <= GETDATE())
+          OR 
+           h.DiffusionsID = 99999
       )
 ),
 base_data AS (
