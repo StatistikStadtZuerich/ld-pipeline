@@ -1,6 +1,6 @@
 
 from pipeline.base import Base, Environment
-from pipeline.steps.ldview import (
+from .ld_view_model import (
     Attribute,
     BasicDimension,
     Filter,
