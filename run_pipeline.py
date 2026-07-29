@@ -143,7 +143,7 @@ if __name__ == "__main__":
         "-r",
         "--runId",
         help="the unique run id (for logging)",
-        default=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S"),
+        default=datetime.datetime.now(datetime.UTC).strftime("%Y%m%d_%H%M%S"),
     )
     __parser.add_argument(
         "-c",
