@@ -1,6 +1,6 @@
 import os
 import re
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from ..interfaces.services import DbConnection
 from .base import Base
