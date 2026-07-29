@@ -101,9 +101,9 @@ class JinjaTemplateEngine(TemplateEngine):
 
         def is_valid_date(date_string):
             try:
-                datetime.strptime(date_string, "%Y-%m-%d") # noqa: DTZ007
+                datetime.strptime(date_string, "%Y-%m-%d")  # noqa: DTZ007
                 return True
-            except Exception: # noqa: BLE001
+            except Exception:  # noqa: BLE001
                 return False
 
         self._output_filepath = output_filepath
@@ -139,7 +139,7 @@ class JinjaTemplateEngine(TemplateEngine):
             raise ValueError("Output filepath is not set")
         if not self._output_file:
             os.makedirs(os.path.dirname(self._output_filepath), exist_ok=True)
-            self._output_file = open( # noqa: SIM115
+            self._output_file = open(  # noqa: SIM115
                 file=self._output_filepath, mode="wt", encoding="utf-8"
             )
 

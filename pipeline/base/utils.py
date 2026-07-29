@@ -29,7 +29,9 @@ class Utils(Base):
         search_path = os.path.join(start_signal_folder, "Running_pipeline_*.txt")
         files = glob.glob(search_path)
         if len(files) > 0:
-            logging.getLogger("pipeline_state").debug("Found pipeline running: %s", files)
+            logging.getLogger("pipeline_state").debug(
+                "Found pipeline running: %s", files
+            )
             return True
         else:
             return False

@@ -45,13 +45,15 @@ class Templating(Step):
 
         query = self._load_sql_query(environment)
 
-        with environment.get_db_connection() as connection, connection.query(query) as cursor, environment.get_template_engine(
-                    self._template_filename, output_filepath
-                ) as template_engine:
-                    self.logger.info(f"Started templating to {output_filepath}...")
-                    for row in cursor:
-                        for r in self.pre_process(row):
-                            template_engine.template(r)
-                    self.logger.info(
-                        f"Successfully completed templating to {output_filepath}"
-                    )
+        with (
+            environment.get_db_connection() as connection,
+            connection.query(query) as cursor,
+            environment.get_template_engine(
+                self._template_filename, output_filepath
+            ) as template_engine,
+        ):
+            self.logger.info(f"Started templating to {output_filepath}...")
+            for row in cursor:
+                for r in self.pre_process(row):
+                    template_engine.template(r)
+            self.logger.info(f"Successfully completed templating to {output_filepath}")

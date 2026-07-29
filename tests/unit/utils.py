@@ -12,7 +12,11 @@ class TestUtils:
         return os.path.join(os.path.dirname(__file__), rel_path)
 
     @staticmethod
-    def read_file(rel_path, mode="r", encoding: str | None = None,):
+    def read_file(
+        rel_path,
+        mode="r",
+        encoding: str | None = None,
+    ):
         with open(rel_path, mode, encoding=encoding) as f:
             return f.read()
 

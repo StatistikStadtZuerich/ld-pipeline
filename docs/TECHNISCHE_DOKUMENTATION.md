@@ -518,6 +518,7 @@ Dieser Abschnitt beschreibt die häufigsten Erweiterungen. Die drei typischen F�
    ```python
    from ..base import Step, Environment
 
+
    class MeinStep(Step):
        def __init__(self, options=None):
            super().__init__()
@@ -538,11 +539,13 @@ Dieser Abschnitt beschreibt die häufigsten Erweiterungen. Die drei typischen F�
 3. **Registrieren** in `main.get_step_definitions()` als `StepDefinition`:
 
    ```python
-   StepDefinition(
-       "meinStep",
-       MeinStep(options=options),
-       "Kurzbeschreibung des Steps",
-   ),
+   (
+       StepDefinition(
+           "meinStep",
+           MeinStep(options=options),
+           "Kurzbeschreibung des Steps",
+       ),
+   )
    ```
 
 4. **In den Ablauf einhängen**: entweder in `main.run()` (für `python main.py run`)
@@ -582,17 +585,19 @@ Artefakte nötig:
    `create_templating(...)`:
 
    ```python
-   StepDefinition(
-       "myTypeTemplating",
-       create_templating(
-           env,
-           "my_type.ttl.jinja",   # Template
-           "my_type.ttl",         # Ausgabedatei
-           "view_my_type",        # Quell-View
-           options=options,
+   (
+       StepDefinition(
+           "myTypeTemplating",
+           create_templating(
+               env,
+               "my_type.ttl.jinja",  # Template
+               "my_type.ttl",  # Ausgabedatei
+               "view_my_type",  # Quell-View
+               options=options,
+           ),
+           "Creates triples from view_my_type with the my_type.ttl template",
        ),
-       "Creates triples from view_my_type with the my_type.ttl template",
-   ),
+   )
    ```
 
    - Für gruppierte Ausgaben (mehrere Zeilen → ein Triple-Block):

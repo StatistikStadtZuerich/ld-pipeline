@@ -11,7 +11,10 @@ from .services import GzipEngine, JinjaTemplateEngine, MySQLDbConnection
 
 class Environment(Base):
     def __init__(
-        self, env: Env, config_files: list[os.PathLike] | None = None, run_id: str | None = None
+        self,
+        env: Env,
+        config_files: list[os.PathLike] | None = None,
+        run_id: str | None = None,
     ):
         super().__init__()
         self._env = env

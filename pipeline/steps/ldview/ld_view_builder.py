@@ -1,4 +1,3 @@
-
 from pipeline.base import Base, Environment
 
 from .ld_view_model import (
