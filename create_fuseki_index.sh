@@ -46,6 +46,7 @@ done
 
 # Validate all the input files
 RIOT_LOG="$TMP_DIR/riot.log"
+log "Validating data-files in '$TMP_DIR', details will be reported to $RIOT_LOG"
 if ! "${JENA_DIR}/bin/riot" --validate "$TMP_DIR"/*.gz &>"$RIOT_LOG"; then
   log "Invalid data-files, refuse to build fuseki-index"
   cat "$RIOT_LOG"
@@ -116,6 +117,7 @@ log "Compressed tar file created: $TAR_FILE"
 # Copy the .tar.gz file to the target directory
 log "Copying $TAR_FILE to $PIPELINE_DATA_DIR"
 (
+  mkdir -p "${PIPELINE_DATA_DIR}"
   cp "$TAR_FILE" "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}.tmp" \
     && mv "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}.tmp" "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}"
 ) || { log "Failed to copy $TAR_FILE to $PIPELINE_DATA_DIR" >&2; exit 2; }

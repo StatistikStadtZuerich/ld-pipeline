@@ -1,3 +1,4 @@
+import gzip
 import os
 
 from .ld_view_model import View
@@ -5,20 +6,20 @@ from ...base import Environment
 
 
 class LdViewSerializer:
-    def __init__(self, environment: Environment):
+    def __init__(self, environment: Environment, output_path: str):
         self._environment = environment
+        self._output_path = output_path
 
     def _templater(self, template: str):
         return self._environment.get_template_engine(template, None)
 
     def serialize(self, view: View):
         out = os.path.join(
-            self._environment.config.get("template_output_path"),
-            "ldviews",
-            f"view.{view.id}.ttl",
+            self._output_path,
+            f"ldview_{view.id}.ttl.gz",
         )
         os.makedirs(os.path.dirname(out), exist_ok=True)
-        with open(out, "wt") as ttl_file:
+        with gzip.open(out, "wt") as ttl_file:
             # serialize base
             with self._templater("ldviews/metadata.ttl.jinja") as engine:
                 ttl_file.write(engine.render({"view": view}) + "\n")

@@ -3,14 +3,13 @@ import logging
 import logging.config
 import pathlib
 from argparse import ArgumentParser
-from pathlib import Path
 
 import main
 from pipeline import Pipeline
 from pipeline.base import Utils, Env, Environment
 
 
-def run_pipeline(env: Environment, target_env: str = None):
+def run_pipeline(env: Environment, target_env: str | None = None):
     utils = Utils()
 
     options_batching = {
@@ -149,26 +148,39 @@ if __name__ == "__main__":
         "--config",
         action="append",
         help="config file (config.ini)",
-        type=lambda p: Path(p).absolute(),
+        type=lambda p: pathlib.Path(p).absolute(),
         default=["config.ini"],
     )
     __args = __parser.parse_args()
     __config = Environment(__args.env, __args.config, __args.runId)
 
     # Determine log-target
-    __log_file_name: pathlib.Path = __config.config.get("log.file.name", str, None)
-    __log_file = None
-    if __log_file_name is not None:
-        __log_file = pathlib.Path(__log_file_name)
-        if __log_file.is_dir():
-            _log_dir = __log_file
-        elif __log_file.parent.is_dir():
-            _log_dir = __log_file.parent
+    _log_dir_name = __config.config.get("log.dir", str, None)
+    _log_fallback = False
+    if _log_dir_name is not None:
+        _log_dir = pathlib.Path(_log_dir_name)
+    else:
+        __log_file_name: pathlib.Path = __config.config.get("log.file.name", str, None)
+        if __log_file_name is not None:
+            _log_fallback = True
+            __log_file = pathlib.Path(__log_file_name)
+            if __log_file.is_dir():
+                _log_dir = __log_file
+            elif __log_file.parent.is_dir():
+                _log_dir = __log_file.parent
+            else:
+                _log_dir = pathlib.Path(".")
         else:
             _log_dir = pathlib.Path(".")
-        __log_file = _log_dir / f"pipeline_{__config.name}_{__args.runId}.log"
+
+    __log_file = _log_dir / f"pipeline_{__config.name}_{__args.runId}.log"
 
     configure_logging(__config, __log_file)
+    if _log_fallback:
+        logging.warning(
+            "No log.dir configured, falling back to log.file.name's directory"
+        )
+
     try:
         logging.info("Starting pipeline with runId %s", __args.runId)
         run_pipeline(__config, (__args.targetEnv or __args.env))

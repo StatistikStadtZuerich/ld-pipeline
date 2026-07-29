@@ -31,6 +31,9 @@ class BuildTermsetHierarchy(Templating):
         super().run(environment)
         folderpath = environment.config.get("template_output_path")
         file_path = os.path.join(folderpath, self._output_filename)
+        if not os.path.exists(file_path):
+            self.logger.warn("File %s does not exist!", file_path)
+            return
         filename_dest = f"{self._output_filename}.gz"
         filepath_dest = os.path.join(folderpath, filename_dest)
         with gzip.open(filepath_dest, "wb") as gz_file:

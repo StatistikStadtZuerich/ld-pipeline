@@ -18,13 +18,15 @@ class TestSqlScriptTemplating:
         _int_sql = _step.render_sql_file(
             self._int,
             pathlib.Path(
-                TestUtils.abs_path("../../sql/int/pipe_tables/pipe_HDB_TEST.sql")
+                TestUtils.abs_path("../../sql/int/pipe_tables/020_pipe_HDB_TEST.sql")
             ),
         )
         _int_rendered = _step.render_sql_file(
             self._int,
             pathlib.Path(
-                TestUtils.abs_path("../../sql/templates/pipe_tables/pipe_HDB.sql.jinja")
+                TestUtils.abs_path(
+                    "../../sql/templates/pipe_tables/020_pipe_HDB.sql.jinja"
+                )
             ),
         )
         TestUtils.assert_text_equals(
@@ -34,13 +36,15 @@ class TestSqlScriptTemplating:
         _prod_sql = _step.render_sql_file(
             self._prod,
             pathlib.Path(
-                TestUtils.abs_path("../../sql/prod/pipe_tables/pipe_HDB_FINAL.sql")
+                TestUtils.abs_path("../../sql/prod/pipe_tables/020_pipe_HDB_FINAL.sql")
             ),
         )
         _prod_rendered = _step.render_sql_file(
             self._prod,
             pathlib.Path(
-                TestUtils.abs_path("../../sql/templates/pipe_tables/pipe_HDB.sql.jinja")
+                TestUtils.abs_path(
+                    "../../sql/templates/pipe_tables/020_pipe_HDB.sql.jinja"
+                )
             ),
         )
         TestUtils.assert_text_equals(
@@ -54,7 +58,7 @@ class TestSqlScriptTemplating:
             self._int,
             pathlib.Path(
                 TestUtils.abs_path(
-                    "../../sql/int/pipe_tables/pipe_HDBDatenobjekte_TEST.sql"
+                    "../../sql/int/pipe_tables/070_pipe_HDBDatenobjekte_TEST.sql"
                 )
             ),
         )
@@ -62,7 +66,7 @@ class TestSqlScriptTemplating:
             self._int,
             pathlib.Path(
                 TestUtils.abs_path(
-                    "../../sql/templates/pipe_tables/pipe_HDBDatenobjekte.sql.jinja"
+                    "../../sql/templates/pipe_tables/070_pipe_HDBDatenobjekte.sql.jinja"
                 )
             ),
         )
@@ -74,7 +78,7 @@ class TestSqlScriptTemplating:
             self._prod,
             pathlib.Path(
                 TestUtils.abs_path(
-                    "../../sql/prod/pipe_tables/pipe_HDBDatenobjekte_FINAL.sql"
+                    "../../sql/prod/pipe_tables/070_pipe_HDBDatenobjekte_FINAL.sql"
                 )
             ),
         )
@@ -82,7 +86,7 @@ class TestSqlScriptTemplating:
             self._prod,
             pathlib.Path(
                 TestUtils.abs_path(
-                    "../../sql/templates/pipe_tables/pipe_HDBDatenobjekte.sql.jinja"
+                    "../../sql/templates/pipe_tables/070_pipe_HDBDatenobjekte.sql.jinja"
                 )
             ),
         )
@@ -113,6 +117,7 @@ class TestSqlScriptTemplating:
             )
         )
         if not _expected_path.exists():
+            _expected_path.parent.mkdir(parents=True, exist_ok=True)
             _expected_path.write_text(
                 f"""-- FIXME: This file was generated as placeholder.\n--   Verify that it's correct and remove this header.\n\n{_step.render_sql_file(env, template)}""",
                 encoding="utf-8",

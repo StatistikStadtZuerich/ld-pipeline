@@ -1,3 +1,4 @@
+import gzip
 import os
 import shutil
 from unittest.mock import Mock, MagicMock
@@ -115,15 +116,15 @@ class TestLdViews:
             views = view_builder.build_all()
             assert len(views) == 2
 
-            serializer = LdViewSerializer(env)
+            serializer = LdViewSerializer(env, tmp_dir)
             serializer.serialize(views[0])
             serializer.serialize(views[1])
 
-            content = open(
-                os.path.join(TestUtils.abs_path("tmp"), "ldviews/view.WIR100OD100A.ttl")
+            content = gzip.open(
+                os.path.join(tmp_dir, "ldview_WIR100OD100A.ttl.gz"), "rt"
             ).read()
-            content2 = open(
-                os.path.join(TestUtils.abs_path("tmp"), "ldviews/view.WIR100OD100B.ttl")
+            content2 = gzip.open(
+                os.path.join(tmp_dir, "ldview_WIR100OD100B.ttl.gz"), "rt"
             ).read()
 
             expected_content = open(

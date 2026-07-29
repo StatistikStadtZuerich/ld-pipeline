@@ -94,6 +94,8 @@ if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
 else
   GIT_REV="$(cd "$SCRIPT_HOME" && git rev-parse HEAD)"
 fi
+# Make sure we have the correct branch name
+branch=$(cd "$SCRIPT_HOME" && git rev-parse --abbrev-ref HEAD)
 # From now on, a read-lock is sufficient
 flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
 
@@ -141,6 +143,7 @@ NOTIFY_ARGS=(
 "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" pipeline-status --status started --icon "🚀" "${NOTIFY_ARGS[@]}"
 (
   cd "$SCRIPT_HOME" || { debug "Could not change to '$SCRIPT_HOME'"; exit 2; }
+  debug "${PY_VENV%/}/bin/python" "${SCRIPT_HOME}/run_pipeline.py" "${ARGS[@]}"
   "${PY_VENV%/}/bin/python" "${SCRIPT_HOME}/run_pipeline.py" "${ARGS[@]}"
 ) || {
   exit_code="$?"

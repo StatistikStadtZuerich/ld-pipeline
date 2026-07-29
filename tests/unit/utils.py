@@ -11,7 +11,7 @@ class TestUtils:
         return os.path.join(os.path.dirname(__file__), rel_path)
 
     @staticmethod
-    def assert_text_equals(expected, actual, msg="", normalize=True):
+    def assert_text_equals(expected: str, actual: str, msg="", normalize=True):
         def _normalize_string(string: str) -> str:
             if not normalize:
                 return string
