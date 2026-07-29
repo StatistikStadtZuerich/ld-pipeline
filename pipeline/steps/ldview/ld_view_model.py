@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, TypedDict
+from typing import TypedDict
 
 
 class FilterOperation(Enum):
@@ -34,9 +34,9 @@ class Attribute:
 @dataclass
 class Dimension:
     identifier: str
-    name: Optional[str]
-    path: List[str]
-    column: Optional[Attribute]
+    name: str | None
+    path: list[str]
+    column: Attribute | None
 
     def to_bnode(self, view_id):
         return f"_:{self.identifier}_{view_id}"
@@ -47,7 +47,7 @@ class Dimension:
 
 @dataclass
 class BasicDimension(Dimension):
-    sources: List[Source]
+    sources: list[Source]
 
     def list_source_bnodes(self, view_id):
         return [source.to_bnode(view_id) for source in self.sources]
@@ -90,8 +90,8 @@ class View:
     def __init__(self, id: str, include_datenstatus=False):
         self.id = id
         self.include_datenstatus = include_datenstatus
-        self.dimensions: List[Dimension] = []  # https://cube.link/view/dimension
-        self.filters: List[Filter] = []
+        self.dimensions: list[Dimension] = []  # https://cube.link/view/dimension
+        self.filters: list[Filter] = []
         metadata: ViewMetadata  # noqa: F842
 
     def sort_and_numerate_dimensions(self):

@@ -2,7 +2,7 @@ import gzip
 import os
 import shutil
 
-from ..base import Step, Environment
+from ..base import Environment, Step
 
 
 class Copy(Step):

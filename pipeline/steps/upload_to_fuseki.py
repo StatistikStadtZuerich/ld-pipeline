@@ -1,7 +1,8 @@
 import os
+
 import requests
 
-from ..base import Step, Environment
+from ..base import Environment, Step
 
 
 class UploadToFuseki(Step):

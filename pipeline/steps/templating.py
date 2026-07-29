@@ -1,9 +1,10 @@
 import os
 import pathlib
-from typing import Dict, Any
+from typing import Any
 
 from database import BaseSQLStep
-from ..base import Step, Environment
+
+from ..base import Environment, Step
 
 
 class Templating(Step):
@@ -13,7 +14,7 @@ class Templating(Step):
         output_filename: str,
         sql_view_name: str,
         sql_filepath: str | None = None,
-        options: Dict[str, Any] | None = None,
+        options: dict[str, Any] | None = None,
     ):
         super().__init__()
         self._template_filename = template_filename
@@ -44,9 +45,7 @@ class Templating(Step):
 
         query = self._load_sql_query(environment)
 
-        with environment.get_db_connection() as connection:
-            with connection.query(query) as cursor:
-                with environment.get_template_engine(
+        with environment.get_db_connection() as connection, connection.query(query) as cursor, environment.get_template_engine(
                     self._template_filename, output_filepath
                 ) as template_engine:
                     self.logger.info(f"Started templating to {output_filepath}...")

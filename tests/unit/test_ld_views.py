@@ -1,9 +1,8 @@
-import gzip
 import os
 import shutil
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
-from pipeline.base import Environment, Env
+from pipeline.base import Env, Environment
 from pipeline.steps.ldview import LdViewBuilder, LdViewSerializer
 from tests.unit.utils import TestUtils
 
@@ -120,16 +119,16 @@ class TestLdViews:
             serializer.serialize(views[0])
             serializer.serialize(views[1])
 
-            content = gzip.open(
+            content = TestUtils.gzip_read(
                 os.path.join(tmp_dir, "ldview_WIR100OD100A.ttl.gz"), "rt"
-            ).read()
-            content2 = gzip.open(
+            )
+            content2 = TestUtils.gzip_read(
                 os.path.join(tmp_dir, "ldview_WIR100OD100B.ttl.gz"), "rt"
-            ).read()
+            )
 
-            expected_content = open(
+            expected_content = TestUtils.read_file(
                 TestUtils.abs_path("data/expected_view.WIR100OD100A.ttl")
-            ).read()
+            )
             expected_content2 = expected_content.replace("WIR100OD100A", "WIR100OD100B")
 
             TestUtils.assert_text_equals(expected_content, content, "View WIR100OD100A")

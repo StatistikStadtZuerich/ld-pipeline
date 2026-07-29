@@ -1,5 +1,5 @@
-from typing import Self, Any
 from abc import abstractmethod
+from typing import Any, Self
 
 from ..base import Base
 
@@ -40,7 +40,6 @@ class TemplateEngine(ContextManager):
         Args:
             data (Dict): The data argument provides the data to be used in the template in the form of a dictonary.
         """
-        pass
 
 
 class CompressionEngine(Base):
@@ -52,4 +51,3 @@ class CompressionEngine(Base):
             filepath (str): The file to be compressed
             filename (str): The name of the compressed file
         """
-        pass

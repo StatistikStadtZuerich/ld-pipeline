@@ -13,7 +13,7 @@ class Utils(Base):
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
-            cls._instance = super(Utils, cls).__new__(cls, *args, **kwargs)
+            cls._instance = super().__new__(cls, *args, **kwargs)
         return cls._instance
 
     @staticmethod
@@ -29,7 +29,7 @@ class Utils(Base):
         search_path = os.path.join(start_signal_folder, "Running_pipeline_*.txt")
         files = glob.glob(search_path)
         if len(files) > 0:
-            logging.debug("Found pipeline running: %s", files)
+            logging.getLogger("pipeline_state").debug("Found pipeline running: %s", files)
             return True
         else:
             return False
@@ -51,7 +51,7 @@ class Utils(Base):
             running_signal = filename.replace("Start_", "Running_")
             running_signal_path = os.path.join(start_signal_folder, running_signal)
             with open(running_signal_path, "w") as f:
-                f.write(f"{datetime.now()}")
+                f.write(f"{datetime.now(tz=datetime.UTC)}")
             done_folder = os.path.join(start_signal_folder, "done")
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
@@ -74,7 +74,7 @@ class Utils(Base):
             finished_signal = filename.replace("Running_", "Finished_")
             finished_signal_path = os.path.join(start_signal_folder, finished_signal)
             with open(finished_signal_path, "w") as f:
-                f.write(f"{datetime.now()}")
+                f.write(f"{datetime.now(tz=datetime.UTC)}")
             done_folder = os.path.join(start_signal_folder, "done")
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
@@ -82,20 +82,21 @@ class Utils(Base):
             break
 
     def set_start_signal_fuseki_index(
-        self, environment: Environment, target_env: str = None
+        self, environment: Environment, target_env: str | None = None
     ):
         """
         Create a start-signal for the 'create_fuseki_index'-script
         """
+        now = datetime.now(tz=datetime.UTC)
         output_path = environment.config.get("output_path")
-        current_datetime = datetime.now().strftime("%Y%m%d%H%M")
+        current_datetime = now.strftime("%Y%m%d%H%M")
         file_name = f"start_fuseki_index_{current_datetime}.txt"
         file_path = os.path.join(output_path, file_name)
         with open(file_path, "w") as file:
             file.write(
                 "\n".join(
                     [
-                        f"Created: {datetime.now()}",
+                        f"Created: {now}",
                         f"Run-Id: {environment.run_id}",
                         f"Target-Env: {target_env or ''}",
                     ]

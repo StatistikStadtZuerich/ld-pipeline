@@ -1,5 +1,5 @@
 from database.base_sql_step import BaseSQLStep
-from pipeline.base import Environment, Env
+from pipeline.base import Env, Environment
 
 
 class MockEnvironment(Environment):

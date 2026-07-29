@@ -1,6 +1,5 @@
-from typing import Dict
 
-from .base import Environment, Base, StepDefinition
+from .base import Base, Environment, StepDefinition
 
 
 class Pipeline(Base):
@@ -9,7 +8,7 @@ class Pipeline(Base):
     """
 
     def __init__(
-        self, environment: Environment, steps: Dict[str, StepDefinition] = None
+        self, environment: Environment, steps: dict[str, StepDefinition] | None = None
     ):
         """
         initializes environment for pipeline and configures logger
@@ -23,7 +22,7 @@ class Pipeline(Base):
     def execute(self, step: str) -> None:
         _step = self._steps.get(step)
         if _step is None:
-            raise NotImplementedError("Step '%s' not found" % step)
+            raise NotImplementedError(f"Step '{step}' not found")
         self.run(_step)
 
     def run(self, *steps: StepDefinition):

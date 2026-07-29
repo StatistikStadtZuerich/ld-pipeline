@@ -1,8 +1,8 @@
 import os
 import shutil
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
-from pipeline.base import Environment, Env
+from pipeline.base import Env, Environment
 from pipeline.steps import Templating
 from tests.unit.utils import TestUtils
 
@@ -34,11 +34,11 @@ def test_templating():
         ).run(env)
 
         env.get_db_connection().__enter__().query.assert_called_with(
-            open(sql_filepath).read()
+            TestUtils.read_file(sql_filepath)
         )
 
-        content = open(os.path.join(TestUtils.abs_path("tmp"), output_filename)).read()
-        expected_content = open(TestUtils.abs_path("data/expected_content.ttl")).read()
+        content = TestUtils.read_file(os.path.join(TestUtils.abs_path("tmp"), output_filename))
+        expected_content = TestUtils.read_file(TestUtils.abs_path("data/expected_content.ttl"))
         assert expected_content == content
 
     finally:

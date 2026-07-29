@@ -1,14 +1,13 @@
 import pathlib
 import re
 import time
-from typing import List
 
 from database import BaseSQLStep
 from pipeline.base import Environment
 
 
 class InitPipeTables(BaseSQLStep):
-    def __init__(self, sql_dirs: List[str]):
+    def __init__(self, sql_dirs: list[str]):
         super().__init__(sql_dirs)
 
     def run(self, environment: Environment, tables=None):
@@ -28,7 +27,7 @@ class InitPipeTables(BaseSQLStep):
             f"Execution time for initializing pipe tables: {execution_time:.2f} seconds"
         )
 
-    def _create_pipe_tables(self, environment: Environment, tables: List[pathlib.Path]):
+    def _create_pipe_tables(self, environment: Environment, tables: list[pathlib.Path]):
         with environment.get_db_connection() as connection:
             try:
                 with connection.cursor() as cursor:

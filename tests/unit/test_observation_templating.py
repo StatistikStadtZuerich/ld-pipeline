@@ -1,8 +1,8 @@
 import os
 import shutil
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
-from pipeline.base import Environment, Env, StepDefinition
+from pipeline.base import Env, Environment, StepDefinition
 from pipeline.steps import create_templating
 from tests.unit.utils import TestUtils
 
@@ -58,13 +58,13 @@ def test_observation_templating():
         )
         step_def.step.run(env)
 
-        actual = open(
+        actual = TestUtils.read_file(
             os.path.join(TestUtils.abs_path("tmp"), output_filename), encoding="utf-8"
-        ).read()
-        expected = open(
+        )
+        expected = TestUtils.read_file(
             TestUtils.abs_path("data/expected_content_observation.ttl"),
             encoding="utf-8",
-        ).read()
+        )
         TestUtils.assert_text_equals(expected, actual)
     finally:
         shutil.rmtree(tmp_dir)

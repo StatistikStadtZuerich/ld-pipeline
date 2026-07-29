@@ -1,5 +1,5 @@
-import pytest
 import mysql.connector
+import pytest
 
 
 def is_responsive(docker_ip, port):

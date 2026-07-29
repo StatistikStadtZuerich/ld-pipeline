@@ -1,15 +1,16 @@
-import os
-import mysql.connector
 import gzip
+import os
 import re
-
 from datetime import datetime
-from urllib.parse import quote
-from rdflib import Literal
 from typing import TYPE_CHECKING
-from jinja2 import Environment as JinjaEnv, FileSystemLoader
+from urllib.parse import quote
 
-from ..interfaces.services import TemplateEngine, DbConnection, CompressionEngine
+import mysql.connector
+from jinja2 import Environment as JinjaEnv
+from jinja2 import FileSystemLoader
+from rdflib import Literal
+
+from ..interfaces.services import CompressionEngine, DbConnection, TemplateEngine
 
 if TYPE_CHECKING:
     from .environment import Environment
@@ -62,7 +63,7 @@ class JinjaTemplateEngine(TemplateEngine):
         self,
         environment: "Environment",
         template_filename: str,
-        output_filepath: str = None,
+        output_filepath: str | None = None,
     ):
         super().__init__()
 
@@ -100,9 +101,9 @@ class JinjaTemplateEngine(TemplateEngine):
 
         def is_valid_date(date_string):
             try:
-                datetime.strptime(date_string, "%Y-%m-%d")
+                datetime.strptime(date_string, "%Y-%m-%d") # noqa: DTZ007
                 return True
-            except Exception:
+            except Exception: # noqa: BLE001
                 return False
 
         self._output_filepath = output_filepath
@@ -130,7 +131,7 @@ class JinjaTemplateEngine(TemplateEngine):
             self._ensure_output_file()
             self._output_file.write(content + "\n")
         except Exception as e:
-            self.logger.error("Caught:", e)
+            self.logger.exception("Caught an Exception", exc_info=e)
             raise
 
     def _ensure_output_file(self):
@@ -138,7 +139,7 @@ class JinjaTemplateEngine(TemplateEngine):
             raise ValueError("Output filepath is not set")
         if not self._output_file:
             os.makedirs(os.path.dirname(self._output_filepath), exist_ok=True)
-            self._output_file = open(
+            self._output_file = open( # noqa: SIM115
                 file=self._output_filepath, mode="wt", encoding="utf-8"
             )
 

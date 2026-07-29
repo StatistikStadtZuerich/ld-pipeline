@@ -1,11 +1,11 @@
-from .buildInfo import BuildInfo
+from .build_info import BuildInfo
 from .build_termset_hierarchy import BuildTermsetHierarchy
 from .compressing import Compressing
 from .copy import Copy
 from .create_views_from_sql import CreateViewsFromSQL
 from .optimized import (
-    create_templating,
     create_fuseki_uploader,
+    create_templating,
 )
 from .templating import Templating
 from .templating_optimized import TemplatingOptimized
@@ -14,16 +14,16 @@ from .upload_to_fuseki_optimized import UploadToFusekiOptimized
 from .write_publication_stati_to_hdb import WritePublicationStatiToHDB
 
 __all__ = [
-    "Copy",
-    "Compressing",
     "BuildInfo",
     "BuildTermsetHierarchy",
+    "Compressing",
+    "Copy",
     "CreateViewsFromSQL",
-    "WritePublicationStatiToHDB",
     "Templating",
     "TemplatingOptimized",
     "UploadToFuseki",
     "UploadToFusekiOptimized",
-    "create_templating",
+    "WritePublicationStatiToHDB",
     "create_fuseki_uploader",
+    "create_templating",
 ]

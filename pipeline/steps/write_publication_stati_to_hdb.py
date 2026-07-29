@@ -1,5 +1,6 @@
 from database import BaseSQLStep
-from ..base import Step, Environment, Utils
+
+from ..base import Environment, Step, Utils
 
 
 class WritePublicationStatiToHDB(Step):
@@ -13,8 +14,7 @@ class WritePublicationStatiToHDB(Step):
         self._calculate_observation_hashes(environment, suffix)
         self.logger.info("Done")
 
-        with environment.get_db_connection() as connection:
-            with connection.cursor() as cursor:
+        with environment.get_db_connection() as connection, connection.cursor() as cursor:
                 cursor.execute(
                     BaseSQLStep.render_sql(
                         environment,
@@ -105,8 +105,7 @@ class WritePublicationStatiToHDB(Step):
                 connection.commit()
 
     def _calculate_observation_hashes(self, environment: Environment, suffix):
-        with environment.get_db_connection() as connection:
-            with connection.cursor() as cursor:
+        with environment.get_db_connection() as connection, connection.cursor() as cursor:
                 cursor.execute(
                     BaseSQLStep.render_sql(
                         environment,

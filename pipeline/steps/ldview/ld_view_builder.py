@@ -1,15 +1,14 @@
-from typing import List, Tuple, Optional
 
-from pipeline.base import Environment, Base
+from pipeline.base import Base, Environment
 from pipeline.steps.ldview import (
-    View,
-    BasicDimension,
-    Source,
-    LookupDimension,
     Attribute,
-    ViewMetadata,
+    BasicDimension,
     Filter,
     FilterOperation,
+    LookupDimension,
+    Source,
+    View,
+    ViewMetadata,
 )
 
 
@@ -20,7 +19,7 @@ class LdViewBuilder(Base):
         self._env = environment.name
         self._cache = {}
 
-    def build_all(self) -> List[View]:
+    def build_all(self) -> list[View]:
         views = []
         for view_dict in self._list_views():
             view = self._create_view_from_dict(view_dict)
@@ -148,13 +147,13 @@ class LdViewBuilder(Base):
                 return result
 
     ###### QUERIES #######
-    def _list_views(self) -> List:
+    def _list_views(self) -> list:
         # id = viewId
         # name = like all attributes from Datenobjekte table
         # return [{"id":"WIR100OD100A", "name": "Haushaltseinkommen nach ...", "include_datenstatus": True}]
         return self._get_view_data("view_vb_view", None)
 
-    def _list_sources_by_view_id(self, view_id: str) -> List:
+    def _list_sources_by_view_id(self, view_id: str) -> list:
         """
         return [
             {"cube_id": "000610", "name": "Haushaltseinkommen 25%"},
@@ -163,7 +162,7 @@ class LdViewBuilder(Base):
         """
         return self._get_view_data("view_vb_source", view_id)
 
-    def _list_filters_by_view_id(self, view_id: str) -> List:
+    def _list_filters_by_view_id(self, view_id: str) -> list:
         """
         return [
             {"termset": "KreiseZH", "dimension": "RAUM"},
@@ -173,7 +172,7 @@ class LdViewBuilder(Base):
         """
         return self._get_view_data("view_vb_filter", view_id)
 
-    def _list_dimensions_by_view_id(self, view_id) -> List:
+    def _list_dimensions_by_view_id(self, view_id) -> list:
         """
         return [
             # HTY|HYTLEVEL1
@@ -182,7 +181,7 @@ class LdViewBuilder(Base):
         """
         return self._get_view_data("view_vb_dimension", view_id)
 
-    def _list_measurements_by_view_id(self, view_id) -> List:
+    def _list_measurements_by_view_id(self, view_id) -> list:
         """
         return [
             {"identifier": "HAE", "identifier_full": "HAE_GGH1400_STK1025", "cube_id": "000610", "name": "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 25%-Perzentil", "description": "Haushaltsäquivalenzeinkommen: Für die Berechnung wird die Haushaltsgrösse über die Äquivalenzskala ..."},
@@ -250,8 +249,8 @@ class LdViewBuilder(Base):
         return Source(name=source_dict["name"], cube_id=source_dict["cube_id"])
 
     def _create_filter_from_dict(
-        self, filter_dict: dict, dim_list: List
-    ) -> Tuple[Optional[Filter], Optional[LookupDimension]]:
+        self, filter_dict: dict, dim_list: list
+    ) -> tuple[Filter | None, LookupDimension | None]:
         basic_dimension = next(
             (d for d in dim_list if d.identifier == filter_dict["dimension"].upper()),
             None,
@@ -280,7 +279,7 @@ class LdViewBuilder(Base):
 
     def _create_dimensions_from_dimension_dict(
         self, dimension_dict, sources, skip_lookups=False
-    ) -> List:
+    ) -> list:
         dimension = BasicDimension(
             identifier=dimension_dict["identifier"],
             name=dimension_dict["name"],
@@ -345,7 +344,7 @@ class LdViewBuilder(Base):
         return [dimension, dlang, dcode, dsort]
 
     def _create_measurement_from_dimension_dict(self, measurement_dict, sources):
-        source = next((s for s in sources if s.cube_id == measurement_dict["cube_id"]))
+        source = next(s for s in sources if s.cube_id == measurement_dict["cube_id"])
 
         attribute = Attribute(
             name=measurement_dict["name"],

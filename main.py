@@ -1,27 +1,26 @@
-import typer
-from typing import Dict
 import logging
 
+import typer
+
+from database import InitPipeTables
 from pipeline import Pipeline
-from pipeline.base import Env, StepDefinition, Environment
+from pipeline.base import Env, Environment, StepDefinition
 from pipeline.steps import (
-    Copy,
     BuildInfo,
-    Compressing,
     BuildTermsetHierarchy,
-    WritePublicationStatiToHDB,
+    Compressing,
+    Copy,
     CreateViewsFromSQL,
+    WritePublicationStatiToHDB,
     create_templating,
 )
-
 from pipeline.steps.views import ViewsStep
-from database import InitPipeTables
 
 app = typer.Typer()
 logger = logging.getLogger(__name__)
 
 
-def get_step_definitions(env: Environment, options=None) -> Dict[str, StepDefinition]:
+def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefinition]:
     if options is None:
         options = {}
     env_name = env.name
