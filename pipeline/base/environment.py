@@ -1,6 +1,6 @@
 import os
 import re
-from datetime import datetime
+from datetime import datetime, UTC
 
 from ..interfaces.services import DbConnection
 from .base import Base
@@ -16,7 +16,7 @@ class Environment(Base):
         super().__init__()
         self._env = env
         self._config = Config(env, config_files)
-        self._run_id = run_id or datetime.now(datetime.UTC).strftime("%Y-%m-%d-%H-%M-%S")
+        self._run_id = run_id or datetime.now(UTC).strftime("%Y-%m-%d-%H-%M-%S")
 
     @property
     def run_id(self) -> str:

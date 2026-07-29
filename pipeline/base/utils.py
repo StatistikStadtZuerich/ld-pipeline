@@ -2,7 +2,7 @@ import glob
 import logging
 import os
 import shutil
-from datetime import datetime
+from datetime import datetime, UTC
 
 from .base import Base
 from .environment import Environment
@@ -51,7 +51,7 @@ class Utils(Base):
             running_signal = filename.replace("Start_", "Running_")
             running_signal_path = os.path.join(start_signal_folder, running_signal)
             with open(running_signal_path, "w") as f:
-                f.write(f"{datetime.now(tz=datetime.UTC)}")
+                f.write(f"{datetime.now(tz=UTC)}")
             done_folder = os.path.join(start_signal_folder, "done")
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
@@ -74,7 +74,7 @@ class Utils(Base):
             finished_signal = filename.replace("Running_", "Finished_")
             finished_signal_path = os.path.join(start_signal_folder, finished_signal)
             with open(finished_signal_path, "w") as f:
-                f.write(f"{datetime.now(tz=datetime.UTC)}")
+                f.write(f"{datetime.now(tz=UTC)}")
             done_folder = os.path.join(start_signal_folder, "done")
             if not os.path.exists(done_folder):
                 os.makedirs(done_folder)
@@ -87,7 +87,7 @@ class Utils(Base):
         """
         Create a start-signal for the 'create_fuseki_index'-script
         """
-        now = datetime.now(tz=datetime.UTC)
+        now = datetime.now(tz=UTC)
         output_path = environment.config.get("output_path")
         current_datetime = now.strftime("%Y%m%d%H%M")
         file_name = f"start_fuseki_index_{current_datetime}.txt"

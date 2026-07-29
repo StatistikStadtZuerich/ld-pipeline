@@ -27,7 +27,7 @@ class Attribute:
     name: str
     alternate_name: str
     description: str
-    position = 0
+    position: int = 0
 
 
 # abstract base class
