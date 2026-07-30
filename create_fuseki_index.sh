@@ -5,14 +5,17 @@ SCRIPT="$(readlink -f "$0")"
 SCRIPT_HOME="$(dirname "$SCRIPT")"
 
 ENV_NAME="${1:-local}"
+ENV_NAME_UC="$(echo "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
 RUN_ID="${2:-$(date -u +"%FT%H-%M-%SZ")}"
 TARGET_ENV="${3:-test}"
 
 # Those ENVs should be passed by the calling script
 JENA_DIR="${JENA_DIR:-/home/lod_pipeline/apache-jena-fuseki-4.9.0/jena}"
-FUSEKI_INDEX_DIR="${FUSEKI_INDEX_DIR:-/home/lod_pipeline/ld-pipeline-2024/fuseki_index/${TARGET_ENV}}"
-INPUT_DIR="${INPUT_DIR:-/home/lod_pipeline/ld-pipeline-2024/output/${ENV_NAME}}"
-PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-/home/lod_pipeline/hdb_dropzone/prod/test/Pipeline_Data}"
+FUSEKI_INDEX_DIR="${FUSEKI_INDEX_DIR:-${SCRIPT_HOME%/}/fuseki_index/${TARGET_ENV}}"
+INPUT_DIR="${INPUT_DIR:-${SCRIPT_HOME%/}/output/${ENV_NAME}}"
+DROPZONE_BASE=${DROPZONE_BASE:-/home/lod_pipeline/hdb_dropzone}
+DROPZONE_DIR=${DROPZONE_DIR:-${DROPZONE_BASE%/}/${ENV_NAME_UC}}
+PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-${DROPZONE_DIR%/}/Pipeline_Data}"
 
 TMP_DIR="$INPUT_DIR/tmp"
 DONE_DIR="$INPUT_DIR/done"
