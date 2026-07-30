@@ -1,4 +1,4 @@
-from pipeline.base import Step, Environment, Utils
+from pipeline.base import Environment, Step, Utils
 from pipeline.steps.ldview import LdViewBuilder, LdViewSerializer
 
 

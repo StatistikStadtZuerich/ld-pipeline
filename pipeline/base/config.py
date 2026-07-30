@@ -1,7 +1,8 @@
-from configparser import ConfigParser
-from extended_configparser.interpolator import EnvInterpolation
-from enum import Enum
 import os
+from configparser import ConfigParser
+from enum import Enum
+
+from extended_configparser.interpolator import EnvInterpolation
 
 from .base import Base
 
@@ -18,7 +19,7 @@ class Env(str, Enum):
 
 
 class Config(Base):
-    def __init__(self, env: Env, config_files: list[os.PathLike] = None):
+    def __init__(self, env: Env, config_files: list[os.PathLike] | None = None):
         super().__init__()
         self._env = env.value
         self._config_parser = ConfigParser(interpolation=EnvInterpolation())

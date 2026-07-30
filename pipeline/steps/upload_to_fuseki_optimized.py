@@ -1,9 +1,10 @@
-import os
-import requests
 import glob
+import os
 import shutil
 
-from ..base import Step, Environment, Utils
+import requests
+
+from ..base import Environment, Step, Utils
 
 
 class UploadToFusekiOptimized(Step):

@@ -1,20 +1,22 @@
 import pathlib
 from abc import ABC
-from typing import List, Callable
+from collections.abc import Callable
 
-from pipeline.base import Step, Environment
-from jinja2 import Environment as JinjaEnv, FileSystemLoader, Template
+from jinja2 import Environment as JinjaEnv
+from jinja2 import FileSystemLoader, Template
+
+from pipeline.base import Environment, Step
 
 
 class BaseSQLStep(Step, ABC):
     def __init__(
         self,
-        sql_dirs: List[str],
+        sql_dirs: list[str],
     ):
         super().__init__()
         self._sql_dirs = sql_dirs
 
-    def _get_sql_files(self) -> List[pathlib.Path]:
+    def _get_sql_files(self) -> list[pathlib.Path]:
         return sorted(
             [
                 filepath

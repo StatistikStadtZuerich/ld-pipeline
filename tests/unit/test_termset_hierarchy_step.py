@@ -1,9 +1,9 @@
 import gzip
 import os
 import shutil
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
-from pipeline.base import Environment, Env
+from pipeline.base import Env, Environment
 from pipeline.steps import BuildTermsetHierarchy
 from tests.unit.utils import TestUtils
 
@@ -118,7 +118,7 @@ def test_termset_hierarchy():
         ).run(env)
 
         env.get_db_connection().__enter__().query.assert_called_with(
-            open(sql_filepath).read()
+            TestUtils.read_file(sql_filepath)
         )
 
         with gzip.open(

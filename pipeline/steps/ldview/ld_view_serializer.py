@@ -1,8 +1,8 @@
 import gzip
 import os
 
-from .ld_view_model import View
 from ...base import Environment
+from .ld_view_model import View
 
 
 class LdViewSerializer:

@@ -1,8 +1,9 @@
-from typing import Dict, Any
+from typing import Any
 
 from pipeline.base import Environment, Step
+
 from .templating import Templating
-from .templating_optimized import TemplatingOptimized, GroupedTemplatingOptimized
+from .templating_optimized import GroupedTemplatingOptimized, TemplatingOptimized
 from .upload_to_fuseki import UploadToFuseki
 from .upload_to_fuseki_optimized import UploadToFusekiOptimized
 
@@ -17,7 +18,7 @@ def create_templating(
     output_filename: str,
     view_or_table_name: str,
     sql_filepath: str | None = None,
-    options: Dict[str, Any] | None = None,
+    options: dict[str, Any] | None = None,
 ) -> Step:
     options = options or {}
 

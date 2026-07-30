@@ -3,7 +3,7 @@ import pathlib
 import pytest
 
 from database import InitPipeTables
-from pipeline.base import Environment, Env
+from pipeline.base import Env, Environment
 from pipeline.steps import CreateViewsFromSQL
 from tests.unit.utils import TestUtils
 

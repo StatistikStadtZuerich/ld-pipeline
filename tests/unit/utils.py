@@ -1,4 +1,5 @@
 import difflib
+import gzip
 import os
 import re
 
@@ -9,6 +10,20 @@ class TestUtils:
     @staticmethod
     def abs_path(rel_path):
         return os.path.join(os.path.dirname(__file__), rel_path)
+
+    @staticmethod
+    def read_file(
+        rel_path,
+        mode="r",
+        encoding: str | None = None,
+    ):
+        with open(rel_path, mode, encoding=encoding) as f:
+            return f.read()
+
+    @staticmethod
+    def gzip_read(file_path, mode="rb"):
+        with gzip.open(file_path, mode) as f:
+            return f.read()
 
     @staticmethod
     def assert_text_equals(expected: str, actual: str, msg="", normalize=True):

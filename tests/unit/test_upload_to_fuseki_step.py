@@ -38,12 +38,12 @@ def test_upload_to_fuseki(mock_request_put):
             [
                 call(
                     url="http://localhost:3030/test/data?eingraph",
-                    data=open(
+                    data=TestUtils.read_file(
                         os.path.join(
                             TestUtils.abs_path("data/compressed"), "sample_1.ttl.gz"
                         ),
                         "rb",
-                    ).read(),
+                    ),
                     auth=("testuser", password),
                     headers={
                         "Content-Type": "text/turtle",
@@ -52,12 +52,12 @@ def test_upload_to_fuseki(mock_request_put):
                 ),
                 call(
                     url="http://localhost:3030/test/data?eingraph",
-                    data=open(
+                    data=TestUtils.read_file(
                         os.path.join(
                             TestUtils.abs_path("data/compressed"), "sample_2.ttl.gz"
                         ),
                         "rb",
-                    ).read(),
+                    ),
                     auth=("testuser", password),
                     headers={
                         "Content-Type": "text/turtle",

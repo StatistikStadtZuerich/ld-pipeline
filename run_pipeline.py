@@ -2,15 +2,17 @@ import datetime
 import logging
 import logging.config
 import pathlib
+import sys
 from argparse import ArgumentParser
 
 import main
 from pipeline import Pipeline
-from pipeline.base import Utils, Env, Environment
+from pipeline.base import Env, Environment, Utils
 
 
 def run_pipeline(env: Environment, target_env: str | None = None):
     utils = Utils()
+    logger = logging.getLogger("run_pipeline")
 
     options_batching = {
         "db_batch_size": 100000,
@@ -29,14 +31,14 @@ def run_pipeline(env: Environment, target_env: str | None = None):
     generate_triple_files(pipeline=pipeline)
 
     # Create the start signal to generate the Fuseki index
-    logging.info("Create start signal to generate the Fuseki index")
+    logger.info("Create start signal to generate the Fuseki index")
     utils.set_start_signal_fuseki_index(env, target_env)
 
     # Write back the publication status to the HDB
-    logging.info("Write back the publication status to the HDB")
+    logger.info("Write back the publication status to the HDB")
     pipeline.execute("writePublicationStatiToHDB")
 
-    logging.info("Pipeline is finished.")
+    logger.info("Pipeline is finished.")
 
 
 def generate_triple_files(pipeline: Pipeline):
@@ -116,7 +118,7 @@ def configure_logging(
     }
 
     logging.config.dictConfig(logger_config)
-    logging.debug("Logging configured")
+    logging.getLogger("logging").debug("Logging configured")
 
 
 if __name__ == "__main__":
@@ -141,7 +143,7 @@ if __name__ == "__main__":
         "-r",
         "--runId",
         help="the unique run id (for logging)",
-        default=datetime.datetime.now().strftime("%Y%m%d_%H%M%S"),
+        default=datetime.datetime.now(datetime.UTC).strftime("%Y%m%d_%H%M%S"),
     )
     __parser.add_argument(
         "-c",
@@ -176,14 +178,15 @@ if __name__ == "__main__":
     __log_file = _log_dir / f"pipeline_{__config.name}_{__args.runId}.log"
 
     configure_logging(__config, __log_file)
+    logger = logging.getLogger("main")
     if _log_fallback:
-        logging.warning(
+        logger.warning(
             "No log.dir configured, falling back to log.file.name's directory"
         )
 
     try:
-        logging.info("Starting pipeline with runId %s", __args.runId)
+        logger.info("Starting pipeline with runId %s", __args.runId)
         run_pipeline(__config, (__args.targetEnv or __args.env))
     except Exception as e:
-        logging.fatal("Unexpected Error while running pipeline", exc_info=e)
-        exit(1)
+        logger.exception("Unexpected Error while running pipeline", exc_info=e)
+        sys.exit(1)

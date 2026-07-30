@@ -4,10 +4,11 @@ import pathlib
 import shutil
 import time
 from itertools import groupby as itertools_groupby
-from typing import Dict, Any
+from typing import Any
 
 from database import BaseSQLStep
-from ..base import Step, Environment, Utils
+
+from ..base import Environment, Step, Utils
 
 
 class TemplatingOptimized(Step):
@@ -17,7 +18,7 @@ class TemplatingOptimized(Step):
         output_filename: str,
         sql_view_name: str,
         sql_filepath: str | None = None,
-        options: Dict[str, Any] | None = None,
+        options: dict[str, Any] | None = None,
     ):
         super().__init__()
         self._template_filename = template_filename

@@ -1,5 +1,6 @@
 from database import BaseSQLStep
-from ..base import Step, Environment, Utils
+
+from ..base import Environment, Step, Utils
 
 
 class WritePublicationStatiToHDB(Step):
@@ -13,44 +14,46 @@ class WritePublicationStatiToHDB(Step):
         self._calculate_observation_hashes(environment, suffix)
         self.logger.info("Done")
 
-        with environment.get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    BaseSQLStep.render_sql(
-                        environment,
-                        """
+        with (
+            environment.get_db_connection() as connection,
+            connection.cursor() as cursor,
+        ):
+            cursor.execute(
+                BaseSQLStep.render_sql(
+                    environment,
+                    """
                         SELECT COLUMN_NAME
                         FROM INFORMATION_SCHEMA.COLUMNS
                         WHERE TABLE_NAME = '{{ "pipe_HDB" | pipe_table_name(False, False) }}'
                         AND TABLE_SCHEMA = 'dbo'
                         AND COLUMN_NAME NOT IN ('hash')
                         """,
-                    )
                 )
-                columns = cursor.fetchall()
-                column_names = [column["COLUMN_NAME"] for column in columns]
-                concat_expression = " + ".join(
-                    [
-                        f"CONVERT(VARCHAR(MAX),ISNULL({column}, ''))"
-                        for column in column_names
-                    ]
-                )
+            )
+            columns = cursor.fetchall()
+            column_names = [column["COLUMN_NAME"] for column in columns]
+            concat_expression = " + ".join(
+                [
+                    f"CONVERT(VARCHAR(MAX),ISNULL({column}, ''))"
+                    for column in column_names
+                ]
+            )
 
-                self.logger.info(f"Creating temporary table #hash_HDB_{suffix} ...")
-                query = BaseSQLStep.render_sql(
-                    environment,
-                    """
+            self.logger.info(f"Creating temporary table #hash_HDB_{suffix} ...")
+            query = BaseSQLStep.render_sql(
+                environment,
+                """
                     DROP TABLE IF EXISTS [{{ '#hash_HDB' | pipe_table_name }}];
                     CREATE TABLE [{{ '#hash_HDB' | pipe_table_name }}] (
                         GESAMTCODE nvarchar(60),
                         hash VARBINARY(16)
                     )
                 """,
-                )
-                cursor.execute(query)
-                query = BaseSQLStep.render_sql(
-                    environment,
-                    f"""
+            )
+            cursor.execute(query)
+            query = BaseSQLStep.render_sql(
+                environment,
+                f"""
                     INSERT INTO [{{{{ '#hash_HDB' | pipe_table_name }}}}] (GESAMTCODE, hash)
                     SELECT 
                         GESAMTCODE,
@@ -62,14 +65,14 @@ class WritePublicationStatiToHDB(Step):
                     AND
                         h.CUBEID <> ''
                 """,
-                )
-                cursor.execute(query)
-                self.logger.info("done")
+            )
+            cursor.execute(query)
+            self.logger.info("done")
 
-                self.logger.info(f"Updating publication stati to HDB_{suffix} ...")
-                query = BaseSQLStep.render_sql(
-                    environment,
-                    """
+            self.logger.info(f"Updating publication stati to HDB_{suffix} ...")
+            query = BaseSQLStep.render_sql(
+                environment,
+                """
                     UPDATE c
                         SET 
                             c.PUBLIKATIONSSTATUS = 'veröffentlicht',
@@ -98,43 +101,45 @@ class WritePublicationStatiToHDB(Step):
                         WHERE 
                             COALESCE(d.StartDate, '') <= GETDATE()
                     """,
-                )
-                cursor.execute(query)
-                self.logger.info("done")
+            )
+            cursor.execute(query)
+            self.logger.info("done")
 
-                connection.commit()
+            connection.commit()
 
     def _calculate_observation_hashes(self, environment: Environment, suffix):
-        with environment.get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    BaseSQLStep.render_sql(
-                        environment,
-                        """
+        with (
+            environment.get_db_connection() as connection,
+            connection.cursor() as cursor,
+        ):
+            cursor.execute(
+                BaseSQLStep.render_sql(
+                    environment,
+                    """
                     SELECT COLUMN_NAME
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME = '{{ "pipe_HDB" | pipe_table_name(False, False) }}'
                       AND TABLE_SCHEMA = 'dbo'
                       AND COLUMN_NAME NOT IN ('hash')
                     """,
-                    )
                 )
-                columns = cursor.fetchall()
-                column_names = [column["COLUMN_NAME"] for column in columns]
-                concat_expression = " + ".join(
-                    [
-                        f"CONVERT(VARCHAR(MAX),ISNULL({column}, ''))"
-                        for column in column_names
-                    ]
-                )
-                query = BaseSQLStep.render_sql(
-                    environment,
-                    f"""
+            )
+            columns = cursor.fetchall()
+            column_names = [column["COLUMN_NAME"] for column in columns]
+            concat_expression = " + ".join(
+                [
+                    f"CONVERT(VARCHAR(MAX),ISNULL({column}, ''))"
+                    for column in column_names
+                ]
+            )
+            query = BaseSQLStep.render_sql(
+                environment,
+                f"""
                 UPDATE
                     [{{{{ 'pipe_HDB' | pipe_table_name }}}}]
                 SET
                     hash = HASHBYTES('MD5', CONVERT(VARBINARY(MAX), {concat_expression}))
                 """,
-                )
-                cursor.execute(query)
-                connection.commit()
+            )
+            cursor.execute(query)
+            connection.commit()

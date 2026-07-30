@@ -18,7 +18,6 @@ class Step(Base):
         This methode is called by the pipeline
         :param environment: the current environment, managed by the pipeline
         """
-        pass
 
 
 class StepDefinition:

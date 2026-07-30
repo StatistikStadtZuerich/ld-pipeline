@@ -1,5 +1,5 @@
 from pipeline import Pipeline
-from pipeline.base import Environment, Env, Step, StepDefinition
+from pipeline.base import Env, Environment, Step, StepDefinition
 
 
 class TestStep(Step):

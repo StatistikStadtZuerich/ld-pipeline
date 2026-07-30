@@ -2,8 +2,8 @@ import gzip
 import os
 import shutil
 
-from .templating import Templating
 from ..base import Environment
+from .templating import Templating
 
 
 class BuildTermsetHierarchy(Templating):
@@ -12,7 +12,7 @@ class BuildTermsetHierarchy(Templating):
         for x in range(1, 4):
             if not row.get(f"r{x}"):
                 break
-            for y in range(0, x):
+            for y in range(x):
                 value = row.get(f"f{y}")
                 if not value:
                     break
@@ -32,7 +32,7 @@ class BuildTermsetHierarchy(Templating):
         folderpath = environment.config.get("template_output_path")
         file_path = os.path.join(folderpath, self._output_filename)
         if not os.path.exists(file_path):
-            self.logger.warn("File %s does not exist!", file_path)
+            self.logger.warning("File %s does not exist!", file_path)
             return
         filename_dest = f"{self._output_filename}.gz"
         filepath_dest = os.path.join(folderpath, filename_dest)

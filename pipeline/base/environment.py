@@ -1,22 +1,25 @@
 import os
 import re
-from datetime import datetime
+from datetime import UTC, datetime
 
+from ..interfaces.services import DbConnection
+from .base import Base
 from .config import Config, Env
 from .mmsql_service import MSSQLDbConnection
-from .services import JinjaTemplateEngine, GzipEngine, MySQLDbConnection
-from .base import Base
-from ..interfaces.services import DbConnection
+from .services import GzipEngine, JinjaTemplateEngine, MySQLDbConnection
 
 
 class Environment(Base):
     def __init__(
-        self, env: Env, config_files: list[os.PathLike] = None, run_id: str = None
+        self,
+        env: Env,
+        config_files: list[os.PathLike] | None = None,
+        run_id: str | None = None,
     ):
         super().__init__()
         self._env = env
         self._config = Config(env, config_files)
-        self._run_id = run_id or datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        self._run_id = run_id or datetime.now(UTC).strftime("%Y-%m-%d-%H-%M-%S")
 
     @property
     def run_id(self) -> str:
@@ -72,7 +75,7 @@ class Environment(Base):
             raise NotImplementedError(f"Database '{_db_type}' is not supported")
 
     def get_template_engine(
-        self, template_filename: str, output_filepath: str = None
+        self, template_filename: str, output_filepath: str | None = None
     ) -> JinjaTemplateEngine:
         """
         Returns the template engine for the environment, the template file, and the defined output

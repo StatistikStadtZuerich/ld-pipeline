@@ -1,12 +1,12 @@
 import time
-from typing import List
 
 from database import BaseSQLStep
+
 from ..base import Environment
 
 
 class CreateViewsFromSQL(BaseSQLStep):
-    def __init__(self, sql_folder: List[str]):
+    def __init__(self, sql_folder: list[str]):
         super().__init__(sql_folder)
 
     def run(self, environment: Environment):
@@ -26,13 +26,15 @@ class CreateViewsFromSQL(BaseSQLStep):
         )
 
     def _execute_sql_files(self, environment: Environment):
-        with environment.get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                # Alle SQL-Dateien im Ordner durchgehen
-                for sql_file in self._get_sql_files():
-                    self._execute_sql_file(sql_file, cursor, environment)
+        with (
+            environment.get_db_connection() as connection,
+            connection.cursor() as cursor,
+        ):
+            # Alle SQL-Dateien im Ordner durchgehen
+            for sql_file in self._get_sql_files():
+                self._execute_sql_file(sql_file, cursor, environment)
 
-                connection.commit()
+            connection.commit()
 
     def _execute_sql_file(self, sql_file, cursor, environment: Environment):
         self.logger.debug(f"Executing SQL file: {sql_file}")
