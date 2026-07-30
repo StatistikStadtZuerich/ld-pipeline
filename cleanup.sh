@@ -21,6 +21,33 @@ INPUT_DIR="${INPUT_DIR:-/home/lod_pipeline/ld-pipeline-2024/output/${ENV_NAME}}"
 DONE_DIR="$INPUT_DIR/done"
 PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-/home/lod_pipeline/hdb_dropzone/prod/test/Pipeline_Data}"
 
+function cleanup_files() {
+    local dir="$1"
+    local pattern="${2:-*}"
+    local days_old="${3:-30}"
+    local keep_count="${4:-5}"
+
+    if [ -z "$dir" ]; then
+      echo "Usage: $0 <dir> [pattern=$pattern] [days_old=$days_old] [keep_count=$keep_count]" >&2
+      return 1
+    elif [ ! -d "$dir" ]; then
+      echo "Directory not found: '$dir'" >&2
+      return 1
+    fi
+
+    local files
+    files=$(ls -1t "$dir"/$pattern 2>/dev/null)
+    
+    if [ -n "$files" ]; then
+        # Skip the newest <keep_count> files
+        echo "$files" | tail -n +"$((keep_count + 1))" | while read -r file; do
+            if [ -f "$file" ] && [ -n "$(find "$file" -mtime +"$days_old" -print)" ]; then
+                rm "$file"
+            fi
+        done
+    fi
+}
+
 # 1) Lösche alle regulären Dateien im Ordner $DONE_DIR, die älter als 24 h sind
 find "$DONE_DIR" -type f -mmin +1440 -delete
 
@@ -47,5 +74,5 @@ for ITEM in "$FUSEKI_INDEX_DIR"/*; do
 done
 
 # 3) Lösche alle *.tar.gz Dateien in $PIPELINE_DATA_DIR, die älter als 30 Tage sind
-find "$PIPELINE_DATA_DIR" -type f -name "*.tar.gz" -mtime +30 -delete
-
+#    behalte die 5 neuesten aber immer, egal wie alt sie sind.
+cleanup_files "$PIPELINE_DATA_DIR" "*.tar.gz" 30 5
