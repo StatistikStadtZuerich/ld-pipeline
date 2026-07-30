@@ -80,3 +80,8 @@ done
 # 3) Lösche alle *.tar.gz Dateien in $PIPELINE_DATA_DIR, die älter als 30 Tage sind
 #    behalte die 5 neuesten aber immer, egal wie alt sie sind.
 cleanup_files "$PIPELINE_DATA_DIR" "*.tar.gz" 30 5
+# 4) Cleanup der alten Log-Files (in $LOG_DIR)
+#    Alter: 30 Tage, die letzten 7 immer, egal wie alt sie sind.
+cleanup_files "$LOGS_DIR" "pipeline_${ENV_NAME}_*.log" 30 7
+cleanup_files "$LOGS_DIR" "fuseki_index_${ENV_NAME}_*.log" 30 7
+
