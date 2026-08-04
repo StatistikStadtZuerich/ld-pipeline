@@ -27,7 +27,7 @@ export INPUT_DIR="${INPUT_DIR:-${SCRIPT_HOME%/}/output/${ENV_NAME}}"
 export DROPZONE_BASE=${DROPZONE_BASE:-/home/lod_pipeline/hdb_dropzone}
 export DROPZONE_DIR=${DROPZONE_DIR:-${DROPZONE_BASE%/}/${ENV_NAME_UC}}
 export PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-${DROPZONE_DIR%/}/Pipeline_Data}"
-export LOGS_DIR="${PIPELINE_DATA_DIR:-${DROPZONE_DIR%/}/logs}"
+export LOGS_DIR="${LOGS_DIR:-${DROPZONE_DIR%/}/logs}"
 DONE_DIR="$INPUT_DIR/done"
 
 exec 999<"$SCRIPT_HOME" 1001<"$INPUT_DIR"

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 ENV_NAME="${1:-local}"
 ENV_NAME_UC="$(echo "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
@@ -23,7 +24,7 @@ DONE_DIR="$INPUT_DIR/done"
 DROPZONE_BASE=${DROPZONE_BASE:-/home/lod_pipeline/hdb_dropzone}
 DROPZONE_DIR=${DROPZONE_DIR:-${DROPZONE_BASE%/}/${ENV_NAME_UC}}
 PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-${DROPZONE_DIR%/}/Pipeline_Data}"
-LOGS_DIR="${PIPELINE_DATA_DIR:-${DROPZONE_DIR%/}/logs}"
+LOGS_DIR="${LOGS_DIR:-${DROPZONE_DIR%/}/logs}"
 
 function cleanup_files() {
     local dir="$1"
@@ -40,7 +41,7 @@ function cleanup_files() {
     fi
 
     local files
-    files=$(ls -1t "$dir"/$pattern 2>/dev/null)
+    files=$(ls -1t "$dir"/$pattern 2>/dev/null || true)
     
     if [ -n "$files" ]; then
         # Skip the newest <keep_count> files
