@@ -4,11 +4,16 @@ set -euo pipefail
 SCRIPT="$(readlink -f "$0")"
 SCRIPT_ARGS=("$@")
 SCRIPT_HOME="$(dirname "$SCRIPT")"
-START_SIGNAL_FOLDER="${START_SIGNAL_FOLDER:-.}"
 ##############################################
 _start_signal_prefix="Start_pipeline_"
 _running_signal_prefix="Running_pipeline_"
 _done_signal_prefix="Finished_pipeline_"
+##############################################
+ENV_NAME="${1:-local}"
+ENV_NAME_UC="$(echo "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
+DROPZONE_BASE=${DROPZONE_BASE:-/home/lod_pipeline/hdb_dropzone}
+DROPZONE_DIR=${DROPZONE_DIR:-${DROPZONE_BASE%/}/${ENV_NAME_UC}}
+START_SIGNAL_FOLDER="${START_SIGNAL_FOLDER:-${DROPZONE_DIR%/}/Pipeline}"
 ##############################################
 debug() {
   if [ "${DEBUG:-false}" = "true" ]; then
@@ -37,10 +42,9 @@ loadSetting() {
   fi
 }
 ##############################################
-ENV="${1:-local}"
 
 # Determine default settings
-case "$ENV" in
+case "$ENV_NAME" in
   prod)
     branch=main
     ;;
@@ -65,9 +69,9 @@ flock -xn 1001 || { debug "Could not acquire exclusive lock on '$startSignal'"; 
 RUN_ID="$(basename "$startSignal" .txt | sed "s/$_start_signal_prefix//")"
 # Extract further run-parameters for the pipeline
 branch="$(loadSetting branch "$branch" "$startSignal")"
-target_env="$(loadSetting target-env "$ENV" "$startSignal")"
+target_env="$(loadSetting target-env "$ENV_NAME" "$startSignal")"
 
-debug "Starting ($ENV) Pipeline with runID $RUN_ID"
+debug "Starting ($ENV_NAME) Pipeline with runID $RUN_ID"
 GIT_REV=""
 if [ "${GIT_AUTO_UPDATE:-false}" == "true" ]; then
   # Acquire write-lock on the current directory
@@ -102,7 +106,7 @@ _runFile="$START_SIGNAL_FOLDER/${_running_signal_prefix}${RUN_ID}.txt"
 cat >"$_runFile" <<EOF
 Started: $(date -u +%FT%TZ)
   Run ID: $RUN_ID
-  Env: $ENV
+  Env: $ENV_NAME
   Branch: $branch
   Git-Rev: $GIT_REV
   Target-Env: $target_env
@@ -120,20 +124,20 @@ if [ -n "${LD_LIBRARY_PATH:-}" ] && [[ ":$LD_LIBRARY_PATH:" != *":/home/lod_pipe
 fi
 
 ARGS=(
-  --env "$ENV"
+  --env "$ENV_NAME"
   --runId "$RUN_ID"
   --targetEnv "$target_env"
   --config "$SCRIPT_HOME/config.ini"
 )
-if [ -f "$SCRIPT_HOME/$ENV.ini" ]; then
-  ARGS+=(--config "$SCRIPT_HOME/$ENV.ini")
+if [ -f "$SCRIPT_HOME/$ENV_NAME.ini" ]; then
+  ARGS+=(--config "$SCRIPT_HOME/$ENV_NAME.ini")
 fi
-if [ -f "$SCRIPT_HOME/config-$ENV.ini" ]; then
-  ARGS+=(--config "$SCRIPT_HOME/config-$ENV.ini")
+if [ -f "$SCRIPT_HOME/config-$ENV_NAME.ini" ]; then
+  ARGS+=(--config "$SCRIPT_HOME/config-$ENV_NAME.ini")
 fi
 
 NOTIFY_ARGS=(
-  --environment "$(echo "$ENV" | tr '[:lower:]' '[:upper:]')"
+  --environment "$ENV_NAME_UC"
   --runId "$RUN_ID"
   --branch "$branch"
   --targetEnv "$(echo "$target_env" | tr '[:lower:]' '[:upper:]')"

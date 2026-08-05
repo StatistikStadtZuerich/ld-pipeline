@@ -13,6 +13,7 @@ findSignal() {
 }
 
 ENV_NAME="${1:-local}"
+ENV_NAME_UC="$(echo "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
 
 # load local settings
 load_env "${SCRIPT_HOME}/.env"
@@ -21,10 +22,12 @@ load_env "./.env"
 load_env "./${ENV_NAME}.env"
 
 export JENA_DIR="${JENA_DIR:-/home/lod_pipeline/apache-jena-fuseki-4.9.0/jena}"
-export FUSEKI_INDEX_DIR="${FUSEKI_INDEX_DIR:-/home/lod_pipeline/ld-pipeline-2024/fuseki_index/${ENV_NAME}}"
-export INPUT_DIR="${INPUT_DIR:-/home/lod_pipeline/ld-pipeline-2024/output/${ENV_NAME}}"
-export PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-/home/lod_pipeline/hdb_dropzone/prod/test/Pipeline_Data}"
-export LOG_DIR="${LOG_DIR:-/home/lod_pipeline/logs}"
+export FUSEKI_INDEX_DIR="${FUSEKI_INDEX_DIR:-${SCRIPT_HOME%/}/fuseki_index/${ENV_NAME}}"
+export INPUT_DIR="${INPUT_DIR:-${SCRIPT_HOME%/}/output/${ENV_NAME}}"
+export DROPZONE_BASE=${DROPZONE_BASE:-/home/lod_pipeline/hdb_dropzone}
+export DROPZONE_DIR=${DROPZONE_DIR:-${DROPZONE_BASE%/}/${ENV_NAME_UC}}
+export PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-${DROPZONE_DIR%/}/Pipeline_Data}"
+export LOGS_DIR="${LOGS_DIR:-${DROPZONE_DIR%/}/logs}"
 DONE_DIR="$INPUT_DIR/done"
 
 exec 999<"$SCRIPT_HOME" 1001<"$INPUT_DIR"
@@ -51,7 +54,7 @@ TARGET_ENV="${TARGET_ENV:-test}"
 mkdir -p "$DONE_DIR"
 mv "$startSignal" "$DONE_DIR/"
 
-mkdir -p "$LOG_DIR"
-LOG_FILE="$LOG_DIR/fuseki_index_${ENV_NAME}_${RUN_ID}.log"
+mkdir -p "$LOGS_DIR"
+LOG_FILE="$LOGS_DIR/fuseki_index_${ENV_NAME}_${RUN_ID}.log"
 
 "${SCRIPT_HOME}/create_fuseki_index.sh" "$ENV_NAME" "$RUN_ID" "$TARGET_ENV" >> "$LOG_FILE" 2>&1
