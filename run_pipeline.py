@@ -54,8 +54,8 @@ def run_pipeline(
 def run_fast_views(
     env: Environment, embargo: bool = False, view_ids: list[str] | None = None
 ):
-    """Fast-View: generiert nur die LD-View-TTLs (ein ttl.gz je View), ohne initPipeTables, 
-    Fuseki-Index-Neuaufbau, Rückschreiben in HDB. Hier können nach Referenznummer/view id gefilterte 
+    """Fast-View: generiert nur die LD-View-TTLs (ein ttl.gz je View), ohne initPipeTables,
+    Fuseki-Index-Neuaufbau, Rückschreiben in HDB. Hier können nach Referenznummer/view id gefilterte
     Daten generiert und in template_output_path/locked gespeichert werden."""
     options = {}
     step_definitions = main.get_step_definitions(env, options)
@@ -80,7 +80,7 @@ def _generate_locked_output(
     view_ids: list[str],
 ):
     """
-    Generiert eine nach Referenznummer/view id gefilterte Auswahl (Views + Observations) 
+    Generiert eine nach Referenznummer/view id gefilterte Auswahl (Views + Observations)
     nach template_output_path/locked (kein öffentlicher Fuseki-Index-Zugriff).
     - embargo=False: veröffentlichte Observations für die selektierten Views
     - embargo=True: embargoed Observations für die selektierten Views (nur für interne Nutzung, nicht öffentlich)

@@ -43,7 +43,9 @@ class Templating(Step):
         if self._reference_numbers:
             for value in self._reference_numbers:
                 if not _REFERENCE_NUMBER_VALUE_PATTERN.match(value):
-                    raise ValueError(f"Invalid reference_number filter value: {value!r}")
+                    raise ValueError(
+                        f"Invalid reference_number filter value: {value!r}"
+                    )
             values = ", ".join(f"'{value}'" for value in self._reference_numbers)
             query = f"SELECT * FROM ({query}) AS filtered WHERE reference_number IN ({values})"
 

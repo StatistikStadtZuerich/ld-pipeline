@@ -22,7 +22,9 @@ class ObservationEmbargoed(Templating):
 
     def run(self, environment: Environment):
         self.logger.info("Generating embargoed observations ...")
-        super().run(environment)  # rendert view_observation_embargoed -> observation_embargoed.ttl
+        super().run(
+            environment
+        )  # rendert view_observation_embargoed -> observation_embargoed.ttl
 
         folderpath = self._output_folder(environment)
         file_path = os.path.join(folderpath, self._output_filename)
