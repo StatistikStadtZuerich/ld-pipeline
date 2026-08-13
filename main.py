@@ -11,6 +11,8 @@ from pipeline.steps import (
     Compressing,
     Copy,
     CreateViewsFromSQL,
+    ObservationEmbargoed,
+    ObservationFastView,
     WritePublicationStatiToHDB,
     create_templating,
 )
@@ -124,6 +126,38 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                 "Creates triples from the view_observation data with the observation.ttl template",
             ),
             StepDefinition(
+                "observationEmbargoedTemplating",
+                ObservationEmbargoed(
+                    "observation.ttl.jinja",
+                    "observation_embargoed.ttl",
+                    "view_observation_embargoed",
+                    options=options,
+                ),
+                "Creates a single ttl.gz of embargoed observations (Sperrfrist in future) for a protected named graph/locked Fuseki",
+            ),
+            StepDefinition(
+                "observationFastViewPublicTemplating",
+                ObservationFastView(
+                    "observation.ttl.jinja",
+                    "observation_fastview.ttl",
+                    "view_observation",
+                    options=options,
+                    reference_numbers=options.get("reference_numbers"),
+                ),
+                "Creates a single ttl.gz of published observations, filtered for the requested view ID(s)",
+            ),
+            StepDefinition(
+                "observationFastViewEmbargoedTemplating",
+                ObservationFastView(
+                    "observation.ttl.jinja",
+                    "observation_embargoed_fastview.ttl",
+                    "view_observation_embargoed",
+                    options=options,
+                    reference_numbers=options.get("reference_numbers"),
+                ),
+                "Creates a single ttl.gz of embargoed observations, filtered for the requested view ID(s)",
+            ),
+            StepDefinition(
                 "propertyTemplating",
                 create_templating(
                     env,
@@ -206,7 +240,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
             ),
             StepDefinition(
                 "generateViews",
-                ViewsStep(),
+                ViewsStep(options=options),
                 "Generate all RDF files for ld views",
             ),
             StepDefinition(
