@@ -11,8 +11,7 @@ from pipeline.steps import (
     Compressing,
     Copy,
     CreateViewsFromSQL,
-    ObservationEmbargoed,
-    ObservationFastView,
+    FastRunObservationTemplating,
     WritePublicationStatiToHDB,
     create_templating,
 )
@@ -126,36 +125,26 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                 "Creates triples from the view_observation data with the observation.ttl template",
             ),
             StepDefinition(
-                "observationEmbargoedTemplating",
-                ObservationEmbargoed(
-                    "observation.ttl.jinja",
-                    "observation_embargoed.ttl",
-                    "view_observation_embargoed",
-                    options=options,
-                ),
-                "Creates a single ttl.gz of embargoed observations (Sperrfrist in future) for a protected named graph/locked Fuseki",
-            ),
-            StepDefinition(
                 "observationFastViewPublicTemplating",
-                ObservationFastView(
+                FastRunObservationTemplating(
                     "observation.ttl.jinja",
-                    "observation_fastview.ttl",
+                    "Public_observations_fast_view.ttl",
                     "view_observation",
                     options=options,
                     reference_numbers=options.get("reference_numbers"),
                 ),
-                "Creates a single ttl.gz of published observations, filtered for the requested view ID(s)",
+                "Creates a single ttl.gz 'Public_observations_fast_view' of published observations, filtered for the requested view ID(s)",
             ),
             StepDefinition(
-                "observationFastViewEmbargoedTemplating",
-                ObservationFastView(
+                "observationFastViewAllTemplating",
+                FastRunObservationTemplating(
                     "observation.ttl.jinja",
-                    "observation_embargoed_fastview.ttl",
+                    "Plus_Sperrfrist_observations_fast_view.ttl",
                     "view_observation_embargoed",
                     options=options,
                     reference_numbers=options.get("reference_numbers"),
                 ),
-                "Creates a single ttl.gz of embargoed observations, filtered for the requested view ID(s)",
+                "Creates a single ttl.gz 'Plus_Sperrfrist_observations_fast_view' of ALL observations (RECORDSTATUS=0, published and embargoed) for the requested view ID(s)",
             ),
             StepDefinition(
                 "propertyTemplating",

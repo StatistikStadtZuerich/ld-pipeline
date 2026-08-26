@@ -39,12 +39,8 @@ FROM [{{ 'dbo.pipe_HDB' | pipe_table_name }}] h
     LEFT JOIN [{{ 'pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] g4 ON g4.Gruppe = h.Gruppe4
     LEFT JOIN [{{ 'pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] g5 ON g5.Gruppe = h.Gruppe5
     LEFT JOIN [{{ 'pipe_HDBZeit' | pipe_table_name }}] z ON z.ZEIT = h.ZEIT
-    LEFT JOIN [{{ 'pipe_Diffusionsereignisse' | pipe_table_name }}] d ON d.id = h.DiffusionsID
     WHERE h.RECORDSTATUS = '0'
-        AND h.CUBEID <> ''
-        AND (h.Publikationsstatus <> 'veröffentlicht' AND d.StartDate > GETDATE())
-        AND DiffusionsID <> 99999
-    )
+)
 SELECT
     b.uri,
     b.cube_ids,

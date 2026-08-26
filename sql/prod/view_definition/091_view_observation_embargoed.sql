@@ -39,12 +39,8 @@ FROM [dbo].[pipe_HDB_prod] h
     LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g4 ON g4.Gruppe = h.Gruppe4
     LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] g5 ON g5.Gruppe = h.Gruppe5
     LEFT JOIN [dbo].[pipe_HDBZeit_prod] z ON z.ZEIT = h.ZEIT
-    LEFT JOIN [dbo].[pipe_Diffusionsereignisse_prod] d ON d.id = h.DiffusionsID
     WHERE h.RECORDSTATUS = '0'
-        AND h.CUBEID <> ''
-        AND (h.Publikationsstatus <> 'veröffentlicht' AND d.StartDate > GETDATE())
-        AND DiffusionsID <> 99999
-    )
+)
 SELECT
     b.uri,
     b.cube_ids,

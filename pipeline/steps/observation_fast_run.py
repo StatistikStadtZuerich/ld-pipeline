@@ -6,31 +6,28 @@ from .templating import Templating
 from ..base import Environment
 
 
-class ObservationEmbargoed(Templating):
+class FastRunObservationTemplating(Templating):
     """
-    Rendert die embargoed Observations (Sperrfrist in der Zukunft) in
-    EIN gzip-File observation_embargoed.ttl.gz — zum separaten Laden
-    in einen geschützten Named Graph/einen gesperrten Fuseki.
-    Schreibt in den 'locked/'-Unterordner von template_output_path (keine embargoed
-    Daten im öffentlichen Index).
+    Rendert eine Observation-Menge (veröffentlicht oder embargoed), optional
+    gefiltert auf bestimmte Referenznummern, in ein gzip-File. Schreibt in den
+    'locked/'-Unterordner von template_output_path.
 
-    NICHT über TemplatingOptimized (Batching) erstellt, damit keine _batchNNN.ttl.gz entstehen.
+    Nicht über TemplatingOptimized (Batching) erstellt, damit keine
+    _batchNNN.ttl.gz-Dateien entstehen.
     """
 
     def _output_folder(self, environment: Environment) -> str:
         return os.path.join(super()._output_folder(environment), "locked")
 
     def run(self, environment: Environment):
-        self.logger.info("Generating embargoed observations ...")
-        super().run(
-            environment
-        )  # rendert view_observation_embargoed -> observation_embargoed.ttl
+        self.logger.info("Generating FastRun observations ...")
+        super().run(environment)
 
         folderpath = self._output_folder(environment)
         file_path = os.path.join(folderpath, self._output_filename)
         if not os.path.exists(file_path):
             self.logger.info(
-                "No embargoed observations found, skipping zipping of %s",
+                "No observations found, skipping zipping of %s",
                 self._output_filename,
             )
             return

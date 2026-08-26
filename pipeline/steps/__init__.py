@@ -3,8 +3,7 @@ from .build_termset_hierarchy import BuildTermsetHierarchy
 from .compressing import Compressing
 from .copy import Copy
 from .create_views_from_sql import CreateViewsFromSQL
-from .observation_embargoed import ObservationEmbargoed
-from .observation_fastview import ObservationFastView
+from .observation_fast_run import FastRunObservationTemplating
 from .optimized import (
     create_fuseki_uploader,
     create_templating,
@@ -21,8 +20,7 @@ __all__ = [
     "Compressing",
     "Copy",
     "CreateViewsFromSQL",
-    "ObservationEmbargoed",
-    "ObservationFastView",
+    "FastRunObservationTemplating",
     "Templating",
     "TemplatingOptimized",
     "UploadToFuseki",
