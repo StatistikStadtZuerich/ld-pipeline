@@ -1,29 +1,11 @@
 import glob
 import logging
 import os
-import re
 import shutil
 from datetime import UTC, datetime
 
 from .base import Base
 from .environment import Environment
-
-_REFERENCE_NUMBER_PATTERN = re.compile(r"^[A-Za-z]{3}\d{3}")
-
-
-def derive_reference_number(view_id: str) -> str:
-    """
-    Leitet aus einer vollen, 12-stelligen View-Id (z.B. 'BEV411OD411A', das
-    'id'-Feld aus view_vb_view) die 6-stellige Referenznummer ab, unter der
-    Observations in pipe_HDB.REFERENZNUMMER referenziert sind (z.B. 'BEV411').
-    """
-    match = _REFERENCE_NUMBER_PATTERN.match(view_id)
-    if not match:
-        raise ValueError(
-            f"Cannot derive reference number from view id '{view_id}': "
-            "expected it to start with 3 letters followed by 3 digits (e.g. 'BEV411...')."
-        )
-    return match.group(0)
 
 
 class Utils(Base):

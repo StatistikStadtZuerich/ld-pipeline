@@ -1,13 +1,10 @@
 import os
 import pathlib
-import re
 from typing import Any
 
 from database import BaseSQLStep
 
 from ..base import Environment, Step
-
-_REFERENCE_NUMBER_VALUE_PATTERN = re.compile(r"^[A-Za-z0-9_]+$")
 
 
 class Templating(Step):
@@ -18,7 +15,6 @@ class Templating(Step):
         sql_view_name: str,
         sql_filepath: str | None = None,
         options: dict[str, Any] | None = None,
-        reference_numbers: list[str] | set[str] | None = None,
     ):
         super().__init__()
         self._template_filename = template_filename
@@ -26,30 +22,18 @@ class Templating(Step):
         self._sql_filepath = sql_filepath
         self._sql_view_name = sql_view_name
         self._options = options or {}
-        self._reference_numbers = reference_numbers
 
     def _load_sql_query(self, enviroment: Environment):
         if self._sql_filepath is None:
-            query = BaseSQLStep.render_sql(
+            return BaseSQLStep.render_sql(
                 enviroment,
                 f"SELECT * FROM [{{{{ '{self._sql_view_name}' | view_name }}}}]",
             )
         else:
-            query = BaseSQLStep.render_sql_file(
+            return BaseSQLStep.render_sql_file(
                 enviroment,
                 pathlib.Path(self._sql_filepath),
             )
-
-        if self._reference_numbers:
-            for value in self._reference_numbers:
-                if not _REFERENCE_NUMBER_VALUE_PATTERN.match(value):
-                    raise ValueError(
-                        f"Invalid reference_number filter value: {value!r}"
-                    )
-            values = ", ".join(f"'{value}'" for value in self._reference_numbers)
-            query = f"SELECT * FROM ({query}) AS filtered WHERE reference_number IN ({values})"
-
-        return query
 
     def _output_folder(self, environment: Environment) -> str:
         return environment.config.get("template_output_path")

@@ -6,29 +6,21 @@ from argparse import ArgumentParser
 
 import main
 from pipeline import Pipeline
-from pipeline.base import Env, Environment, derive_reference_number
+from pipeline.base import Env, Environment
 from run_pipeline import configure_logging
 
 
-def generate_fast_view(env: Environment, view_ids: set[str], embargo: bool = False):
-    """Generiert eine nach view id gefilterte Auswahl (LD-View + Observations) für
-    genau die übergebenen Views, nach template_output_path/locked. Ohne embargo nur
-    die veröffentlichten Observations, mit embargo=True zusätzlich auch die mit
-    Sperrfrist (also alle Daten der ausgewählten View(s)). Läuft ohne initPipeTables,
-    ohne öffentlichen Fuseki-Index-Neubau und ohne Rückschreiben des
-    Publikationsstatus in die HDB."""
+def generate_fast_view(env: Environment, view_ids: set[str]):
+    """Generiert eine nach view-id gefilterte LD-View nach template_output_path/locked. 
+    Läuft ohne initPipeTables, ohne öffentlichen Fuseki-Index-Neubau und ohne
+    Rückschreiben des Publikationsstatus in die HDB."""
     logger = logging.getLogger("run_fast_view")
 
-    reference_numbers = {derive_reference_number(v) for v in view_ids}
-    options = {"view_ids": view_ids, "reference_numbers": reference_numbers}
+    options = {"view_ids": view_ids}
     step_definitions = main.get_step_definitions(env, options)
     pipeline = Pipeline(env, step_definitions)
 
-    logger.info(
-        "Generating fast view for view id(s) %s (embargo=%s)",
-        sorted(view_ids),
-        embargo,
-    )
+    logger.info("Generating fast view for view id(s) %s", sorted(view_ids))
 
     # DB-Views aktualisieren, damit die view_vb_* aktuell sind.
     pipeline.execute("createViewsFromSQL")
@@ -36,20 +28,13 @@ def generate_fast_view(env: Environment, view_ids: set[str], embargo: bool = Fal
     # Nur die ausgewählte(n) LD-View(s) erzeugen -> template_output_path/locked
     pipeline.execute("generateViews")
 
-    if embargo:
-        # Alle Observations der ausgewählten View(s): veröffentlicht UND mit Sperrfrist.
-        pipeline.execute("observationFastViewAllTemplating")
-    else:
-        # Nur veröffentlichte Observations der ausgewählten View(s).
-        pipeline.execute("observationFastViewPublicTemplating")
-
     logger.info("Fast view run finished.")
 
 
 if __name__ == "__main__":
     __parser = ArgumentParser(
-        description="Generates a single LD-view (public or embargoed) into the "
-        "locked output folder, without running the full pipeline."
+        description="Generates a single LD-view into the locked output folder, "
+        "without running the full pipeline."
     )
     __parser.add_argument(
         "-e",
@@ -78,13 +63,6 @@ if __name__ == "__main__":
         required=True,
         help="Kommagetrennte volle View-Id(s) (z.B. BEV411OD411A,WIR400OD100B) "
         "zur Auswahl der zu generierenden View(s)",
-    )
-    __parser.add_argument(
-        "--embargo",
-        help="Zusätzlich zu den veröffentlichten auch die Observations mit "
-        "Sperrfrist generieren (alle Daten der ausgewählten View(s), statt nur "
-        "der veröffentlichten)",
-        action="store_true",
     )
     __args = __parser.parse_args()
     __view_ids = {v.strip() for v in __args.view_ids.split(",") if v.strip()}
@@ -123,7 +101,7 @@ if __name__ == "__main__":
 
     try:
         logger.info("Starting fast view run with runId %s", __args.runId)
-        generate_fast_view(__config, __view_ids, embargo=__args.embargo)
+        generate_fast_view(__config, __view_ids)
     except Exception as e:
         logger.exception("Unexpected Error while running fast view", exc_info=e)
         sys.exit(1)

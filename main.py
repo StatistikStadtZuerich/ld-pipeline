@@ -11,7 +11,6 @@ from pipeline.steps import (
     Compressing,
     Copy,
     CreateViewsFromSQL,
-    FastRunObservationTemplating,
     WritePublicationStatiToHDB,
     create_templating,
 )
@@ -123,28 +122,6 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     options=options,
                 ),
                 "Creates triples from the view_observation data with the observation.ttl template",
-            ),
-            StepDefinition(
-                "observationFastViewPublicTemplating",
-                FastRunObservationTemplating(
-                    "observation.ttl.jinja",
-                    "Public_observations_fast_view.ttl",
-                    "view_observation",
-                    options=options,
-                    reference_numbers=options.get("reference_numbers"),
-                ),
-                "Creates a single ttl.gz 'Public_observations_fast_view' of published observations, filtered for the requested view ID(s)",
-            ),
-            StepDefinition(
-                "observationFastViewAllTemplating",
-                FastRunObservationTemplating(
-                    "observation.ttl.jinja",
-                    "Plus_Sperrfrist_observations_fast_view.ttl",
-                    "view_observation_embargoed",
-                    options=options,
-                    reference_numbers=options.get("reference_numbers"),
-                ),
-                "Creates a single ttl.gz 'Plus_Sperrfrist_observations_fast_view' of ALL observations (RECORDSTATUS=0, published and embargoed) for the requested view ID(s)",
             ),
             StepDefinition(
                 "propertyTemplating",
