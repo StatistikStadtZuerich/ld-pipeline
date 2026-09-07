@@ -2,9 +2,9 @@ import os
 import tempfile
 from datetime import datetime, timezone
 
-from .templating import OutputType
 from ..base import Environment
 from .copy import Copy
+from .templating import OutputType
 
 
 class BuildInfo(Copy):

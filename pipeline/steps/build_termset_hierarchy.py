@@ -1,8 +1,4 @@
-import gzip
-import os
-import shutil
 
-from ..base import Environment
 from .templating import Templating
 
 

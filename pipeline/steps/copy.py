@@ -3,8 +3,8 @@ import os
 import pathlib
 import shutil
 
-from .templating import OutputType
 from ..base import Environment, Step
+from .templating import OutputType
 
 
 class Copy(Step):

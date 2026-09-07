@@ -6,9 +6,9 @@ from itertools import groupby as itertools_groupby
 from typing import Any
 
 from database import BaseSQLStep
-from .templating import OutputType
 
 from ..base import Environment, Step, Utils
+from .templating import OutputType
 
 
 class TemplatingOptimized(Step):

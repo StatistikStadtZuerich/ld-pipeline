@@ -1,9 +1,8 @@
-from enum import Enum
 from typing import Any
 
 from pipeline.base import Environment, Step
 
-from .templating import Templating, OutputType
+from .templating import OutputType, Templating
 from .templating_optimized import GroupedTemplatingOptimized, TemplatingOptimized
 from .upload_to_fuseki import UploadToFuseki
 from .upload_to_fuseki_optimized import UploadToFusekiOptimized

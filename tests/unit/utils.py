@@ -2,7 +2,6 @@ import difflib
 import gzip
 import os
 import re
-from os import PathLike
 
 import pytest
 
