@@ -5,12 +5,13 @@ from unittest.mock import MagicMock, Mock
 
 from pipeline.base import Env, Environment
 from pipeline.steps import BuildTermsetHierarchy
+from pipeline.steps.templating import OutputType
 from tests.unit.utils import TestUtils
 
 
 def test_pre_process_room_hierarchy():
     step = BuildTermsetHierarchy(
-        "raum_hierarchy.ttl.jinja", "out.ttl", "view_room_hierarchy_int"
+        "raum_hierarchy.ttl.jinja", "out.ttl", "view_room_hierarchy_int", OutputType.SHARED
     )
 
     row = {
@@ -113,8 +114,9 @@ def test_termset_hierarchy():
             template_filename,
             output_filename,
             "view_property",
-            sql_filepath,
-            {"env": "test"},
+            OutputType.SHARED,
+            sql_filepath=sql_filepath,
+            options={"env": "test"},
         ).run(env)
 
         env.get_db_connection().__enter__().query.assert_called_with(
@@ -122,7 +124,7 @@ def test_termset_hierarchy():
         )
 
         with gzip.open(
-            os.path.join(TestUtils.abs_path("tmp"), f"{output_filename}.gz"), "rt"
+            os.path.join(TestUtils.abs_path("tmp"), OutputType.SHARED, f"{output_filename}.gz"), "rt"
         ) as generated:
             content = generated.read()
 

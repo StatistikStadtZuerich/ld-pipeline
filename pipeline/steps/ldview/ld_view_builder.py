@@ -1,5 +1,6 @@
-from pipeline.base import Base, Environment
+from typing import Any
 
+from pipeline.base import Base, Environment
 from .ld_view_model import (
     Attribute,
     BasicDimension,
@@ -32,7 +33,7 @@ class LdViewBuilder(Base):
                 for source_dict in source_dict_list
             ]
 
-            static_dimension_dicts = [
+            static_dimension_dicts: list[dict[str, Any]] = [
                 {
                     "identifier": "ZEIT",
                     "name": "Key Zeit",

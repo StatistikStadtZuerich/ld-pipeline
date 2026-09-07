@@ -1,16 +1,17 @@
 import os
 import pathlib
-from enum import Enum
-from typing import Any, LiteralString
+from enum import StrEnum
+from typing import Any
 
 from database import BaseSQLStep
-
 from ..base import Environment, Step
 
-class OutputType(Enum):
+
+class OutputType(StrEnum):
     SHARED = "shared"
     PUBLIC = "public"
     EMBARGOED = "embargoed"
+    PREVIEW = "preview"
 
 class Templating(Step):
     def __init__(
@@ -18,7 +19,7 @@ class Templating(Step):
         template_filename: str,
         output_filename: str,
         sql_view_name: str,
-        output_type: OutputType = OutputType.SHARED,
+        output_type: OutputType, # = OutputType.SHARED,
         sql_filepath: str | None = None,
         options: dict[str, Any] | None = None,
     ):
@@ -48,7 +49,7 @@ class Templating(Step):
     def run(self, environment: Environment):
         output_filepath = os.path.join(
             environment.config.get("template_output_path"),
-            self._output_type.value,
+            self._output_type,
             self._output_filename,
         )
 
@@ -58,7 +59,7 @@ class Templating(Step):
             environment.get_db_connection() as connection,
             connection.query(query) as cursor,
             environment.get_template_engine(
-                self._template_filename, output_filepath
+                self._template_filename, output_filepath, compress=True
             ) as template_engine,
         ):
             self.logger.info(f"Started templating to {output_filepath}...")

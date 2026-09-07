@@ -37,10 +37,10 @@ def test_compressing():
             os.path.join(TestUtils.abs_path("tmp"), "sample_2.ttl.gz")
         )
         sample_1_expected_content = TestUtils.read_file(
-            os.path.join(TestUtils.abs_path("data/triples"), "sample_1.ttl"), "rb"
+            os.path.join(TestUtils.abs_path("data/triples"), "sample_1.ttl"), "rt"
         )
         sample_2_expected_content = TestUtils.read_file(
-            os.path.join(TestUtils.abs_path("data/triples"), "sample_2.ttl"), "rb"
+            os.path.join(TestUtils.abs_path("data/triples"), "sample_2.ttl"), "rt"
         )
 
         assert sample_1_expected_content == sample_1_content

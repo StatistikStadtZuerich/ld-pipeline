@@ -3,6 +3,7 @@ from typing import Any
 
 from pipeline.base import Environment, Step, Utils
 from pipeline.steps.ldview import LdViewBuilder, LdViewSerializer
+from pipeline.steps.templating import OutputType
 
 
 class ViewsStep(Step):
@@ -17,7 +18,9 @@ class ViewsStep(Step):
         if view_ids:
             # Fast-View: nie in den öffentlichen Ordner schreiben, den das
             # create_fuseki_index.sh für den öffentlichen Index einliest.
-            output_path = os.path.join(output_path, "locked")
+            output_path = os.path.join(output_path, OutputType.PREVIEW.value)
+        else:
+            output_path = os.path.join(output_path, OutputType.SHARED.value)
         serializer = LdViewSerializer(environment, output_path)
 
         self.logger.info("Start building ld-views")

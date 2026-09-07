@@ -5,6 +5,7 @@ from unittest.mock import Mock
 
 from pipeline.base import Env, Environment
 from pipeline.steps import Copy
+from pipeline.steps.templating import OutputType
 from tests.unit.utils import TestUtils
 
 
@@ -21,11 +22,11 @@ def test_simple_copy():
         input_file = TestUtils.abs_path("data/copy-text.txt")
         output_file = "copy-target.txt"
 
-        copy = Copy(input_file, output_file, {"env": "test"})
+        copy = Copy(input_file, output_file, OutputType.SHARED, {"env": "test"})
         copy.run(env)
 
         with gzip.open(
-            os.path.join(TestUtils.abs_path("tmp"), output_file + ".gz"), mode="rt"
+            os.path.join(TestUtils.abs_path("tmp"), OutputType.SHARED, output_file + ".gz"), mode="rt"
         ) as f:
             assert "Hello World\n" == f.read()
 

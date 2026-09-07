@@ -14,6 +14,7 @@ from pipeline.steps import (
     WritePublicationStatiToHDB,
     create_templating,
 )
+from pipeline.steps.templating import OutputType
 from pipeline.steps.views import ViewsStep
 
 app = typer.Typer()
@@ -30,12 +31,12 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
         for stepDef in [
             StepDefinition(
                 "copyStatic",
-                Copy("./static/static.ttl", "static.ttl", options=options),
+                Copy("./static/static.ttl", "static.ttl", output_type=OutputType.SHARED, options=options),
                 "Copies static.ttl files from /static to defined output folder",
             ),
             StepDefinition(
                 "buildInfo",
-                BuildInfo(options=options),
+                BuildInfo(output_type=OutputType.SHARED, options=options),
                 "Builds the info.ttl file with the current build date and time",
             ),
             StepDefinition(
@@ -45,6 +46,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "code.ttl.jinja",
                     "code.ttl",
                     "view_code",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
                 "Creates triples from the view_code data with the code.ttl template",
@@ -56,6 +58,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "cube.ttl.jinja",
                     "cube.ttl",
                     "view_cube",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
                 "Creates triples from the view_cube data with the cube.ttl template",
@@ -67,6 +70,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "group_code.ttl.jinja",
                     "group_code.ttl",
                     "view_group_code",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
             ),
@@ -77,6 +81,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "group_termset.ttl.jinja",
                     "group_termset.ttl",
                     "view_group_termset",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
             ),
@@ -87,6 +92,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "hierarchy.ttl.jinja",
                     "hierarchy.ttl",
                     "view_hierarchy",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
                 "Creates triples from the view_hierarchy data with the hierarchy.ttl template",
@@ -98,6 +104,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "measure_unit.ttl.jinja",
                     "measure_unit.ttl",
                     "view_measure_unit",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
             ),
@@ -108,6 +115,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "measure.ttl.jinja",
                     "measure.ttl",
                     "view_measure",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
                 "Creates triples from the view_measure data with the measure.ttl template",
@@ -119,6 +127,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "observation.ttl.jinja",
                     "observation.ttl",
                     "view_observation",
+                    output_type=OutputType.PUBLIC,
                     options=options,
                 ),
                 "Creates triples from the view_observation data with the observation.ttl template",
@@ -130,6 +139,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "observation.ttl.jinja",
                     "embargoed-observation.ttl",
                     "view_observation_embargoed",
+                    output_type=OutputType.EMBARGOED,
                     options=options,
                 ),
                 "Creates triples from the view_observation_embargoed data with the observation.ttl template, contains observations within the SPERRFRIST",
@@ -141,6 +151,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "property.ttl.jinja",
                     "property.ttl",
                     "view_property",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
                 "Creates triples from the view_property data with the property.ttl template",
@@ -152,6 +163,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "room.ttl.jinja",
                     "room.ttl",
                     "view_room",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
                 "Creates triples from the view_room data with the room.ttl template",
@@ -163,6 +175,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "time.ttl.jinja",
                     "time.ttl",
                     "view_time",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
                 "Creates triples from the view_time data with the time.ttl template",
@@ -174,6 +187,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "time_relation_termset.ttl.jinja",
                     "time_relation_termset.ttl",
                     "view_time_termset_relation",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
                 "Creates triples for time termset relations",
@@ -185,6 +199,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "time_termset.ttl.jinja",
                     "time_termset.ttl",
                     "view_time_termset_relation",
+                    output_type=OutputType.SHARED,
                     options={**options, "grouped": True, "group_by": "termset_code"},
                 ),
                 "Creates triples for grouped time termset relations",
@@ -196,6 +211,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "dimension_hierarchy.ttl.jinja",
                     "termset_dimension_hierarchy.ttl",
                     "view_dimension_hierarchy",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
                 "Creates triples from the view_dimension_hierarchy data with the dimension_hierarchy.ttl template",
@@ -226,6 +242,7 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                     "raum_hierarchy.ttl.jinja",
                     "termset_hierarchy.ttl",
                     "view_room_hierarchy",
+                    output_type=OutputType.SHARED,
                     options=options,
                 ),
                 "Creates triples from the view_room_hierarchy data with the raum_hierarchy.ttl template",
@@ -270,11 +287,11 @@ def run(environment: Environment):
 
 @app.command(short_help="Run single step on given environment")
 def step(
-    name: str = typer.Option(
-        help="The name of the step to be executed. Get supported names with command 'list_steps'"
-    ),
-    env: Environment = None,
-    options=None,
+        name: str = typer.Option(
+            help="The name of the step to be executed. Get supported names with command 'list_steps'"
+        ),
+        env: Environment = None,
+        options=None,
 ):
     steps = get_step_definitions(env, options)
     logger.info(f"Running step {name}")
