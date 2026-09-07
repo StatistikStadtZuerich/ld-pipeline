@@ -124,6 +124,17 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
                 "Creates triples from the view_observation data with the observation.ttl template",
             ),
             StepDefinition(
+                "embargoedObservationTemplating",
+                create_templating(
+                    env,
+                    "observation.ttl.jinja",
+                    "embargoed-observation.ttl",
+                    "view_observation_embargoed",
+                    options=options,
+                ),
+                "Creates triples from the view_observation_embargoed data with the observation.ttl template, contains observations within the SPERRFRIST",
+            ),
+            StepDefinition(
                 "propertyTemplating",
                 create_templating(
                     env,

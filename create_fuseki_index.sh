@@ -66,9 +66,20 @@ log "Final combined file created: $FINAL_COMBINED_FILE"
 
 # Load the final combined .ttl.gz file with tdb2.xloader
 log "Starting import of $FINAL_COMBINED_FILE into $DATA_DIR"
+# TODO: Load only the "shared"-part
 "${JENA_DIR}/bin/tdb2.xloader" --loc "$DATA_DIR" "$FINAL_COMBINED_FILE" \
   || { log "Import failed for $FINAL_COMBINED_FILE" >&2; exit 2; }
 log "Import complete for $FINAL_COMBINED_FILE"
+
+# TODO:
+# 1. Create the Base-Archive
+# 2. Load the public observations
+#    - add the stats-file
+#    - create the public Fuseki-Index
+#    - copy the public Index to HDB Dropzone
+# 3. Load the embargoed observations (into the Base Archive)
+#    - add the stats-file
+#    - create the embargoed Fuseki-Index
 
 # Move processed file to the done directory
 mkdir -p "$DONE_DIR"

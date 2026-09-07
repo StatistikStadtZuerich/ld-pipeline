@@ -122,10 +122,10 @@ class JinjaTemplateEngine(TemplateEngine):
     def get_template(self):
         return self._template
 
-    def render(self, data):
+    def render(self, data) -> str:
         return self._template.render(data)
 
-    def template(self, data):
+    def template(self, data) -> None:
         content = self.render(data)
         try:
             self._ensure_output_file()
