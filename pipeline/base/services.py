@@ -108,7 +108,11 @@ class JinjaTemplateEngine(TemplateEngine):
                 return False
 
         self._output_filepath = output_filepath
-        if self._output_filepath and compress and not self._output_filepath.endswith(".gz"):
+        if (
+            self._output_filepath
+            and compress
+            and not self._output_filepath.endswith(".gz")
+        ):
             self._output_filepath += ".gz"
         self._output_file = None
         self._env = JinjaEnv(

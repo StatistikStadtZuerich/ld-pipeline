@@ -31,7 +31,12 @@ def get_step_definitions(env: Environment, options=None) -> dict[str, StepDefini
         for stepDef in [
             StepDefinition(
                 "copyStatic",
-                Copy("./static/static.ttl", "static.ttl", output_type=OutputType.SHARED, options=options),
+                Copy(
+                    "./static/static.ttl",
+                    "static.ttl",
+                    output_type=OutputType.SHARED,
+                    options=options,
+                ),
                 "Copies static.ttl files from /static to defined output folder",
             ),
             StepDefinition(
@@ -287,11 +292,11 @@ def run(environment: Environment):
 
 @app.command(short_help="Run single step on given environment")
 def step(
-        name: str = typer.Option(
-            help="The name of the step to be executed. Get supported names with command 'list_steps'"
-        ),
-        env: Environment = None,
-        options=None,
+    name: str = typer.Option(
+        help="The name of the step to be executed. Get supported names with command 'list_steps'"
+    ),
+    env: Environment = None,
+    options=None,
 ):
     steps = get_step_definitions(env, options)
     logger.info(f"Running step {name}")

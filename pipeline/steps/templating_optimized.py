@@ -42,16 +42,16 @@ class TemplatingOptimized(Step):
                 pathlib.Path(self._sql_filepath),
             )
 
-    def _write_batch(
-        self, counter: int, batch: list[str], output_folder
-    ):
+    def _write_batch(self, counter: int, batch: list[str], output_folder):
         """Writes a batch of triples to a gzipped file."""
         outpath = pathlib.Path(self._output_filename)
         file_ext = outpath.suffix
         base_name = outpath.stem
         filename = f"{base_name}_batch{counter:03d}{file_ext}.gz"
 
-        dest_file = pathlib.Path(os.path.join(output_folder, self._output_type.value, filename))
+        dest_file = pathlib.Path(
+            os.path.join(output_folder, self._output_type.value, filename)
+        )
         self.logger.debug(
             f"Writing batch {counter} data to {os.path.basename(dest_file)} ..."
         )
@@ -136,9 +136,7 @@ class TemplatingOptimized(Step):
         self.logger.info(f"Total number of rows processed: {number_rows_total}")
 
         if batch:
-            self._write_batch(
-                batch_counter + 1, batch, output_folder
-            )
+            self._write_batch(batch_counter + 1, batch, output_folder)
 
     def _cooldown(
         self, delay: float, iteration_durations: list[float], max_delay: float = 0
@@ -216,7 +214,8 @@ class TemplatingOptimized(Step):
                 self.logger.info("done")
 
                 with environment.get_template_engine(
-                    self._template_filename, None,
+                    self._template_filename,
+                    None,
                 ) as template_engine:
                     template = template_engine.get_template()
                     self.process_triples(
@@ -292,6 +291,4 @@ class GroupedTemplatingOptimized(TemplatingOptimized):
                 batch.clear()
 
         if batch:
-            self._write_batch(
-                batch_counter + 1, batch, output_folder
-            )
+            self._write_batch(batch_counter + 1, batch, output_folder)

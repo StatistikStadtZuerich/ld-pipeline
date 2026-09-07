@@ -13,13 +13,14 @@ class OutputType(StrEnum):
     EMBARGOED = "embargoed"
     PREVIEW = "preview"
 
+
 class Templating(Step):
     def __init__(
         self,
         template_filename: str,
         output_filename: str,
         sql_view_name: str,
-        output_type: OutputType, # = OutputType.SHARED,
+        output_type: OutputType,
         sql_filepath: str | None = None,
         options: dict[str, Any] | None = None,
     ):

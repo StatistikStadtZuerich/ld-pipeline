@@ -11,7 +11,7 @@ from run_pipeline import configure_logging
 
 
 def generate_fast_view(env: Environment, view_ids: set[str]):
-    """Generiert eine nach view-id gefilterte LD-View nach template_output_path/locked. 
+    """Generiert eine nach view-id gefilterte LD-View nach template_output_path/locked.
     Läuft ohne initPipeTables, ohne öffentlichen Fuseki-Index-Neubau und ohne
     Rückschreiben des Publikationsstatus in die HDB."""
     logger = logging.getLogger("run_fast_view")

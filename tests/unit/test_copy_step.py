@@ -26,7 +26,10 @@ def test_simple_copy():
         copy.run(env)
 
         with gzip.open(
-            os.path.join(TestUtils.abs_path("tmp"), OutputType.SHARED, output_file + ".gz"), mode="rt"
+            os.path.join(
+                TestUtils.abs_path("tmp"), OutputType.SHARED, output_file + ".gz"
+            ),
+            mode="rt",
         ) as f:
             assert "Hello World\n" == f.read()
 

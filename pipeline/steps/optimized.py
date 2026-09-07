@@ -18,7 +18,7 @@ def create_templating(
     template_filename: str,
     output_filename: str,
     view_or_table_name: str,
-    output_type: OutputType, # = OutputType.SHARED,
+    output_type: OutputType,
     sql_filepath: str | None = None,
     options: dict[str, Any] | None = None,
 ) -> Step:

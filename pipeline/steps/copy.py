@@ -13,8 +13,9 @@ class Copy(Step):
     creating it if it doesn’t exist, and overwriting it if it does.
     """
 
-    def __init__(self, source, target, output_type: OutputType = OutputType.SHARED,
-                 options=None):
+    def __init__(
+        self, source, target, output_type: OutputType = OutputType.SHARED, options=None
+    ):
         """
         Copy file from source to target
         :param source absolute filepath (or relative to runner file)
@@ -28,7 +29,9 @@ class Copy(Step):
 
     def run(self, environment: Environment):
         out_dir = environment.config.get("output_path")
-        out_file = pathlib.Path(os.path.join(out_dir, self._output_type.value, self._target))
+        out_file = pathlib.Path(
+            os.path.join(out_dir, self._output_type.value, self._target)
+        )
         self.logger.info(f"Copy {self._source} to {out_file}")
         os.makedirs(out_file.parent, exist_ok=True)
         shutil.copyfile(self._source, out_file)

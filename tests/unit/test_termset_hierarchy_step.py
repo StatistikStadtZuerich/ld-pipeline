@@ -11,7 +11,10 @@ from tests.unit.utils import TestUtils
 
 def test_pre_process_room_hierarchy():
     step = BuildTermsetHierarchy(
-        "raum_hierarchy.ttl.jinja", "out.ttl", "view_room_hierarchy_int", OutputType.SHARED
+        "raum_hierarchy.ttl.jinja",
+        "out.ttl",
+        "view_room_hierarchy_int",
+        OutputType.SHARED,
     )
 
     row = {
@@ -124,7 +127,10 @@ def test_termset_hierarchy():
         )
 
         with gzip.open(
-            os.path.join(TestUtils.abs_path("tmp"), OutputType.SHARED, f"{output_filename}.gz"), "rt"
+            os.path.join(
+                TestUtils.abs_path("tmp"), OutputType.SHARED, f"{output_filename}.gz"
+            ),
+            "rt",
         ) as generated:
             content = generated.read()
 
