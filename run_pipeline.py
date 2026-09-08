@@ -57,7 +57,10 @@ def generate_triple_files(pipeline: Pipeline):
         "timeTermset",
         "dimensionTermset",
     ]
-    triple_types_observations = ["observation"]
+    triple_types_observations = [
+        "observation",
+        "embargoedObservation",
+    ]
     triple_types_others = [
         "copyStatic",
         "buildInfo",
