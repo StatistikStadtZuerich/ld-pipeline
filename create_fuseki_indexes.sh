@@ -24,18 +24,18 @@ function create_fuseki_index() {
     local index_dir="${1:?}"
     local ttl_source_dir="${2:?}"
 
-    index_dir="${index_dir#/}"
+    index_dir="${index_dir%/}"
 
     mkdir -p "$index_dir"
     if [ -f "$index_dir/tdb.lock" ]; then
       log "tdb.lock found in $index_dir, using incremental load"
       find "$ttl_source_dir" -type f -name '*.ttl.gz' -print0 \
-        | xargs -0 "${JENA_DIR}/bin/tdb2.tbdloader" --loc "$index_dir" \
-        || { log "tdb2.tbdloader failed to load $ttl_source_dir into $index_dir data" >&2; return 2; }
+        | xargs -r -0 "${JENA_DIR}/bin/tdb2.tdbloader" --loc "$index_dir" \
+        || { log "tdb2.tdbloader failed to load $ttl_source_dir into $index_dir data" >&2; return 2; }
     else
       log "$index_dir seems empty, using xloader"
       find "$ttl_source_dir" -type f -name '*.ttl.gz' -print0 \
-        | xargs -0 "${JENA_DIR}/bin/tdb2.xloader" --loc "$index_dir" \
+        | xargs -r -0 "${JENA_DIR}/bin/tdb2.xloader" --loc "$index_dir" \
         || { log "tdb2.xloader failed to create $index_dir from $ttl_source_dir" >&2; return 2; }
     fi
 
@@ -59,8 +59,8 @@ function compress_fuseki_index() {
     local index_name="${2:?}"
     local target_dir="${3:?}"
 
-    base_dir=${base_dir#/}
-    target_dir=${target_dir#/}
+    base_dir=${base_dir%/}
+    target_dir=${target_dir%/}
 
     [ -d "$base_dir/$index_name" ] || { log "No Fuseki-Index at $base_dir/$index_name found"; return 1; }
     local archive="${index_name}.tar.gz"
@@ -77,7 +77,8 @@ function unpack_fuseki_archive() {
     [ -f "$archive" ] || { log "Can't read Fuseki-Archive $archive"; return 1; }
     log "Unpacking $(basename "$archive") to $target_dir"
     mkdir -p "$target_dir"
-    tar -xzf "$archive" --strip-components 1 -C "$target_dir"
+    tar -xzf "$archive" --strip-components 1 -C "$target_dir" \
+      || { log "Failed to unpack $(basename "$archive") to $target_dir" >&2; return 1; }
     log "Unpacked $(basename "$archive") to $target_dir"
 }
 function run_data_tests() {
@@ -110,6 +111,11 @@ INPUT_FILES=()
 while IFS= read -r -d '' file; do
   INPUT_FILES+=("$file")
 done < <(find "$WORKING_DIR/input" -type f -name '*.ttl.gz' -print0)
+
+if [ "${#INPUT_FILES[@]}" -eq 0 ]; then
+  log "No .ttl.gz input files found in $INPUT_DIR" >&2
+  exit 3
+fi
 log "Found ${#INPUT_FILES[@]} input files in $INPUT_DIR"
 
 # Validate all the input files
@@ -127,37 +133,57 @@ log "Building base archive from shared data"
 FUSEKI_BASE="$WORKING_DIR/fuseki"
 mkdir -p "$FUSEKI_BASE"
 
+INDEXES=()
+
+[ -d "$WORKING_DIR/input/shared" ] || { log "Missing shared input directory"; exit 3; }
 BASE_INDEX="base_${TARGET_ENV}_${RUN_ID}"
 create_fuseki_index "$FUSEKI_BASE/$BASE_INDEX" "$WORKING_DIR/input/shared"
 compress_fuseki_index "$FUSEKI_BASE" "$BASE_INDEX" "$FUSEKI_INDEX_DIR"
 log "Base-Archive built: $BASE_INDEX ($BASE_INDEX.tar.gz)"
+INDEXES+=("$BASE_INDEX")
 
-log "Building Public Index"
-PUBLIC_INDEX="${TARGET_ENV}_${RUN_ID}"
-mv "$FUSEKI_BASE/$BASE_INDEX" "$FUSEKI_BASE/$PUBLIC_INDEX"
-create_fuseki_index "$FUSEKI_BASE/$PUBLIC_INDEX" "$WORKING_DIR/input/public"
-run_data_tests "$FUSEKI_BASE/$PUBLIC_INDEX"
-compress_fuseki_index "$FUSEKI_BASE" "$PUBLIC_INDEX" "$FUSEKI_INDEX_DIR"
-rm -rf "${FUSEKI_BASE:?}/$PUBLIC_INDEX"
-log "Public Index built: $PUBLIC_INDEX ($PUBLIC_INDEX.tar.gz)"
+if [ -d "$WORKING_DIR/input/public" ]; then
+  log "Building Public Index"
+  PUBLIC_INDEX="${TARGET_ENV}_${RUN_ID}"
+  mv "$FUSEKI_BASE/$BASE_INDEX" "$FUSEKI_BASE/$PUBLIC_INDEX"
+  create_fuseki_index "$FUSEKI_BASE/$PUBLIC_INDEX" "$WORKING_DIR/input/public"
+  run_data_tests "$FUSEKI_BASE/$PUBLIC_INDEX"
+  compress_fuseki_index "$FUSEKI_BASE" "$PUBLIC_INDEX" "$FUSEKI_INDEX_DIR"
+  rm -rf "${FUSEKI_BASE:?}/$PUBLIC_INDEX"
+  log "Public Index built: $PUBLIC_INDEX ($PUBLIC_INDEX.tar.gz)"
+  INDEXES+=("$PUBLIC_INDEX")
+else
+  rm -rf "${FUSEKI_BASE:?}/$BASE_INDEX"
+  log "Missing public input directory, will not create public index"
+fi
 
-log "Building Preview Index with embargoed Data"
-PREVIEW_INDEX="embargoed_${TARGET_ENV}_${RUN_ID}"
-unpack_fuseki_archive "$FUSEKI_INDEX_DIR/$BASE_INDEX.tar.gz" "$FUSEKI_BASE/$PREVIEW_INDEX"
-create_fuseki_index "$FUSEKI_BASE/$PREVIEW_INDEX" "$WORKING_DIR/input/embargoed"
-run_data_tests "$FUSEKI_BASE/$PREVIEW_INDEX"
-compress_fuseki_index "$FUSEKI_BASE" "$PREVIEW_INDEX" "$FUSEKI_INDEX_DIR"
-log "Preview Index built: $PREVIEW_INDEX ($PREVIEW_INDEX.tar.gz)"
+if [ -d "$WORKING_DIR/input/embargoed" ]; then
+  log "Building Preview Index with embargoed Data"
+  PREVIEW_INDEX="embargoed_${TARGET_ENV}_${RUN_ID}"
+  unpack_fuseki_archive "$FUSEKI_INDEX_DIR/$BASE_INDEX.tar.gz" "$FUSEKI_BASE/$PREVIEW_INDEX"
+  create_fuseki_index "$FUSEKI_BASE/$PREVIEW_INDEX" "$WORKING_DIR/input/embargoed"
+  run_data_tests "$FUSEKI_BASE/$PREVIEW_INDEX"
+  compress_fuseki_index "$FUSEKI_BASE" "$PREVIEW_INDEX" "$FUSEKI_INDEX_DIR"
+  log "Preview Index built: $PREVIEW_INDEX ($PREVIEW_INDEX.tar.gz)"
+  INDEXES+=("$PREVIEW_INDEX")
+else
+  log "Missing embargoed input directory, will not create preview/embargoed index"
+fi
 
 log "Copying Archives to Dropzone"
-for a in "$BASE_INDEX" "$PUBLIC_INDEX" "$PREVIEW_INDEX"; do
+for a in "${INDEXES[@]}"; do
   log "Copy $a to $PIPELINE_DATA_DIR"
   secure_copy "$FUSEKI_INDEX_DIR/$a.tar.gz" "$PIPELINE_DATA_DIR"
   log "$a copied to $PIPELINE_DATA_DIR"
 done
 
-"${SCRIPT_HOME:-.}/scripts/teams-notify.sh" index-created \
-  --sourceEnv "$(echo "${ENV_NAME}" | tr '[:lower:]' '[:upper:]')" \
-  --targetEnv "$(echo "${TARGET_ENV}" | tr '[:lower:]' '[:upper:]')" \
-  --archive "$(basename "$PUBLIC_INDEX")"
+if [ -n "${PUBLIC_INDEX:-}" ]; then
+  "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" index-created \
+    --sourceEnv "$(echo "${ENV_NAME}" | tr '[:lower:]' '[:upper:]')" \
+    --targetEnv "$(echo "${TARGET_ENV}" | tr '[:lower:]' '[:upper:]')" \
+    --archive "$PUBLIC_INDEX.tar.gz"
+else
+  log "No public index was created, skipping index-created notification"
+fi
+
 log "All files processed and import complete"
