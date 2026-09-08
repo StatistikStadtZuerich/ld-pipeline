@@ -104,7 +104,7 @@ trap 'rm -rf "$WORKING_DIR"' EXIT
 
 log "Moving Data-Input to the Working-Dir at $WORKING_DIR"
 mkdir -p "$WORKING_DIR/input"
-mv "$INPUT_DIR/*" "$WORKING_DIR/input/"
+mv "$INPUT_DIR"/* "$WORKING_DIR/input/"
 
 mapfile -d '' INPUT_FILES < <(find "$WORKING_DIR/input" -type f -name '*.ttl.gz' -print0)
 log "Found ${#INPUT_FILES[@]} input files in $INPUT_DIR"
