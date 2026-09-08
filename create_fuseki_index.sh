@@ -21,6 +21,8 @@ TMP_DIR="$INPUT_DIR/tmp"
 DONE_DIR="$INPUT_DIR/done"
 CURRENT=current
 
+OUTPUT_TYPES=(shared public embargoed)
+
 function log() {
     echo "$(date -u +%FT%TZ) $*"
 }
@@ -30,6 +32,12 @@ mkdir -p "$FUSEKI_INDEX_DIR"
 VERSION="$(date +"%F_%H-%M-%S_%Z")"
 DATA_DIR="$FUSEKI_INDEX_DIR/$VERSION"
 
+VERSION_DIR="$FUSEKI_INDEX_DIR/$VERSION"
+SHARED_DIR="$VERSION_DIR/shared"
+
+mkdir -p "$VERSION_DIR" "$SHARED_DIR"
+
+declare -A INDEX_DIR
 # Get the current date and time for the filename
 CURRENT_DATETIME=$(date +"%Y%m%d%H%M%S")
 FINAL_COMBINED_FILE="$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl.gz"
@@ -37,39 +45,57 @@ FINAL_COMBINED_FILE="$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl.gz"
 log "Loading all .gz files in $INPUT_DIR"
 # Move all .gz files from the input to the temporary directory
 rm -rf "$TMP_DIR" && mkdir -p "$TMP_DIR"
-for FILE in "$INPUT_DIR"/*.gz; do
-    [ -e "$FILE" ] || continue
-    if [ -r "$FILE" ]; then
-        log "Moving $FILE to $TMP_DIR"
-        mv "$FILE" "$TMP_DIR/"
-    else
-        log "No readable .gz files found in $INPUT_DIR, skipping"
-    fi
+
+AVAILABLE_TYPES=()
+for TYPE in "${OUTPUT_TYPES[@]}"; do
+  SRC="$INPUT_DIR/$TYPE"
+  FILES=("$SRC"/*.gz)
+
+  if [ ${#FILES[@]} -eq 0 ]; then
+    log "Typ '$TYPE': No readable .gz files found in $SRC, skipping"
+    continue
+  fi
+
+  mkdir -p "$TMP_DIR/$TYPE"
+  log "Typ '$TYPE': Moving ${#FILES[@]} files"
+  mv "${FILES[@]}" "$TMP_DIR/$TYPE/"
+  AVAILABLE_TYPES+=("$TYPE")
 done
 
-# Validate all the input files
-RIOT_LOG="$TMP_DIR/riot.log"
-log "Validating data-files in '$TMP_DIR', details will be reported to $RIOT_LOG"
-if ! "${JENA_DIR}/bin/riot" --validate "$TMP_DIR"/*.gz &>"$RIOT_LOG"; then
-  log "Invalid data-files, refuse to build fuseki-index"
-  cat "$RIOT_LOG"
+if [ ! -d "$TMP_DIR/shared" ]; then
+  log "No 'shared'-Files found, abort" >&2
   exit 3
 fi
 
-# Combine all .gz files into a single .ttl file and then compress it into a single .gz file
-log "Combining all .gz files into a single gz file"
-gunzip -c "$TMP_DIR"/*.gz > "$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl" \
-  || { log "Failed to combine .gz files" >&2; exit 2; }
-gzip -c "$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl" > "$FINAL_COMBINED_FILE" \
-  || { log "Failed to compress combined .ttl file" >&2; exit 2; }
-log "Final combined file created: $FINAL_COMBINED_FILE"
+# Validate all the input files
+RIOT_LOG="$TMP_DIR/riot.log"
+: > "$RIOT_LOG"
 
-# Load the final combined .ttl.gz file with tdb2.xloader
-log "Starting import of $FINAL_COMBINED_FILE into $DATA_DIR"
-# TODO: Load only the "shared"-part
-"${JENA_DIR}/bin/tdb2.xloader" --loc "$DATA_DIR" "$FINAL_COMBINED_FILE" \
-  || { log "Import failed for $FINAL_COMBINED_FILE" >&2; exit 2; }
-log "Import complete for $FINAL_COMBINED_FILE"
+for TYPE in "${AVAILABLE_TYPES[@]}"; do
+  log "Validating data-files in '$TMP_DIR/$TYPE', details will be reported to $RIOT_LOG"
+  if ! "${JENA_DIR}/bin/riot" --validate "$TMP_DIR/$TYPE"/*.gz &>>"$RIOT_LOG"; then
+    log "Invalid data-files in '$TMP_DIR/$TYPE', refuse to build fuseki-index"
+    cat "$RIOT_LOG"
+    exit 3
+  fi
+done
+
+declare -A COMBINED_FILE
+
+for TYPE in "${AVAILABLE_TYPES[@]}"; do
+  PLAIN="$TMP_DIR/${TARGET_ENV}_${TYPE}_${CURRENT_DATETIME}.ttl"
+  PACKED="${PLAIN}.gz"
+
+  log "Combining all .gz files f type '$TYPE' into a single gz file"
+  gunzip -c "$TMP_DIR/$TYPE"/*.gz > "$PLAIN" \
+    || { log "Failed to combine .gz files for type '$TYPE'" >&2; exit 2; }
+  gzip -c "$PLAIN" > "$PACKED" \
+    || { log "Failed to compress combined .ttl file for type '$TYPE'" >&2; exit 2; }
+  rm -f "$PLAIN"
+
+  COMBINED_FILE["$TYPE"]="$PACKED"
+  log "Combined file created for type '$TYPE': $PACKED"
+done
 
 # TODO:
 # 1. Create the Base-Archive
@@ -81,12 +107,79 @@ log "Import complete for $FINAL_COMBINED_FILE"
 #    - add the stats-file
 #    - create the embargoed Fuseki-Index
 
+log "Building base archive from shared data"
+"${JENA_DIR}/bin/tdb2.xloader" --loc "$BASE_DIR" "${COMBINED_FILE[shared]}" \
+   || { log "xloader failed for shared data" >&2; exit 2; }
+log "Base archive complete"
+
+if [ -n "${COMBINED_FILE[public]:-}" ]; then
+  PUBLIC_DIR="$VERSION_DIR/public"
+  log "Copying base archive to $PUBLIC_DIR"
+  cp -a "$BASE_DIR" "$PUBLIC_DIR" \
+     || { log "Failed to copy base archive for public index" >&2; exit 2; }
+
+  log "Base archive copied to $PUBLIC_DIR"
+  "${JENA_DIR}/bin/tdb2.tbdloader" --loc "$PUBLIC_DIR" "${COMBINED_FILE[public]}" \
+     || { log "tdb2.tbdloader failed for public data" >&2; exit 2; }
+
+  INDEX_DIR[public]="$PUBLIC_DIR"
+  log "Public index complete"
+else
+  log "No public data, skipping public index"
+fi
+
+if [ -n "${COMBINED_FILE[embargoed]:-}" ]; then
+  EMBARGOED_DIR="$VERSION_DIR/embargoed"
+  SOURCE_DIR="${INDEX_DIR[public]:-$BASE_DIR}"
+
+  log "Copying $SOURCE_DIR to $EMBARGOED_DIR"
+  cp -a "$SOURCE_DIR" "$EMBARGOED_DIR" \
+     || { log "Failed to copy base archive for embargoed index" >&2; exit 2; }
+
+  log "Loading embargoed data into $EMBARGOED_DIR"
+  "${JENA_DIR}/bin/tdb2.tbdloader" --loc "$EMBARGOED_DIR" "${COMBINED_FILE[embargoed]}" \
+     || { log "tdb2.tbdloader failed for embargoed data" >&2; exit 2; }
+  INDEX_DIR[embargoed]="$EMBARGOED_DIR"
+  log "Embargoed index complete"
+else
+  log "No embargoed data, skipping embargoed index"
+fi
+
 # Move processed file to the done directory
 mkdir -p "$DONE_DIR"
 log "Moving $FINAL_COMBINED_FILE to $DONE_DIR"
 mv "$FINAL_COMBINED_FILE" "$DONE_DIR/"
 
 # TODO: Execute Warmup-Phase here
+
+declare -A ARCHIVE_FILE
+# Generate statistics and place in correct location
+finalize_index() {
+  local type="$1"
+  local data_dir="$2"
+  local stats_dir="$data_dir/Data-0001"
+  local tmp_stats="/tmp/stats_${type}_${CURRENT_DATETIME}.opt"
+
+  log "Generating statistics for $type"
+  "${JENA_DIR}/bin/tdb2.tdbstats" --loc="$data_dir" > "$tmp_stats" \
+    || { log "tdb2.tdbstats failed for $type" >&2; exit 1; }
+
+  if [ -d "$stats_dir" ]; then
+    mv "$tmp_stats" "$stats_dir/stats.opt" \
+      || { log "Failed to move stats file for $type" >&2; exit 1; }
+    log "Statistics file created for $type: $stats_dir/stats.opt"
+  else
+    log "Target directory $stats_dir not found for $type, skipping stats.opt move"
+    rm -f "$tmp_stats"
+  fi
+
+  local archive_name="${TARGET_ENV}_${type}_${CURRENT_DATETIME}.tar.gz"
+
+  log "Creating archive $archive_name"
+  tar -czf "$FUSEKI_INDEX_DIR/$archive_name" -C "$FUSEKI_INDEX_DIR" "$VERSION/$type" \
+    || { log "Failed to create archive for $type" >&2; exit 1; }
+  ARCHIVE_FILE["$type"]="$archive_name"
+}
 
 # Generate statistics and place in correct location
 log "Generating statistics file for $DATA_DIR"
