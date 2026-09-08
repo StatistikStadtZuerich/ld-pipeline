@@ -26,7 +26,6 @@ function create_fuseki_index() {
 
     index_dir="${index_dir%/}"
 
-    mkdir -p "$index_dir"
     if [ -d "$index_dir/Data-0001" ]; then
       log "Data-0001 found in $index_dir, using incremental load"
       find "$ttl_source_dir" -type f -name '*.ttl.gz' -print0 \
