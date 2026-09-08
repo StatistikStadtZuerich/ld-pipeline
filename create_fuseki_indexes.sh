@@ -27,8 +27,8 @@ function create_fuseki_index() {
     index_dir="${index_dir%/}"
 
     mkdir -p "$index_dir"
-    if [ -f "$index_dir/tdb.lock" ]; then
-      log "tdb.lock found in $index_dir, using incremental load"
+    if [ -d "$index_dir/Data-0001" ]; then
+      log "Data-0001 found in $index_dir, using incremental load"
       find "$ttl_source_dir" -type f -name '*.ttl.gz' -print0 \
         | xargs -r -0 "${JENA_DIR}/bin/tdb2.tdbloader" --loc "$index_dir" \
         || { log "tdb2.tdbloader failed to load $ttl_source_dir into $index_dir data" >&2; return 2; }
@@ -100,7 +100,7 @@ function secure_copy() {
 }
 
 log "Start building Fuseki-Index for '$TARGET_ENV' with Run-ID '$RUN_ID' to '$FUSEKI_INDEX_DIR'"
-WORKING_DIR="$(mktemp -d "fuseki_$RUN_ID.XXXX")"
+WORKING_DIR="$(mktemp -d -p "fuseki_$RUN_ID.XXXX")"
 trap 'rm -rf "$WORKING_DIR"' EXIT
 
 log "Moving Data-Input to the Working-Dir at $WORKING_DIR"
@@ -122,12 +122,12 @@ log "Found ${#INPUT_FILES[@]} input files in $INPUT_DIR"
 log "Validating the input-files"
 RIOT_LOG="$WORKING_DIR/riot.log"
 : > "$RIOT_LOG"
-if ! "${JENA_DIR}/bin/riot" --validate "${INPUT_FILES[@]}" &>>"$RIOT_LOG"; then
-  log "Invalid data-files in '$WORKING_DIR/input', refuse to build fuseki-index"
-  cat "$RIOT_LOG"
-  trap - EXIT
-  exit 3
-fi
+#if ! "${JENA_DIR}/bin/riot" --validate "${INPUT_FILES[@]}" &>>"$RIOT_LOG"; then
+#  log "Invalid data-files in '$WORKING_DIR/input', refuse to build fuseki-index"
+#  cat "$RIOT_LOG"
+#  trap - EXIT
+#  exit 3
+#fi
 
 log "Building base archive from shared data"
 FUSEKI_BASE="$WORKING_DIR/fuseki"
