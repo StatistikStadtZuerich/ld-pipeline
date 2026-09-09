@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -xeuo pipefail
+set -euo pipefail
 
 SCRIPT="$(readlink -f "$0")"
 SCRIPT_HOME="$(dirname "$SCRIPT")"
@@ -29,7 +29,7 @@ function create_fuseki_index() {
     if [ -d "$index_dir/Data-0001" ]; then
       log "Data-0001 found in $index_dir, using incremental load"
       find "$ttl_source_dir" -type f -name '*.ttl.gz' -print0 \
-        | xargs -r -0 "${JENA_DIR}/bin/tdb2.tdbloader" --loc "$index_dir" \
+        | xargs -r -0 "${JENA_DIR}/bin/tdb2.tdbloader" --loc "$index_dir" --loader phased \
         || { log "tdb2.tdbloader failed to load $ttl_source_dir into $index_dir data" >&2; return 2; }
     else
       log "$index_dir seems empty, using xloader"
