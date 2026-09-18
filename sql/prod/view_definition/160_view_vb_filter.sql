@@ -16,7 +16,7 @@ UNION ALL
 SELECT
     t.SASA_Job_Output_Id AS view_id,
     SUBSTRING(value, 5, len(value)) AS termset,
-    SUBSTRING(value, 2, 3) AS dimension
+    SUBSTRING(value, 1, 3) AS dimension
 FROM
     [dbo].[pipe_HDBDatenobjekte_prod] t
 CROSS APPLY STRING_SPLIT(t.Dimension_LevelFilter, ';')
