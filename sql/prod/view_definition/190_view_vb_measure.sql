@@ -22,28 +22,6 @@ WITH cleaned_source AS (
     CROSS APPLY OPENJSON(
         '["' + REPLACE(REPLACE(t.Kennzahl_GGH_STK_BEB, '"','\"'), ';','","') + '"]'
     ) AS j
-    WHERE t.Dimension_LevelFilter IS NULL
-    
-    UNION ALL 
-    
-    SELECT DISTINCT
-        t.SASA_Job_Output_Id AS view_id,
-        k.v + '|' AS raw_value,
-        REPLACE(TRIM('| ' FROM k.v), '|', '_') AS identifier_full,
-        COALESCE(h.hier, 'XXX') + '|' AS Cleaned_Dimension_Hierarchie
-    FROM [dbo].[pipe_HDBDatenobjekte_prod] t
-    CROSS APPLY (
-        SELECT STRING_AGG(vals.val, '|') WITHIN GROUP (ORDER BY vals.val) AS hier
-        FROM (
-            SELECT DISTINCT x.v AS val
-            FROM STRING_SPLIT(REPLACE(t.Dimension_Hierarchie, ';', '|'), '|') s
-            CROSS APPLY (SELECT TRIM(s.[value]) AS v) x
-            WHERE x.v <> '' AND LEN(x.v) <= 3
-        ) vals
-    ) h
-    CROSS APPLY STRING_SPLIT(t.Kennzahl_GGH_STK_BEB, ';') s
-    CROSS APPLY (SELECT TRIM(s.[value]) AS v) k
-    WHERE t.Dimension_LevelFilter IS NOT NULL
 ),
 cleaned_lookup AS (
     SELECT DISTINCT
@@ -111,4 +89,40 @@ LEFT JOIN [dbo].[pipe_HDBGruppenliste_prod] g1
    AND g1.Gruppencode = SUBSTRING(cs.identifier_full, 5, 7)
 LEFT JOIN [dbo].[pipe_HDBGruppenliste_prod] g2
     ON LEN(cs.identifier_full) >= 19
-   AND g2.Gruppencode = SUBSTRING(cs.identifier_full, 13, 7);
+   AND g2.Gruppencode = SUBSTRING(cs.identifier_full, 13, 7)
+   
+UNION ALL
+
+SELECT
+    C.id as view_id, 
+    C.Kennzahl as identifier, 
+    CONCAT_WS('_',
+        C.Kennzahl,
+        NULLIF(C.GGH, ''),
+        NULLIF(C.STK, ''),
+        NULLIF(C.BEB, '')
+    ) AS identifier_full,
+    C.CubeIds as cube_id,
+    CONCAT_WS(
+        ' / ',
+        K.Kennzahlname,
+        F1.Filtername,
+        F2.Filtername,
+        F3.Filtername
+        ) AS name,
+    CONCAT_WS(
+        ' / ',
+        K.Beschreibung,
+        F1.Filterbeschreibung,
+        F2.Filterbeschreibung,
+        F3.Filterbeschreibung
+            ) AS description
+FROM [dbo].[pipe_HDBCubeKZLookUp_prod] C
+LEFT JOIN [dbo].[pipe_HDBKennzahlen_prod] K
+    ON C.Kennzahl = K.KennzahlCode
+LEFT JOIN [dbo].[pipe_HDBFilterGruppe_prod] F1
+    ON C.BEB = F1.FilterId
+LEFT JOIN [dbo].[pipe_HDBFilterGruppe_prod] F2
+    ON C.GGH = F2.FilterId
+LEFT JOIN [dbo].[pipe_HDBFilterGruppe_prod] F3
+    ON C.STK = F3.FilterId;
