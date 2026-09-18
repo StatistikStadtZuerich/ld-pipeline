@@ -46,7 +46,7 @@ class Environment(Base):
 
     def table_name(self, table_name: str) -> str:
         match re.sub(r"^\d+_", "", table_name).removeprefix("pipe_"):
-            case "HDB" | "HDBDatenobjekte":
+            case "HDB":
                 return f"{table_name}_{self.table_suffix}"
             case _:
                 return table_name

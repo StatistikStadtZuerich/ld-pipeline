@@ -22,7 +22,7 @@ WITH cleaned_source AS (
     CROSS APPLY OPENJSON(
         '["' + REPLACE(REPLACE(t.Kennzahl_GGH_STK_BEB, '"','\"'), ';','","') + '"]'
     ) AS j
-        WHERE t.Dimension_LevelFilter IS NULL
+    WHERE t.Dimension_LevelFilter IS NULL
     
     UNION ALL 
     

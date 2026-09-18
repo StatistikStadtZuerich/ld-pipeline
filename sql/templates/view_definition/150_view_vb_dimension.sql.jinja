@@ -15,6 +15,7 @@ JOIN
     [{{ 'pipe_HDBGruppenliste' | pipe_table_name }}] h
 ON 
     h.GRUPPE = substring(split_values.value,2, 3)
+    WHERE t.Dimension_LevelFilter IS NULL
 
 UNION ALL
 

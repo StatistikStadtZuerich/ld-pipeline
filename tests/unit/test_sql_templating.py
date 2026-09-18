@@ -58,7 +58,7 @@ class TestSqlScriptTemplating:
             self._int,
             pathlib.Path(
                 TestUtils.abs_path(
-                    "../../sql/int/pipe_tables/070_pipe_HDBDatenobjekte_TEST.sql"
+                    "../../sql/int/pipe_tables/070_pipe_HDBDatenobjekte.sql"
                 )
             ),
         )
@@ -78,7 +78,7 @@ class TestSqlScriptTemplating:
             self._prod,
             pathlib.Path(
                 TestUtils.abs_path(
-                    "../../sql/prod/pipe_tables/070_pipe_HDBDatenobjekte_FINAL.sql"
+                    "../../sql/prod/pipe_tables/070_pipe_HDBDatenobjekte.sql"
                 )
             ),
         )
