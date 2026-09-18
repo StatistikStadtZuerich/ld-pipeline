@@ -89,7 +89,7 @@ LEFT JOIN [dbo].[pipe_HDBGruppenliste_int] g1
    AND g1.Gruppencode = SUBSTRING(cs.identifier_full, 5, 7)
 LEFT JOIN [dbo].[pipe_HDBGruppenliste_int] g2
     ON LEN(cs.identifier_full) >= 19
-   AND g2.Gruppencode = SUBSTRING(cs.identifier_full, 13, 7);
+   AND g2.Gruppencode = SUBSTRING(cs.identifier_full, 13, 7)
 
 UNION ALL
 

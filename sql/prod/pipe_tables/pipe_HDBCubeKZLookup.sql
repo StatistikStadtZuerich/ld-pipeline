@@ -4,7 +4,7 @@ GO
 
 SELECT
     id,
-    Cubeid,
+    Cubeids,
     Kennzahl,
     BEB,
     GGH, 
