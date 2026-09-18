@@ -94,7 +94,7 @@ LEFT JOIN [dbo].[pipe_HDBGruppenliste_prod] g2
 UNION ALL
 
 SELECT
-    C.id as view_id, 
+    D.SASA_Job_Output_Id as view_id, 
     C.Kennzahl as identifier, 
     CONCAT_WS('_',
         C.Kennzahl,
@@ -102,7 +102,7 @@ SELECT
         NULLIF(C.STK, ''),
         NULLIF(C.BEB, '')
     ) AS identifier_full,
-    C.CubeIds as cube_id,
+    REPLACE(c.CubeIds,'CID_','') AS cube_id,
     CONCAT_WS(
         ' / ',
         K.Kennzahlname,
@@ -118,6 +118,8 @@ SELECT
         F3.Filterbeschreibung
             ) AS description
 FROM [dbo].[pipe_HDBCubeKZLookUp_prod] C
+LEFT JOIN [dbo].[pipe_HDBDatenobjekte_prod] D
+    ON C.id = D.id
 LEFT JOIN [dbo].[pipe_HDBKennzahlen_prod] K
     ON C.Kennzahl = K.KennzahlCode
 LEFT JOIN [dbo].[pipe_HDBFilterGruppe_prod] F1
