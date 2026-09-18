@@ -25,7 +25,9 @@ SELECT
     CubeIDs,
     RaumFilter,
     DimensionFilterID,
+    Dimension_Level, 
+    Dimension_LevelFilter,
     Datenowner,
     Datenqualitaet
 INTO [dbo].[pipe_HDBDatenobjekte_int]
-FROM [dbo].[HDBDatenobjekte_TEST];
+FROM [dbo].[HDBDatenobjekte];

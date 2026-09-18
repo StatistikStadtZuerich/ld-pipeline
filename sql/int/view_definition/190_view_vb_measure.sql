@@ -22,6 +22,28 @@ WITH cleaned_source AS (
     CROSS APPLY OPENJSON(
         '["' + REPLACE(REPLACE(t.Kennzahl_GGH_STK_BEB, '"','\"'), ';','","') + '"]'
     ) AS j
+    WHERE t.Dimension_LevelFilter IS NULL
+    
+    UNION ALL 
+    
+    SELECT DISTINCT
+        t.SASA_Job_Output_Id AS view_id,
+        k.v + '|' AS raw_value,
+        REPLACE(TRIM('| ' FROM k.v), '|', '_') AS identifier_full,
+        COALESCE(h.hier, 'XXX') + '|' AS Cleaned_Dimension_Hierarchie
+    FROM [dbo].[pipe_HDBDatenobjekte_int] t
+    CROSS APPLY (
+        SELECT STRING_AGG(vals.val, '|') WITHIN GROUP (ORDER BY vals.val) AS hier
+        FROM (
+            SELECT DISTINCT x.v AS val
+            FROM STRING_SPLIT(REPLACE(t.Dimension_Hierarchie, ';', '|'), '|') s
+            CROSS APPLY (SELECT TRIM(s.[value]) AS v) x
+            WHERE x.v <> '' AND LEN(x.v) <= 3
+        ) vals
+    ) h
+    CROSS APPLY STRING_SPLIT(t.Kennzahl_GGH_STK_BEB, ';') s
+    CROSS APPLY (SELECT TRIM(s.[value]) AS v) k
+    WHERE t.Dimension_LevelFilter IS NOT NULL
 ),
 cleaned_lookup AS (
     SELECT DISTINCT

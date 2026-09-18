@@ -22,4 +22,26 @@ LEFT JOIN [{{ 'dbo.pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] ag
 LEFT JOIN [{{ 'dbo.pipe_HDBHierarchien' | pipe_table_name }}] h
 	on RTRIM(LTRIM(value)) = RTRIM(LTRIM(h.HIERARCHIE))
     and left(t.Gruppencode,3) = SUBSTRING(h.HierarchieID, 2, 3)
-    ;
+
+UNION ALL 
+
+SELECT 
+    F.Gruppencode as term_code, 
+    G.FilterName as term_set_name, 
+    F.FilterID as term_set
+    
+FROM [{{ 'dbo.pipe_HDBFilterCode' | pipe_table_name }}] as F
+LEFT JOIN [{{ 'dbo.pipe_HDBFilterGruppe' | pipe_table_name }}] as G
+ON F.FilterID = G.FilterID
+
+UNION ALL 
+
+SELECT DISTINCT
+    L.Gruppencode as term_code,  
+    G.LevelName as term_set_name, 
+    L.LevelID as term_set
+    
+FROM [{{ 'dbo.pipe_HDBLevelCode' | pipe_table_name }}] as L
+LEFT JOIN [{{ 'dbo.pipe_HDBLevelGruppe' | pipe_table_name }}] as G
+ON G.LevelID = L.LevelID
+;

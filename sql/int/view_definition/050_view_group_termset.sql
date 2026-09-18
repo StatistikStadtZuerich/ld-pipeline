@@ -22,4 +22,27 @@ LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
 LEFT JOIN [dbo].[pipe_HDBHierarchien_int] h
 	on RTRIM(LTRIM(value)) = RTRIM(LTRIM(h.HIERARCHIE))
     and left(t.Gruppencode,3) = SUBSTRING(h.HierarchieID, 2, 3)
-    ;
+
+UNION ALL 
+
+SELECT 
+    F.Gruppencode as term_code, 
+    G.FilterName as term_set_name, 
+    F.FilterID as term_set
+    
+FROM [dbo].[pipe_HDBFilterCode_int] as F
+LEFT JOIN [dbo].[pipe_HDBFilterGruppe_int] as G
+ON F.FilterID = G.FilterID
+
+UNION ALL 
+
+SELECT DISTINCT
+    L.Gruppencode as term_code,  
+    G.LevelName as term_set_name, 
+    L.LevelID as term_set
+    
+FROM [dbo].[HDBLevelCode] as L
+LEFT JOIN [dbo].[HDBLevelGruppe] as G
+ON G.LevelID = L.LevelID
+;
+    

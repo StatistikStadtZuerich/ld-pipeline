@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBLevelGruppe' | pipe_table_name }}];
+
+GO
+
+SELECT
+    LevelID,
+    Levelbeschreibung,
+    Levelname
+INTO [{{ 'dbo.pipe_HDBLevelGruppe' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBLevelGruppe' | table_name }}];

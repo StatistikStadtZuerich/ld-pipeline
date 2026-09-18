@@ -15,4 +15,21 @@ JOIN
     [{{ 'pipe_HDBGruppenliste' | pipe_table_name }}] h
 ON 
     h.GRUPPE = substring(split_values.value,2, 3)
+
+UNION ALL
+
+SELECT DISTINCT
+    t.SASA_Job_Output_Id AS view_id,
+    h.GRUPPE AS identifier,
+    h.Gruppenname AS name,
+    h.Gruppenname as description
+FROM 
+    [{{ 'pipe_HDBDatenobjekte' | pipe_table_name }}] t
+CROSS APPLY 
+    STRING_SPLIT(t.Dimension_LevelFilter, ';') AS split_values
+JOIN 
+    [{{ 'pipe_HDBGruppenliste' | pipe_table_name }}] h
+ON 
+    h.GRUPPE = substring(split_values.value,1, 3)
+    WHERE t.Dimension_LevelFilter IS NOT NULL
 ;

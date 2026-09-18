@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBFilterGruppe' | pipe_table_name }}];
+
+GO
+
+SELECT
+    FilterID,
+    Filterbeschreibung,
+    Filtername
+INTO [{{ 'dbo.pipe_HDBFilterGruppe' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBFilterGruppe' | table_name }}];

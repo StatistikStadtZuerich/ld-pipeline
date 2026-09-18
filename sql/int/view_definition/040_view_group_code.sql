@@ -34,4 +34,39 @@ FROM [dbo].[pipe_HDBGruppenliste_int] t
 LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
     ON LEFT(t.GRUPPENCODE, 3) = ag.gruppe
     OR LEFT(t.GRUPPE, 3) = ag.gruppe
-    OR LEFT(t.PARENTCODE, 3) = ag.gruppe;
+    OR LEFT(t.PARENTCODE, 3) = ag.gruppe
+    
+UNION ALL 
+
+SELECT 
+    F.Gruppencode as term_code, 
+    F.Gruppencodename as title, 
+    G.FilterBeschreibung as description, 
+    F.Gruppe as term_group_code, 
+    '0' as position, 
+    NULL as part_of, 
+    NULL as sameAs, 
+    G.FilterName as term_sets_name, 
+    F.FilterID as term_sets
+    
+FROM [dbo].[pipe_HDBFilterCode_int] as F
+LEFT JOIN [dbo].[pipe_HDBFilterGruppe_int] as G
+ON F.FilterID = G.FilterID
+
+UNION ALL 
+
+SELECT DISTINCT
+    L.Gruppencode as term_code, 
+    L.Gruppencodename as title, 
+    G.LevelBeschreibung as description, 
+    L.Gruppe as term_group_code, 
+    '0' as position, 
+    NULL as part_of, 
+    NULL as sameAs, 
+    G.LevelName as term_sets_name, 
+    L.LevelID as term_sets
+    
+FROM [dbo].[HDBLevelCode] as L
+LEFT JOIN [dbo].[HDBLevelGruppe] as G
+ON G.LevelID = L.LevelID
+;
