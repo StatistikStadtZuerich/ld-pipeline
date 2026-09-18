@@ -66,7 +66,7 @@ SELECT DISTINCT
     G.LevelName as term_sets_name, 
     L.LevelID as term_sets
     
-FROM [dbo].[HDBLevelCode] as L
-LEFT JOIN [dbo].[HDBLevelGruppe] as G
+FROM [dbo].[pipe_HDBLevelCode_int] as L
+LEFT JOIN [dbo].[pipe_HDBLevelGruppe_int] as G
 ON G.LevelID = L.LevelID
 ;
