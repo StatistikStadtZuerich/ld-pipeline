@@ -126,3 +126,4 @@ LEFT JOIN [dbo].[pipe_HDBFilterGruppe_int] F2
     ON C.GGH = F2.FilterId
 LEFT JOIN [dbo].[pipe_HDBFilterGruppe_int] F3
     ON C.STK = F3.FilterId
+;
