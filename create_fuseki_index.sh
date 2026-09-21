@@ -126,12 +126,12 @@ log "Found ${#INPUT_FILES[@]} input files in $INPUT_DIR"
 log "Validating the input-files"
 RIOT_LOG="$WORKING_DIR/riot.log"
 : > "$RIOT_LOG"
-#if ! "${JENA_DIR}/bin/riot" --validate "${INPUT_FILES[@]}" &>>"$RIOT_LOG"; then
-#  log "Invalid data-files in '$WORKING_DIR/input', refuse to build fuseki-index"
-#  cat "$RIOT_LOG"
-#  trap - EXIT
-#  exit 3
-#fi
+if ! "${JENA_DIR}/bin/riot" --validate "${INPUT_FILES[@]}" &>>"$RIOT_LOG"; then
+  log "Invalid data-files in '$WORKING_DIR/input', refuse to build fuseki-index"
+  cat "$RIOT_LOG"
+  trap - EXIT
+  exit 3
+fi
 
 log "Building base archive from shared data"
 FUSEKI_BASE="$WORKING_DIR/fuseki"
@@ -185,7 +185,7 @@ if [ -n "${PUBLIC_INDEX:-}" ]; then
   "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" index-created \
     --sourceEnv "$(echo "${ENV_NAME}" | tr '[:lower:]' '[:upper:]')" \
     --targetEnv "$(echo "${TARGET_ENV}" | tr '[:lower:]' '[:upper:]')" \
-    --archive "$PUBLIC_INDEX.tar.gz"
+    --archive "$PUBLIC_INDEX.tar.gz $PREVIEW_INDEX.tar.gz"
 else
   log "No public index was created, skipping index-created notification"
 fi
