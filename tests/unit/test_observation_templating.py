@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, Mock
 
 from pipeline.base import Env, Environment, StepDefinition
 from pipeline.steps import create_templating
+from pipeline.steps.templating import OutputType
 from tests.unit.utils import TestUtils
 
 
@@ -54,12 +55,16 @@ def test_observation_templating():
                 "observation.ttl.jinja",
                 output_filename,
                 "view_observation",
+                output_type=OutputType.PUBLIC,
             ),
         )
         step_def.step.run(env)
 
-        actual = TestUtils.read_file(
-            os.path.join(TestUtils.abs_path("tmp"), output_filename), encoding="utf-8"
+        actual = TestUtils.gzip_read(
+            os.path.join(
+                TestUtils.abs_path("tmp"), OutputType.PUBLIC, output_filename + ".gz"
+            ),
+            encoding="utf-8",
         )
         expected = TestUtils.read_file(
             TestUtils.abs_path("data/expected_content_observation.ttl"),

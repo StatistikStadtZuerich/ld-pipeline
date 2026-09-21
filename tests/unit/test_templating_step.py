@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, Mock
 
 from pipeline.base import Env, Environment
 from pipeline.steps import Templating
+from pipeline.steps.templating import OutputType
 from tests.unit.utils import TestUtils
 
 
@@ -30,15 +31,21 @@ def test_templating():
 
     try:
         Templating(
-            template_filename, output_filename, "view_property", sql_filepath
+            template_filename,
+            output_filename,
+            "view_property",
+            OutputType.PUBLIC,
+            sql_filepath=sql_filepath,
         ).run(env)
 
         env.get_db_connection().__enter__().query.assert_called_with(
             TestUtils.read_file(sql_filepath)
         )
 
-        content = TestUtils.read_file(
-            os.path.join(TestUtils.abs_path("tmp"), output_filename)
+        content = TestUtils.gzip_read(
+            os.path.join(
+                TestUtils.abs_path("tmp"), OutputType.PUBLIC, output_filename + ".gz"
+            )
         )
         expected_content = TestUtils.read_file(
             TestUtils.abs_path("data/expected_content.ttl")

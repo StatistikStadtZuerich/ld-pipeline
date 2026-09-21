@@ -1,3 +1,5 @@
+from typing import Any
+
 from pipeline.base import Base, Environment
 
 from .ld_view_model import (
@@ -19,9 +21,11 @@ class LdViewBuilder(Base):
         self._env = environment.name
         self._cache = {}
 
-    def build_all(self) -> list[View]:
+    def build_all(self, view_ids: set[str] | None = None) -> list[View]:
         views = []
         for view_dict in self._list_views():
+            if view_ids is not None and view_dict["id"] not in view_ids:
+                continue
             view = self._create_view_from_dict(view_dict)
 
             source_dict_list = self._list_sources_by_view_id(view.id)
@@ -30,7 +34,7 @@ class LdViewBuilder(Base):
                 for source_dict in source_dict_list
             ]
 
-            static_dimension_dicts = [
+            static_dimension_dicts: list[dict[str, Any]] = [
                 {
                     "identifier": "ZEIT",
                     "name": "Key Zeit",
@@ -128,6 +132,13 @@ class LdViewBuilder(Base):
                     )
             view.sort_and_numerate_dimensions()
             views.append(view)
+
+        if view_ids is not None:
+            self.logger.info(
+                "Filtered to %d view(s) matching view_ids=%s",
+                len(views),
+                sorted(view_ids),
+            )
 
         return views
 

@@ -75,15 +75,19 @@ class Environment(Base):
             raise NotImplementedError(f"Database '{_db_type}' is not supported")
 
     def get_template_engine(
-        self, template_filename: str, output_filepath: str | None = None
+        self,
+        template_filename: str,
+        output_filepath: str | None = None,
+        compress: bool = False,
     ) -> JinjaTemplateEngine:
         """
         Returns the template engine for the environment, the template file, and the defined output
         :param template_filename: the template file that is used by the engine
         :param output_filepath: the output file where the templated data will be written in
+        :param compress: whether to compress the output file  (.gz)
         :return: a jinja template engine
         """
-        return JinjaTemplateEngine(self, template_filename, output_filepath)
+        return JinjaTemplateEngine(self, template_filename, output_filepath, compress)
 
     def get_compression_engine(self) -> GzipEngine:
         return GzipEngine(self)

@@ -64,6 +64,7 @@ class JinjaTemplateEngine(TemplateEngine):
         environment: "Environment",
         template_filename: str,
         output_filepath: str | None = None,
+        compress: bool = False,
     ):
         super().__init__()
 
@@ -107,6 +108,12 @@ class JinjaTemplateEngine(TemplateEngine):
                 return False
 
         self._output_filepath = output_filepath
+        if (
+            self._output_filepath
+            and compress
+            and not self._output_filepath.endswith(".gz")
+        ):
+            self._output_filepath += ".gz"
         self._output_file = None
         self._env = JinjaEnv(
             loader=FileSystemLoader(environment.config.get("template_path")),
@@ -122,10 +129,10 @@ class JinjaTemplateEngine(TemplateEngine):
     def get_template(self):
         return self._template
 
-    def render(self, data):
+    def render(self, data) -> str:
         return self._template.render(data)
 
-    def template(self, data):
+    def template(self, data) -> None:
         content = self.render(data)
         try:
             self._ensure_output_file()
@@ -139,9 +146,14 @@ class JinjaTemplateEngine(TemplateEngine):
             raise ValueError("Output filepath is not set")
         if not self._output_file:
             os.makedirs(os.path.dirname(self._output_filepath), exist_ok=True)
-            self._output_file = open(  # noqa: SIM115
-                file=self._output_filepath, mode="wt", encoding="utf-8"
-            )
+            if self._output_filepath.endswith(".gz"):
+                self._output_file = gzip.open(  # noqa: SIM115
+                    self._output_filepath, mode="wt", encoding="utf-8"
+                )
+            else:
+                self._output_file = open(  # noqa: SIM115
+                    self._output_filepath, mode="wt", encoding="utf-8"
+                )
 
     def __enter__(self):
         return self

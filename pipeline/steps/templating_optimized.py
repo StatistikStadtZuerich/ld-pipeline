@@ -1,7 +1,6 @@
 import gzip
 import os
 import pathlib
-import shutil
 import time
 from itertools import groupby as itertools_groupby
 from typing import Any
@@ -9,6 +8,7 @@ from typing import Any
 from database import BaseSQLStep
 
 from ..base import Environment, Step, Utils
+from .templating import OutputType
 
 
 class TemplatingOptimized(Step):
@@ -17,6 +17,7 @@ class TemplatingOptimized(Step):
         template_filename: str,
         output_filename: str,
         sql_view_name: str,
+        output_type: OutputType = OutputType.SHARED,
         sql_filepath: str | None = None,
         options: dict[str, Any] | None = None,
     ):
@@ -24,6 +25,7 @@ class TemplatingOptimized(Step):
         self._template_filename = template_filename
         self._output_filename = output_filename
         self._sql_view_name = sql_view_name
+        self._output_type = output_type
         self._sql_filepath = sql_filepath
         self._options = options or {}
         self._utils = Utils()
@@ -40,23 +42,22 @@ class TemplatingOptimized(Step):
                 pathlib.Path(self._sql_filepath),
             )
 
-    def _write_batch(
-        self, counter: int, batch: list[str], output_folder, output_folder_tmp
-    ):
+    def _write_batch(self, counter: int, batch: list[str], output_folder):
         """Writes a batch of triples to a gzipped file."""
         outpath = pathlib.Path(self._output_filename)
         file_ext = outpath.suffix
         base_name = outpath.stem
         filename = f"{base_name}_batch{counter:03d}{file_ext}.gz"
 
-        dest_file = os.path.join(output_folder, filename)
-        dest_file_tmp = os.path.join(output_folder_tmp, filename)
-        self.logger.debug(
-            f"Writing batch {counter} data to {os.path.basename(dest_file_tmp)} ..."
+        dest_file = pathlib.Path(
+            os.path.join(output_folder, self._output_type.value, filename)
         )
-        with gzip.open(dest_file_tmp, "wt") as f_out:
+        self.logger.debug(
+            f"Writing batch {counter} data to {os.path.basename(dest_file)} ..."
+        )
+        os.makedirs(dest_file.parent, exist_ok=True)
+        with gzip.open(dest_file, "wt") as f_out:
             f_out.write("\n".join(batch) + "\n")
-        shutil.move(dest_file_tmp, dest_file)
         self.logger.info(f"Batch {counter} written to {dest_file}.")
 
     def process_triples(self, tablename, cursor, template, output_folder, output_table):
@@ -71,9 +72,6 @@ class TemplatingOptimized(Step):
             write_batch_size = self._options["write_batch_size"]
         if "max_iteration" in self._options:
             max_iteration = self._options["max_iteration"]
-
-        output_folder_tmp = output_folder + "/tmp"
-        os.makedirs(output_folder_tmp, exist_ok=True)
 
         batch: list[str] = []
 
@@ -128,7 +126,6 @@ class TemplatingOptimized(Step):
                     batch_counter,
                     batch,
                     output_folder,
-                    output_folder_tmp,
                 )
                 batch.clear()
             offset += db_batch_size
@@ -139,9 +136,7 @@ class TemplatingOptimized(Step):
         self.logger.info(f"Total number of rows processed: {number_rows_total}")
 
         if batch:
-            self._write_batch(
-                batch_counter + 1, batch, output_folder, output_folder_tmp
-            )
+            self._write_batch(batch_counter + 1, batch, output_folder)
 
     def _cooldown(
         self, delay: float, iteration_durations: list[float], max_delay: float = 0
@@ -219,7 +214,8 @@ class TemplatingOptimized(Step):
                 self.logger.info("done")
 
                 with environment.get_template_engine(
-                    self._template_filename, output_filepath
+                    self._template_filename,
+                    None,
                 ) as template_engine:
                     template = template_engine.get_template()
                     self.process_triples(
@@ -245,9 +241,6 @@ class GroupedTemplatingOptimized(TemplatingOptimized):
             db_batch_size = self._options["db_batch_size"]
         if "write_batch_size" in self._options:
             write_batch_size = self._options["write_batch_size"]
-
-        output_folder_tmp = output_folder + "/tmp"
-        os.makedirs(output_folder_tmp, exist_ok=True)
 
         batch = []
 
@@ -294,11 +287,8 @@ class GroupedTemplatingOptimized(TemplatingOptimized):
                     batch_counter,
                     batch,
                     output_folder,
-                    output_folder_tmp,
                 )
                 batch.clear()
 
         if batch:
-            self._write_batch(
-                batch_counter + 1, batch, output_folder, output_folder_tmp
-            )
+            self._write_batch(batch_counter + 1, batch, output_folder)

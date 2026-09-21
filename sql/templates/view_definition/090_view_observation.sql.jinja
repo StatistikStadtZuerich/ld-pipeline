@@ -13,6 +13,7 @@ SELECT
     h.WERT AS value,
     h.ZEIT AS time_code,
     FORMAT(DATEFROMPARTS(z.JAHR, z.MONAT, z.TAG), 'yyyy-MM-dd') AS [time],
+    h.REFERENZNUMMER AS reference_number,
     h.RAUM AS room_code,
     h.Gruppe1 AS prop1_code_short,
     h.Gruppe2 AS prop2_code_short,
@@ -67,6 +68,7 @@ SELECT
     b.value,
     b.time_code,
     b.[time],
+    b.reference_number,
     --room_code durch die Codes in HDBRaumHistorisch ersetzen, wenn vorhanden
     COALESCE(rh.LDID, b.room_code) AS room_code,
     b.prop1_code_short,

@@ -17,117 +17,177 @@ DROPZONE_BASE=${DROPZONE_BASE:-/home/lod_pipeline/hdb_dropzone}
 DROPZONE_DIR=${DROPZONE_DIR:-${DROPZONE_BASE%/}/${ENV_NAME_UC}}
 PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-${DROPZONE_DIR%/}/Pipeline_Data}"
 
-TMP_DIR="$INPUT_DIR/tmp"
-DONE_DIR="$INPUT_DIR/done"
-CURRENT=current
+# These are conventional names - MUST be synced with OutputType in templating.py
+OT_SHARED="shared"
+OT_PUBLIC="public"
+OT_EMBARGOED="embargoed"
 
 function log() {
     echo "$(date -u +%FT%TZ) $*"
 }
-log "Start building Fuseki-Index for '$TARGET_ENV' with Run-ID '$RUN_ID' to '$FUSEKI_INDEX_DIR'"
+function create_fuseki_index() {
+    local index_dir="${1:?}"
+    local ttl_source_dir="${2:?}"
 
-mkdir -p "$FUSEKI_INDEX_DIR"
-VERSION="$(date +"%F_%H-%M-%S_%Z")"
-DATA_DIR="$FUSEKI_INDEX_DIR/$VERSION"
+    index_dir="${index_dir%/}"
 
-# Get the current date and time for the filename
-CURRENT_DATETIME=$(date +"%Y%m%d%H%M%S")
-FINAL_COMBINED_FILE="$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl.gz"
-
-log "Loading all .gz files in $INPUT_DIR"
-# Move all .gz files from the input to the temporary directory
-rm -rf "$TMP_DIR" && mkdir -p "$TMP_DIR"
-for FILE in "$INPUT_DIR"/*.gz; do
-    [ -e "$FILE" ] || continue
-    if [ -r "$FILE" ]; then
-        log "Moving $FILE to $TMP_DIR"
-        mv "$FILE" "$TMP_DIR/"
+    if [ -d "$index_dir/Data-0001" ]; then
+      log "Data-0001 found in $index_dir, using incremental load"
+      find "$ttl_source_dir" -type f -name '*.ttl.gz' -print0 \
+        | xargs -r -0 "${JENA_DIR}/bin/tdb2.tdbloader" --loc "$index_dir" --loader phased \
+        || { log "tdb2.tdbloader failed to load $ttl_source_dir into $index_dir data" >&2; return 2; }
     else
-        log "No readable .gz files found in $INPUT_DIR, skipping"
+      log "$index_dir seems empty, using xloader"
+      find "$ttl_source_dir" -type f -name '*.ttl.gz' -print0 \
+        | xargs -r -0 "${JENA_DIR}/bin/tdb2.xloader" --loc "$index_dir" \
+        || { log "tdb2.xloader failed to create $index_dir from $ttl_source_dir" >&2; return 2; }
     fi
-done
+
+    log "loading complete, generating stats"
+    local tmp_stats="$index_dir/stats.tmp"
+    local stats_dir="$index_dir/Data-0001"
+    "${JENA_DIR}/bin/tdb2.tdbstats" --loc="$index_dir" > "$tmp_stats" \
+        || { log "tdb2.tdbstats failed in $index_dir" >&2; return 1; }
+
+    if [ -d "$stats_dir" ]; then
+      mv -f "$tmp_stats" "$stats_dir/stats.opt" \
+        || { log "Failed to move stats file to $stats_dir" >&2; exit 1; }
+      log "Statistics file created: $stats_dir/stats.opt"
+    else
+      log "Target directory $stats_dir not found in $index_dir, skipping stats.opt move"
+      rm -f "$tmp_stats"
+    fi
+}
+function compress_fuseki_index() {
+    local base_dir="${1:?}"
+    local index_name="${2:?}"
+    local target_dir="${3:?}"
+
+    base_dir=${base_dir%/}
+    target_dir=${target_dir%/}
+
+    [ -d "$base_dir/$index_name" ] || { log "No Fuseki-Index at $base_dir/$index_name found"; return 1; }
+    local archive="${index_name}.tar.gz"
+    log "Creating $archive from $base_dir/$index_name"
+    mkdir -p "$target_dir"
+    tar -czf "$target_dir/$archive" -C "$base_dir" "$index_name" \
+      || { log "Failed to create $archive from $base_dir/$index_name"; return 1; }
+    log "Created archive $target_dir/$archive"
+}
+function unpack_fuseki_archive() {
+    local archive="${1:?}"
+    local target_dir="${2:?}"
+
+    [ -f "$archive" ] || { log "Can't read Fuseki-Archive $archive"; return 1; }
+    log "Unpacking $(basename "$archive") to $target_dir"
+    mkdir -p "$target_dir"
+    tar -xzf "$archive" --strip-components 1 -C "$target_dir" \
+      || { log "Failed to unpack $(basename "$archive") to $target_dir" >&2; return 1; }
+    log "Unpacked $(basename "$archive") to $target_dir"
+}
+function run_data_tests() {
+    local fuseki_loc="${1:?}"
+    log "TODO: Run Data-Tests on $fuseki_loc"
+}
+function secure_copy() {
+    local source="$1"
+    local target_dir="$2"
+    local temp
+
+    (
+      mkdir -p "$target_dir"
+      temp="$(mktemp -p "$target_dir")"
+      cp -f "$source" "$temp" \
+        && mv "$temp" "$target_dir/$(basename "$source")"
+    ) || { log "Failed to copy $source to $target_dir" >&2; return 2; }
+  log "$source successfully copied to $target_dir"
+}
+
+log "Start building Fuseki-Index for '$TARGET_ENV' with Run-ID '$RUN_ID' to '$FUSEKI_INDEX_DIR'"
+WORKING_DIR="$(mktemp -d "fuseki_$RUN_ID.XXXX")"
+trap 'rm -rf "$WORKING_DIR"' EXIT
+
+log "Moving Data-Input to the Working-Dir at $WORKING_DIR"
+mkdir -p "$WORKING_DIR/input"
+mv "$INPUT_DIR"/* "$WORKING_DIR/input/"
+
+INPUT_FILES=()
+while IFS= read -r -d '' file; do
+  INPUT_FILES+=("$file")
+done < <(find "$WORKING_DIR/input" -type f -name '*.ttl.gz' -print0)
+
+if [ "${#INPUT_FILES[@]}" -eq 0 ]; then
+  log "No .ttl.gz input files found in $INPUT_DIR" >&2
+  exit 3
+fi
+log "Found ${#INPUT_FILES[@]} input files in $INPUT_DIR"
 
 # Validate all the input files
-RIOT_LOG="$TMP_DIR/riot.log"
-log "Validating data-files in '$TMP_DIR', details will be reported to $RIOT_LOG"
-if ! "${JENA_DIR}/bin/riot" --validate "$TMP_DIR"/*.gz &>"$RIOT_LOG"; then
-  log "Invalid data-files, refuse to build fuseki-index"
+log "Validating the input-files"
+RIOT_LOG="$WORKING_DIR/riot.log"
+: > "$RIOT_LOG"
+if ! "${JENA_DIR}/bin/riot" --validate "${INPUT_FILES[@]}" &>>"$RIOT_LOG"; then
+  log "Invalid data-files in '$WORKING_DIR/input', refuse to build fuseki-index"
   cat "$RIOT_LOG"
+  trap - EXIT
   exit 3
 fi
 
-# Combine all .gz files into a single .ttl file and then compress it into a single .gz file
-log "Combining all .gz files into a single gz file"
-gunzip -c "$TMP_DIR"/*.gz > "$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl" \
-  || { log "Failed to combine .gz files" >&2; exit 2; }
-gzip -c "$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl" > "$FINAL_COMBINED_FILE" \
-  || { log "Failed to compress combined .ttl file" >&2; exit 2; }
-log "Final combined file created: $FINAL_COMBINED_FILE"
+log "Building base archive from shared data"
+FUSEKI_BASE="$WORKING_DIR/fuseki"
+mkdir -p "$FUSEKI_BASE"
 
-# Load the final combined .ttl.gz file with tdb2.xloader
-log "Starting import of $FINAL_COMBINED_FILE into $DATA_DIR"
-"${JENA_DIR}/bin/tdb2.xloader" --loc "$DATA_DIR" "$FINAL_COMBINED_FILE" \
-  || { log "Import failed for $FINAL_COMBINED_FILE" >&2; exit 2; }
-log "Import complete for $FINAL_COMBINED_FILE"
+INDEXES=()
 
-# Move processed file to the done directory
-mkdir -p "$DONE_DIR"
-log "Moving $FINAL_COMBINED_FILE to $DONE_DIR"
-mv "$FINAL_COMBINED_FILE" "$DONE_DIR/"
+[ -d "$WORKING_DIR/input/${OT_SHARED}" ] || { log "Missing shared input directory"; exit 3; }
+BASE_INDEX="base_${TARGET_ENV}_${RUN_ID}"
+create_fuseki_index "$FUSEKI_BASE/$BASE_INDEX" "$WORKING_DIR/input/${OT_SHARED}"
+compress_fuseki_index "$FUSEKI_BASE" "$BASE_INDEX" "$FUSEKI_INDEX_DIR"
+log "Base-Archive built: $BASE_INDEX ($BASE_INDEX.tar.gz)"
+INDEXES+=("$BASE_INDEX")
 
-# TODO: Execute Warmup-Phase here
-
-# Generate statistics and place in correct location
-log "Generating statistics file for $DATA_DIR"
-TMP_STATS_FILE="/tmp/stats_${CURRENT_DATETIME}.opt"
-"${JENA_DIR}/bin/tdb2.tdbstats" --loc="$DATA_DIR" > "$TMP_STATS_FILE" \
-  || { log "tdb2.tdbstats failed" >&2; exit 2; }
-
-STATS_PIPELINE_DATA_DIR="$DATA_DIR/Data-0001"
-if [ -d "$STATS_PIPELINE_DATA_DIR" ]; then
-    log "Moving stats file to $STATS_PIPELINE_DATA_DIR"
-    mv "$TMP_STATS_FILE" "$STATS_PIPELINE_DATA_DIR/stats.opt" \
-      || { log "Failed to move stats file" >&2; exit 2; }
-    log "Statistics file created: $STATS_PIPELINE_DATA_DIR/stats.opt"
+if [ -d "$WORKING_DIR/input/${OT_PUBLIC}" ]; then
+  log "Building Public Index"
+  PUBLIC_INDEX="${TARGET_ENV}_${RUN_ID}"
+  mv "$FUSEKI_BASE/$BASE_INDEX" "$FUSEKI_BASE/$PUBLIC_INDEX"
+  create_fuseki_index "$FUSEKI_BASE/$PUBLIC_INDEX" "$WORKING_DIR/input/${OT_PUBLIC}"
+  run_data_tests "$FUSEKI_BASE/$PUBLIC_INDEX"
+  compress_fuseki_index "$FUSEKI_BASE" "$PUBLIC_INDEX" "$FUSEKI_INDEX_DIR"
+  rm -rf "${FUSEKI_BASE:?}/$PUBLIC_INDEX"
+  log "Public Index built: $PUBLIC_INDEX ($PUBLIC_INDEX.tar.gz)"
+  INDEXES+=("$PUBLIC_INDEX")
 else
-    log "Target directory $STATS_PIPELINE_DATA_DIR not found, skipping stats.opt move"
-    rm -f "$TMP_STATS_FILE"
+  rm -rf "${FUSEKI_BASE:?}/$BASE_INDEX"
+  log "Missing public input directory, will not create public index"
 fi
 
-# Clean up temporary directory
-log "Cleaning up temporary directory"
-rm -f "$TMP_DIR"/*.gz "$TMP_DIR/${TARGET_ENV}_combined_${CURRENT_DATETIME}.ttl"
+if [ -d "$WORKING_DIR/input/${OT_EMBARGOED}" ]; then
+  log "Building Preview Index with embargoed Data"
+  PREVIEW_INDEX="${OT_EMBARGOED}_${TARGET_ENV}_${RUN_ID}"
+  unpack_fuseki_archive "$FUSEKI_INDEX_DIR/$BASE_INDEX.tar.gz" "$FUSEKI_BASE/$PREVIEW_INDEX"
+  create_fuseki_index "$FUSEKI_BASE/$PREVIEW_INDEX" "$WORKING_DIR/input/${OT_EMBARGOED}"
+  run_data_tests "$FUSEKI_BASE/$PREVIEW_INDEX"
+  compress_fuseki_index "$FUSEKI_BASE" "$PREVIEW_INDEX" "$FUSEKI_INDEX_DIR"
+  log "Preview Index built: $PREVIEW_INDEX ($PREVIEW_INDEX.tar.gz)"
+  INDEXES+=("$PREVIEW_INDEX")
+else
+  log "Missing embargoed input directory, will not create preview/embargoed index"
+fi
 
-# Update 'current' symlink after processing all files
-(
-    log "Updating '${CURRENT}' symlink"
-    cd "$FUSEKI_INDEX_DIR" || { log "Could not cd to $FUSEKI_INDEX_DIR, exit" >&2; exit 2; }
-    [ -L "${CURRENT}" ] && rm -f "${CURRENT}"
-    ln -s "$VERSION" "${CURRENT}"
-    log "$FUSEKI_INDEX_DIR/${CURRENT} -> $FUSEKI_INDEX_DIR/$VERSION"
-)
+log "Copying Archives to Dropzone"
+for a in "${INDEXES[@]}"; do
+  log "Copy $a to $PIPELINE_DATA_DIR"
+  secure_copy "$FUSEKI_INDEX_DIR/$a.tar.gz" "$PIPELINE_DATA_DIR"
+  log "$a copied to $PIPELINE_DATA_DIR"
+done
 
-# Compress the current directory to a tar.gz file
-log "Compressing the current directory to a tar.gz file"
-CURRENT_DIR="${FUSEKI_INDEX_DIR}/${CURRENT}"
-ARCHIVE_FILE_NAME="${TARGET_ENV}_${CURRENT_DATETIME}.tar.gz"
-TAR_FILE="${FUSEKI_INDEX_DIR}/${ARCHIVE_FILE_NAME}"
+if [ -n "${PUBLIC_INDEX:-}" ]; then
+  "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" index-created \
+    --sourceEnv "$(echo "${ENV_NAME}" | tr '[:lower:]' '[:upper:]')" \
+    --targetEnv "$(echo "${TARGET_ENV}" | tr '[:lower:]' '[:upper:]')" \
+    --archive "$PUBLIC_INDEX.tar.gz $PREVIEW_INDEX.tar.gz"
+else
+  log "No public index was created, skipping index-created notification"
+fi
 
-tar -czf "$TAR_FILE" -C "$FUSEKI_INDEX_DIR" "$VERSION" \
-  || { log "Failed to create tar file for $CURRENT_DIR" >&2; exit 2; }
-log "Compressed tar file created: $TAR_FILE"
-
-# Copy the .tar.gz file to the target directory
-log "Copying $TAR_FILE to $PIPELINE_DATA_DIR"
-(
-  mkdir -p "${PIPELINE_DATA_DIR}"
-  cp "$TAR_FILE" "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}.tmp" \
-    && mv "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}.tmp" "${PIPELINE_DATA_DIR}/${ARCHIVE_FILE_NAME}"
-) || { log "Failed to copy $TAR_FILE to $PIPELINE_DATA_DIR" >&2; exit 2; }
-log "File successfully copied to $PIPELINE_DATA_DIR"
-
-"${SCRIPT_HOME:-.}/scripts/teams-notify.sh" index-created \
-  --sourceEnv "$(echo "${ENV_NAME}" | tr '[:lower:]' '[:upper:]')" \
-  --targetEnv "$(echo "${TARGET_ENV}" | tr '[:lower:]' '[:upper:]')" \
-  --archive "$(basename "$TAR_FILE")"
 log "All files processed and import complete"

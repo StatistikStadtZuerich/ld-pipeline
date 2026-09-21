@@ -21,7 +21,7 @@ class TestUtils:
             return f.read()
 
     @staticmethod
-    def gzip_read(file_path, mode="rb"):
+    def gzip_read(file_path, mode="rt", encoding: str | None = None):
         with gzip.open(file_path, mode) as f:
             return f.read()
 
