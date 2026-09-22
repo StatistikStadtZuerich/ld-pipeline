@@ -139,8 +139,9 @@ mkdir -p "$FUSEKI_BASE"
 
 INDEXES=()
 
+INDEX_ID="$(echo "$RUN_ID" | tr -d '-')"
 [ -d "$WORKING_DIR/input/${OT_SHARED}" ] || { log "Missing shared input directory"; exit 3; }
-BASE_INDEX="base_${TARGET_ENV}_${RUN_ID}"
+BASE_INDEX="base_${TARGET_ENV}_${INDEX_ID}"
 create_fuseki_index "$FUSEKI_BASE/$BASE_INDEX" "$WORKING_DIR/input/${OT_SHARED}"
 compress_fuseki_index "$FUSEKI_BASE" "$BASE_INDEX" "$FUSEKI_INDEX_DIR"
 log "Base-Archive built: $BASE_INDEX ($BASE_INDEX.tar.gz)"
@@ -148,7 +149,7 @@ INDEXES+=("$BASE_INDEX")
 
 if [ -d "$WORKING_DIR/input/${OT_PUBLIC}" ]; then
   log "Building Public Index"
-  PUBLIC_INDEX="${TARGET_ENV}_${RUN_ID}"
+  PUBLIC_INDEX="${TARGET_ENV}_${INDEX_ID}"
   mv "$FUSEKI_BASE/$BASE_INDEX" "$FUSEKI_BASE/$PUBLIC_INDEX"
   create_fuseki_index "$FUSEKI_BASE/$PUBLIC_INDEX" "$WORKING_DIR/input/${OT_PUBLIC}"
   run_data_tests "$FUSEKI_BASE/$PUBLIC_INDEX"
@@ -163,7 +164,7 @@ fi
 
 if [ -d "$WORKING_DIR/input/${OT_EMBARGOED}" ]; then
   log "Building Preview Index with embargoed Data"
-  PREVIEW_INDEX="${OT_EMBARGOED}_${TARGET_ENV}_${RUN_ID}"
+  PREVIEW_INDEX="${OT_EMBARGOED}_${TARGET_ENV}_${INDEX_ID}"
   unpack_fuseki_archive "$FUSEKI_INDEX_DIR/$BASE_INDEX.tar.gz" "$FUSEKI_BASE/$PREVIEW_INDEX"
   create_fuseki_index "$FUSEKI_BASE/$PREVIEW_INDEX" "$WORKING_DIR/input/${OT_EMBARGOED}"
   run_data_tests "$FUSEKI_BASE/$PREVIEW_INDEX"
