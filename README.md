@@ -63,6 +63,7 @@ Follow these steps to set up your development environment:
 ### UploadToFuseki Step
 
 - "uploadToFuseki": Uploads all compressed `.gz` files to a configured fuseki server.
+> ℹ️ Info: Currently not used in the pipeline (dead code).
 
 ## Run with docker
 
