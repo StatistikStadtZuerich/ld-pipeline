@@ -24,12 +24,16 @@ load_env "${SCRIPT_HOME}/${ENV_NAME}.env"
 load_env "./.env"
 load_env "./${ENV_NAME}.env"
 
-# Target environment of the fuseki index. It follows the environment the pipeline
-# runs in; the argument and the env-var are operator overrides.
-TARGET_ENV="${TARGET_ENV:-${2:-$ENV_NAME}}"
 DROPZONE_BASE=${DROPZONE_BASE:-/home/lod_pipeline/hdb_dropzone}
 DROPZONE_DIR=${DROPZONE_DIR:-${DROPZONE_BASE%/}/${ENV_NAME_UC}}
 START_SIGNAL_FOLDER="${START_SIGNAL_FOLDER:-${DROPZONE_DIR%/}/Pipeline}"
+JENA_DIR="${JENA_DIR:-/home/lod_pipeline/apache-jena-fuseki-4.9.0/jena}"
+PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-${DROPZONE_DIR%/}/Pipeline_Data}"
+VIEW_OUTPUT_DIR="${VIEW_OUTPUT_DIR:-${SCRIPT_HOME%/}/output/triples/preview}"
+# Container image carrying the trifid CSV cli
+SSZ_VIEW_CSV_IMAGE_TAG="${SSZ_VIEW_CSV_IMAGE_TAG:-latest}"
+SSZ_VIEW_CSV_IMAGE="${SSZ_VIEW_CSV_IMAGE:-cmp-registry.stzh.ch/ssz-lod/ld.stadt-zuerich.ch:${SSZ_VIEW_CSV_IMAGE_TAG}}"
+CSV_OUTPUT_BASE="${CSV_OUTPUT_BASE:-${DROPZONE_DIR%/}/csv}"
 ##############################################
 debug() {
   if [ "${DEBUG:-false}" = "true" ]; then
@@ -66,6 +70,10 @@ flock -xn 1001 || { debug "Could not acquire exclusive lock on '$startSignal'"; 
 # Extract the run-id
 RUN_ID="$(basename "$startSignal" .txt | sed "s/$_start_signal_prefix//")"
 
+CSV_OUTPUT_DIR="${CSV_OUTPUT_DIR:-${CSV_OUTPUT_BASE%/}/${RUN_ID}}"
+
+# Read the view-ids while the start-signal is still in place
+IFS=" " read -r -a VIEW_IDS <<< "$(loadViewIDs "$startSignal")"
 # From now on, a read-lock is sufficient
 flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
 
@@ -82,6 +90,7 @@ Started: $(date -u +%FT%TZ)
   Env: $ENV_NAME
   Branch: $branch
   Git-Rev: $GIT_REV
+  VIEW_IDS: ${VIEW_IDS[*]}
 EOF
 
 function cleanup() {
@@ -94,9 +103,6 @@ function cleanup() {
   exit "$rc"
 }
 trap cleanup EXIT
-
-# Read the view-ids while the start-signal is still in place
-IFS=" " read -r -a VIEW_IDS <<< "$(loadViewIDs "$startSignal")"
 
 # Move start-signal out of the way - also for a signal without view-ids, so a
 # broken signal is not picked up again by the next run.
@@ -133,18 +139,12 @@ NOTIFY_ARGS=(
 )
 "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" fast_view-status --status started --icon "🏎️" --message "Fast-View started" "${NOTIFY_ARGS[@]}"
 
-JENA_DIR="${JENA_DIR:-/home/lod_pipeline/apache-jena-fuseki-4.9.0/jena}"
-FUSEKI_INDEX_DIR="${FUSEKI_INDEX_DIR:-${SCRIPT_HOME%/}/fuseki_index/${ENV_NAME}}"
-TRIPLES_DIR="${TRIPLES_DIR:-${SCRIPT_HOME%/}/output/triples/preview}"
-# Container image carrying the trifid CSV cli
-SSZ_VIEW_CSV_IMAGE="${SSZ_VIEW_CSV_IMAGE:-}" #TODO: Set image path
-CSV_OUTPUT_DIR="${CSV_OUTPUT_DIR:-${SCRIPT_HOME%/}/output/fastview/${RUN_ID}}" #TODO: Correct Output
 
 # Nothing else cleans this folder, so drop leftovers from earlier fast-view runs
 # to make sure only the views of this run end up in the index.
-if [ -d "$TRIPLES_DIR" ]; then
-  debug "Removing leftover triples from $TRIPLES_DIR"
-  find "$TRIPLES_DIR" -maxdepth 1 -type f -name '*.ttl.gz' -delete
+if [ -d "$VIEW_OUTPUT_DIR" ]; then
+  debug "Removing leftover triples from $VIEW_OUTPUT_DIR"
+  find "$VIEW_OUTPUT_DIR" -maxdepth 1 -type f -name '*.ttl.gz' -delete
 fi
 
 (
@@ -162,24 +162,33 @@ fi
 # against - and load the freshly generated view definitions into it.
 ##############################################
 # create_fuseki_index.sh names it embargoed_<target-env>_<run-id>.tar.gz
-BASE_ARCHIVE="$(find "$FUSEKI_INDEX_DIR" -maxdepth 1 -type f -name "embargoed_${TARGET_ENV}_*.tar.gz" | sort -V | tail -1)"
-[ -n "$BASE_ARCHIVE" ] || { echo "No embargoed index archive for target-env '$TARGET_ENV' found in '$FUSEKI_INDEX_DIR'" >&2; exit 4; }
+BASE_ARCHIVE="$(find "$PIPELINE_DATA_DIR" -maxdepth 1 -type f -name "embargoed_${ENV_NAME}_*.tar.gz" | sort -V | tail -1)"
+[ -n "$BASE_ARCHIVE" ] || { echo "No embargoed index archive for env '$ENV_NAME' found in '$PIPELINE_DATA_DIR'" >&2; exit 4; }
 
 # Collect what the pipeline just generated
 TRIPLE_FILES=()
 while IFS= read -r -d '' file; do
   TRIPLE_FILES+=("$file")
-done < <(find "$TRIPLES_DIR" -type f -name '*.ttl.gz' -print0)
+done < <(find "$VIEW_OUTPUT_DIR" -type f -name '*.ttl.gz' -print0)
 if [ "${#TRIPLE_FILES[@]}" -eq 0 ]; then
-  echo "No generated triples found in '$TRIPLES_DIR' for view id(s) ${VIEW_IDS[*]}" >&2
+  echo "No generated triples found in '$VIEW_OUTPUT_DIR' for view id(s) ${VIEW_IDS[*]}" >&2
   exit 5
 fi
-debug "Found ${#TRIPLE_FILES[@]} generated triple file(s) in $TRIPLES_DIR"
+debug "Found ${#TRIPLE_FILES[@]} generated triple file(s) in $VIEW_OUTPUT_DIR"
+
+debug "Validating the generated triple-files"
+RIOT_LOG="$VIEW_OUTPUT_DIR/riot.log"
+: > "$RIOT_LOG"
+if ! "${JENA_DIR}/bin/riot" --validate "${TRIPLE_FILES[@]}" >>"$RIOT_LOG" 2>&1; then
+  debug "Invalid data-files in '$VIEW_OUTPUT_DIR', refuse to build fuseki-index"
+  cat "$RIOT_LOG"
+  exit 7
+fi
 
 # The index is only a scratch artifact for the CSV generation below and is
 # removed by the cleanup trap together with the working directory.
 FUSEKI_WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/fastview_fuseki_${RUN_ID}.XXXX")"
-FAST_VIEW_INDEX_LOC="$FUSEKI_WORK_DIR/fastview_${TARGET_ENV}_${RUN_ID}"
+FAST_VIEW_INDEX_LOC="$FUSEKI_WORK_DIR/fastview_${ENV_NAME}_${RUN_ID}"
 
 debug "Unpacking $(basename "$BASE_ARCHIVE") to $FAST_VIEW_INDEX_LOC"
 mkdir -p "$FAST_VIEW_INDEX_LOC"
@@ -193,8 +202,6 @@ debug "Fast-View index ready at $FAST_VIEW_INDEX_LOC"
 ##############################################
 # Generate one CSV per view. The trifid cli runs from its container image
 ##############################################
-[ -n "$SSZ_VIEW_CSV_IMAGE" ] || { echo "SSZ_VIEW_CSV_IMAGE is not set" >&2; exit 6; }
-
 # Always fetch the current image - the preview should reflect the latest build.
 debug "Pulling $SSZ_VIEW_CSV_IMAGE"
 docker pull "$SSZ_VIEW_CSV_IMAGE"
@@ -203,11 +210,10 @@ mkdir -p "$CSV_OUTPUT_DIR"
 
 debug "Generating CSVs for ${VIEW_IDS[*]} into $CSV_OUTPUT_DIR"
 docker run --rm --network none \
+  --hostname localhost \
   --user "$(id -u):$(id -g)" \
-  -v "$JENA_DIR:/jena:ro" \
   -v "$FAST_VIEW_INDEX_LOC:/index" \
   -v "$CSV_OUTPUT_DIR:/out" \
-  -e TDB2_QUERY_BIN=/jena/bin/tdb2.tdbquery \
   "$SSZ_VIEW_CSV_IMAGE" \
   node /app/src/ssz-views/bin/ssz-view-csv.js \
     --endpoint /index \
