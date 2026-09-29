@@ -25,6 +25,8 @@ SELECT
     CubeIDs,
     RaumFilter,
     DimensionFilterID,
+    Dimension_Level, 
+    Dimension_LevelFilter,
     Datenowner,
     Datenqualitaet
 INTO [{{ 'dbo.pipe_HDBDatenobjekte' | pipe_table_name }}]

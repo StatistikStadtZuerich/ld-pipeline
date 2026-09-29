@@ -89,4 +89,43 @@ LEFT JOIN [dbo].[pipe_HDBGruppenliste_int] g1
    AND g1.Gruppencode = SUBSTRING(cs.identifier_full, 5, 7)
 LEFT JOIN [dbo].[pipe_HDBGruppenliste_int] g2
     ON LEN(cs.identifier_full) >= 19
-   AND g2.Gruppencode = SUBSTRING(cs.identifier_full, 13, 7);
+   AND g2.Gruppencode = SUBSTRING(cs.identifier_full, 13, 7)
+
+UNION ALL
+
+SELECT
+    D.SASA_Job_Output_Id as view_id, 
+    C.Kennzahl as identifier, 
+    CONCAT_WS('_',
+        C.Kennzahl,
+        NULLIF(C.GGH, ''),
+        NULLIF(C.STK, ''),
+        NULLIF(C.BEB, '')
+    ) AS identifier_full,
+    REPLACE(c.CubeIds,'CID_','') AS cube_id,
+    CONCAT_WS(
+        ' / ',
+        K.Kennzahlname,
+        F1.Filtername,
+        F2.Filtername,
+        F3.Filtername
+        ) AS name,
+    CONCAT_WS(
+        ' / ',
+        K.Beschreibung,
+        F1.Filterbeschreibung,
+        F2.Filterbeschreibung,
+        F3.Filterbeschreibung
+            ) AS description
+FROM [dbo].[pipe_HDBCubeKZLookUp_int] C
+LEFT JOIN [dbo].[pipe_HDBDatenobjekte_int] D
+    ON C.id = D.id
+LEFT JOIN [dbo].[pipe_HDBKennzahlen_int] K
+    ON C.Kennzahl = K.KennzahlCode
+LEFT JOIN [dbo].[pipe_HDBFilterGruppe_int] F1
+    ON C.BEB = F1.FilterId
+LEFT JOIN [dbo].[pipe_HDBFilterGruppe_int] F2
+    ON C.GGH = F2.FilterId
+LEFT JOIN [dbo].[pipe_HDBFilterGruppe_int] F3
+    ON C.STK = F3.FilterId
+;

@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBCubeKZLookup' | pipe_table_name }}];
+
+GO
+
+SELECT
+    id,
+    Cubeids,
+    Kennzahl,
+    BEB,
+    GGH, 
+    STK
+INTO [{{ 'dbo.pipe_HDBCubeKZLookup' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBCubeKZLookup' | table_name }}];
