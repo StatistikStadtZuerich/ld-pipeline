@@ -2,8 +2,7 @@
 
 Script zum Prüfen von **Vollständigkeit und korrekter Struktur der GZIP-Output-Files**
 der Pipeline (Testfall TF-12: "ZIP-File auf Vollständigkeit und korrekte Struktur
-prüfen"). Liegt als Anhang auf dieser Confluence-Seite, ist kein Bestandteil des
-`ld-pipeline`-Repos.
+prüfen"). Liegt im `ld-pipeline`-Repo unter `tests/helper_scripts/check_gzip_output.py`.
 
 ---
 
@@ -19,7 +18,7 @@ prüfen"). Liegt als Anhang auf dieser Confluence-Seite, ist kein Bestandteil de
 ## Welchen Ordner prüfen?
 
 Standardmässig `output/int/` (relativ zum Verzeichnis, aus dem das Script
-aufgerufen wird). Dort legt der Pipeline-Schritt `templating_optimized.py`
+aufgerufen wird — darum immer aus dem Repo-Root starten). Dort legt der Pipeline-Schritt `templating_optimized.py`
 (`TemplatingOptimized`/`GroupedTemplatingOptimized`) die `_batchNNN.ttl.gz`-Dateien
 **direkt** ab.
 
@@ -80,28 +79,26 @@ weitermachen.
 
 ---
 
-## Schritt 2: Script einrichten und ausführen
+## Schritt 2: Script ausführen
 
-1. Datei-Anhang dieser Seite herunterladen: `check_gzip_output.py`
-2. In den Root des `ld-pipeline`-Repos kopieren (temporär — kann danach wieder
-   gelöscht werden, ist kein Bestandteil des Projekts)
-
-### Ausführen
+Das Script ist Teil des Repos, es muss nichts heruntergeladen oder kopiert werden.
+Im Terminal im **Repo-Root** von `ld-pipeline` ausführen (nicht im Ordner
+`tests\helper_scripts`, sonst wird `output\int` nicht gefunden):
 
 ```powershell
-python check_gzip_output.py
+python tests\helper_scripts\check_gzip_output.py
 ```
 
 | Befehl | Wirkung |
 |---|---|
-| `python check_gzip_output.py` | Schneller Check: prüft nur den Gzip-Header jeder Datei |
-| `python check_gzip_output.py --deep` | Vollständige Dekompressions-Prüfung — erkennt auch Trunkierung/Korruption mitten in der Datei. Dauert bei grossen/vielen Dateien länger. |
-| `python check_gzip_output.py --verbose` | Zeigt zusätzlich eine Fortschrittszeile pro geprüfter Datei |
-| `python check_gzip_output.py "anderer\pfad"` | Prüft einen anderen Ordner statt `output/int` |
+| `python tests\helper_scripts\check_gzip_output.py` | Schneller Check: prüft nur den Gzip-Header jeder Datei |
+| `python tests\helper_scripts\check_gzip_output.py --deep` | Vollständige Dekompressions-Prüfung — erkennt auch Trunkierung/Korruption mitten in der Datei. Dauert bei grossen/vielen Dateien länger. |
+| `python tests\helper_scripts\check_gzip_output.py --verbose` | Zeigt zusätzlich eine Fortschrittszeile pro geprüfter Datei |
+| `python tests\helper_scripts\check_gzip_output.py "anderer\pfad"` | Prüft einen anderen Ordner statt `output/int` |
 
 Ergebnis speichern (optional, Script schreibt selbst nichts in eine Datei):
 ```powershell
-python check_gzip_output.py > ergebnis.txt
+python tests\helper_scripts\check_gzip_output.py > ergebnis.txt
 ```
 
 ---
@@ -126,7 +123,7 @@ GESAMTERGEBNIS: ✓ PASS
 
 ## Konfiguration anpassen
 
-Am Anfang der Datei, zwei Listen:
+Am Anfang von `tests/helper_scripts/check_gzip_output.py`, zwei Listen:
 
 - **`EXPECTED_TYPES`** — welche Typen vorhanden sein müssen. Aktuell abgestimmt auf
   `notebooks/ld_pipeline.ipynb` (Zelle "4 Generiere die Triple-Dateien"). Ändert sich
@@ -177,7 +174,7 @@ Copy-Item "output\int_broken_test\property_batch001.ttl.gz" "output\int_broken_t
 
 **Prüfen:**
 ```powershell
-python check_gzip_output.py "output\int_broken_test" --deep
+python tests\helper_scripts\check_gzip_output.py "output\int_broken_test" --deep
 ```
 
 **Aufräumen:**

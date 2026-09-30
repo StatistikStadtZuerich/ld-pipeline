@@ -20,31 +20,32 @@ WAS DIESES SCRIPT PRUEFT:
 
 
 AUSFUEHREN (im Repo-Root von ld-pipeline, damit der Standardpfad "output/int" passt):
-    python check_gzip_output.py                  # schneller Check (nur Gzip-Header)
-    python check_gzip_output.py --deep            # liest jede Datei komplett durch
-                                                   # (erkennt auch abgeschnittene/
-                                                   # korrupte Dateien, dauert laenger)
-    python check_gzip_output.py --verbose         # zusaetzlich 1 Zeile pro Datei
-    python check_gzip_output.py <anderer_pfad>    # statt output/int einen anderen
-                                                   # Ordner pruefen
+    python tests/helper_scripts/check_gzip_output.py                # schneller Check (nur Gzip-Header)
+    python tests/helper_scripts/check_gzip_output.py --deep         # liest jede Datei komplett durch
+                                                                    # (erkennt auch abgeschnittene/
+                                                                    # korrupte Dateien, dauert laenger)
+    python tests/helper_scripts/check_gzip_output.py --verbose      # zusaetzlich 1 Zeile pro Datei
+    python tests/helper_scripts/check_gzip_output.py <anderer_pfad> # statt output/int einen anderen
+                                                                    # Ordner pruefen
 """
 
+import contextlib
 import gzip
 import os
 import re
 import sys
+import zlib
 from collections import defaultdict
 
 # Windows-Konsolen zeigen standardmaessig oft noch das alte cp1252-Encoding an statt
 # UTF-8. Ohne diese Zeile wuerde print() mit einem UnicodeEncodeError abstuerzen,
 # sobald wir die Haekchen-/Kreuz-Symbole (u2713 / u2717) ausgeben wollen.
-try:
+# Falls stdout kein reconfigure() unterstuetzt (AttributeError, z.B. wenn stdout
+# durch ein anderes Objekt ersetzt wurde) oder das Encoding nicht mehr geaendert
+# werden kann (ValueError / io.UnsupportedOperation), einfach weitermachen.
+# Im schlimmsten Fall werden dann eben keine huebschen Symbole angezeigt.
+with contextlib.suppress(AttributeError, ValueError):
     sys.stdout.reconfigure(encoding="utf-8")
-except Exception:
-    # Falls stdout aus irgendeinem Grund kein reconfigure() unterstuetzt
-    # (z.B. wenn die Ausgabe in eine Pipe umgeleitet wird), einfach weitermachen.
-    # Im schlimmsten Fall werden dann eben keine huebschen Symbole angezeigt.
-    pass
 
 # Standardordner: "output/int" relativ zum Verzeichnis, aus dem das Script gestartet
 # wird (nicht relativ zum Speicherort der Datei selbst!). Das Script laeuft normal
@@ -103,9 +104,9 @@ if _USE_COLOR and sys.platform == "win32":
         import ctypes
         kernel32 = ctypes.windll.kernel32
         kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
-    except Exception:
-        # Falls das aus irgendeinem Grund fehlschlaegt (z.B. altes Windows,
-        # eingeschraenkte Rechte): einfach ohne Farbe weitermachen statt abzustuerzen.
+    except (AttributeError, OSError):
+        # Falls das fehlschlaegt (z.B. altes Windows, eingeschraenkte Rechte):
+        # einfach ohne Farbe weitermachen statt abzustuerzen.
         _USE_COLOR = False
 
 
@@ -156,12 +157,13 @@ def check_gzip_content(path: str, chunk_size: int = 8 * 1024 * 1024) -> tuple[bo
             return False, "entpackter Inhalt ist leer"
         return True, ""
 
-    except Exception as e:
-        # gzip.open()/read() wirft z.B. gzip.BadGzipFile oder EOFError, wenn die
-        # Datei abgeschnitten oder anderweitig korrupt ist. Wir fangen hier
-        # bewusst alle Exceptions ab, damit ein einzelner kaputter Fund den
-        # gesamten Testlauf nicht abbrechen laesst - der Fehler wird stattdessen
-        # als Text zurueckgegeben und im Bericht angezeigt.
+    except (OSError, EOFError, zlib.error) as e:
+        # gzip.open()/read() wirft gzip.BadGzipFile (Unterklasse von OSError),
+        # EOFError (Datei abgeschnitten) oder zlib.error (korrupte Daten).
+        # OSError deckt zusaetzlich Lesefehler wie fehlende Rechte ab. Damit
+        # bricht ein einzelner kaputter Fund nicht den gesamten Testlauf ab -
+        # der Fehler wird stattdessen als Text zurueckgegeben und im Bericht
+        # angezeigt.
         return False, str(e)
 
 
@@ -392,8 +394,8 @@ def check_gzip_output(
     }
 
 
-# Dieser Block laeuft nur, wenn die Datei direkt per "python check_gzip_output.py"
-# gestartet wird (nicht, wenn sie aus einem anderen Skript importiert wird).
+# Dieser Block laeuft nur, wenn die Datei direkt per
+# "python tests/helper_scripts/check_gzip_output.py" gestartet wird (nicht, wenn sie aus einem anderen Skript importiert wird).
 if __name__ == "__main__":
     command_line_args = sys.argv[1:]  # sys.argv[0] ist der Skriptname selbst, daher ab Index 1
 
