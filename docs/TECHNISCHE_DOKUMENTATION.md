@@ -1,6 +1,6 @@
 # Technische Dokumentation – LD Pipeline (ssz-lod)
 
-> Stand: Juni 2026 · Zielgruppe: Entwickler:innen
+> Stand: September 2026 · Zielgruppe: Entwickler:innen
 > Repository: `LD-pipeline` (gespiegelt auf [GitHub](https://github.com/StatistikStadtZuerich/ld-pipeline))
 
 Diese Dokumentation beschreibt Aufbau, Technologie und Nutzen der LD Pipeline sowie das
@@ -88,6 +88,7 @@ Kompressions-Engine für die jeweilige Umgebung (`test`, `local`, `int`, `prod`,
 ssz-lod-pipeline/
 ├── main.py                  # Typer-CLI: Step-Definitionen + Befehle (run / step / list-step-names)
 ├── run_pipeline.py          # Orchestrierung des Voll-Laufs inkl. Batching & Signale
+├── run_fast_view.py         # Erzeugt einzelne LD-View(s) ohne vollen Pipeline-Lauf ("Fast-View")
 ├── config.ini               # Konfiguration je Umgebung
 ├── pipeline/
 │   ├── pipeline.py          # Pipeline-Runner (run / step / execute)
@@ -111,6 +112,13 @@ ssz-lod-pipeline/
 │   └── view_definition/     #   DB-Views, die die Templates speisen
 ├── static/static.ttl        # Statische Triples (Vokabular/Präfixe/Organisation)
 ├── scripts/                 # Fuseki-Index-Skripte, Teams-Notify
+│   ├── create_start_signal.sh  #   Legt manuell ein Start_pipeline_*.txt-Signal an
+│   ├── teams-notify.sh         #   Sendet Teams-Webhook-Benachrichtigungen
+│   └── msteams/*.json          #   Nachrichten-Vorlagen (pipeline-status, pipeline-error, index-created)
+├── create_fuseki_index.sh   # Baut Fuseki-Index aus den Output-Dateien
+├── run_fuseki_index.sh      # Signal-Wächter: erkennt Start-Signal und ruft create_fuseki_index.sh
+├── run_pipeline.sh          # Signal-Wächter für den geplanten Betrieb (Cron/Timer): Git-Update, run_pipeline.py, Teams-Notify
+├── cleanup.sh               # Räumt alte Signal-/Log-/Index-Dateien auf (Cron)
 └── tests/                   # unit/ + integration/
 ```
 
@@ -129,10 +137,12 @@ Der vollständige Lauf (`run_pipeline.py`) verläuft in vier Phasen:
    - Metadaten-Triples: `code`, `cube`, `groupCode`, `groupTermset`, `hierarchy`,
      `measureUnit`, `measure`, `property`, `room`, `time`, `timeRelation`,
      `timeTermset`, `dimensionTermset` (jeweils `…Templating`).
-   - Beobachtungen: `observationTemplating` (Massendaten).
+   - Beobachtungen: `observationTemplating` (Massendaten) sowie `embargoedObservationTemplating`
+     (Beobachtungen innerhalb der Sperrfrist).
    - Sonstiges: `copyStatic`, `buildInfo`, `buildTermsetHierarchy`, `generateViews`.
    - Jeder Step liest aus einem View, rendert je Zeile ein Jinja-Template und schreibt
-     `.ttl`-Dateien (im optimierten Modus direkt gezippte `.ttl.gz`-Batches).
+     `.ttl`-Dateien (im optimierten Modus direkt gezippte `.ttl.gz`-Batches). Jeder Step
+     ist einem `OutputType` zugeordnet (`shared`, `public`, `embargoed`, `preview`) und schreibt sein Ergebnis in das gleichnamige Unterverzeichnis von `template_output_path` (s. Abschnitt 5).
 
 3. **Index-Signal**
    - `Utils.set_start_signal_fuseki_index(...)` schreibt eine Signaldatei. Ein separates
@@ -151,9 +161,9 @@ run_pipeline.py
 │       └─ createViewsFromSQL  ──►  view_*-Views (DB-Sichten)
 │
 ├─ Phase 2 · Triple-Erzeugung   (liest view_*, rendert Jinja-Templates)
-│     …Templating · observationTemplating · generateViews
-│     copyStatic · buildInfo · buildTermsetHierarchy
-│       └──►  *.ttl.gz  (in output_path; inkl. static.ttl, info.ttl, view.*.ttl)
+│     …Templating · observationTemplating · embargoedObservationTemplating
+│     generateViews · copyStatic · buildInfo · buildTermsetHierarchy
+│       └──►  *.ttl.gz  je OutputType-Unterordner (in output_path/{shared,public,embargoed,preview}/…; inkl. static.ttl, info.ttl, view.*.ttl)
 │
 ├─ Phase 3 · Index-Signal
 │     Utils.set_start_signal_fuseki_index()  ──►  start_fuseki_index_*.txt
@@ -166,6 +176,9 @@ run_pipeline.py
 
 run_fuseki_index.sh  ──(findet Signal)──►  create_fuseki_index.sh
       riot --validate  →  tdb2.xloader (Offline-Index-Bau)
+        ├─ + public/   ──► Public-Index (öffentlicher Fuseki-Datensatz)
+        └─ + embargoed/ ──► Preview-Index (Public-Index + gesperrte Daten, für Vorschau)
+      Indizes werden als .tar.gz in den Dropzone-Ordner kopiert; Teams-Benachrichtigung bei Erfolg/Fehler
                                           │
                                           ▼
                        Apache Jena Fuseki  ──►  ld.stadt-zuerich.ch (Linked Open Data)
@@ -175,6 +188,17 @@ run_fuseki_index.sh  ──(findet Signal)──►  create_fuseki_index.sh
 > schreibt nur die Signaldatei (Phase 3); das extern getaktete `run_fuseki_index.sh`
 > erkennt sie und ruft `create_fuseki_index.sh` auf, das den Index per Jena `tdb2.xloader`
 > offline baut (kein HTTP-Upload).
+> `create_fuseki_index.sh` baut dabei **zwei Indizes**: einen öffentlichen aus
+> `shared/` + `public/` und einen zweiten „Preview“-Index, der zusätzlich die
+> `embargoed/`-Daten enthält (Beobachtungen innerhalb der Sperrfrist). Beide werden als
+> `.tar.gz`-Archiv in den Dropzone-Ordner kopiert, von wo sie auf den Fuseki-Server
+> gespielt werden.
+>
+> **Fast-View:** Für schnelle Einzelfälle steht mit `run_fast_view.py` ein separater
+> Einstiegspunkt zur Verfügung, der ohne `initPipeTables`, ohne öffentlichen
+> Fuseki-Index-Neubau und ohne Rückschreiben des Publikationsstatus auskommt und nur
+> `createViewsFromSQL` + `generateViews` für eine gezielt ausgewählte LD-View (oder
+> mehrere) ausführt. Das Ergebnis wird in den `preview`-Ordner geschrieben (s. Abschnitt 11).
 
 ---
 
@@ -203,7 +227,7 @@ Zentrale Factory und Namens-Logik je Umgebung:
 - `get_template_engine(template, output)` → `JinjaTemplateEngine`.
 - `get_compression_engine()` → `GzipEngine`.
 - **Namens-Helfer** (wichtig für Mehr-Umgebungs-Betrieb):
-  - `table_name(name)` – hängt z.B. `_FINAL`/`_TEST`-Suffix an HDB-Tabellen an.
+  - `table_name(name)` – hängt z.B. `_FINAL`/`_TEST`-Suffix an die HDB-Tabellen `HDB`/`HDBDatenobjekte` an.
   - `pipe_table_name(name)` – hängt den Umgebungsnamen an (`pipe_HDB_int`).
   - `view_name(name)` – in `prod`/`dev` unverändert, sonst `…_<env>` (`view_code_int`).
 
@@ -211,6 +235,9 @@ Zentrale Factory und Namens-Logik je Umgebung:
 > im Zuge von
 > [Issue #467](https://cmp-sdlc.stzh.ch/OE-7035/ssz-taskmanagement/team-projekte/ld-2025/-/issues/467)
 > angepasst – dieser Abschnitt ist entsprechend nachzuführen.
+
+### `OutputType` (`pipeline/steps/templating.py`)
+`StrEnum` mit den Werten `shared`, `public`, `embargoed`, `preview`. Jeder Templating-/Copy-/View-Step bekommt einen `OutputType` mitgegeben und schreibt sein Ergebnis in das gleichnamige Unterverzeichnis von `template_output_path` (bzw. `output_path` bei `Copy`). Das trennt öffentliche (`public`), immer benötigte (`shared`, z.B. `static.ttl`, `info.ttl`, Codes/Termsets), gesperrte (`embargoed`, Beobachtungen innerhalb der Sperrfrist) und einzeln nachgezogene Vorschau-Daten (`preview`) bereits im Dateisystem, bevor `create_fuseki_index.sh` daraus die Fuseki-Indizes baut.
 
 ### `Config` & `Env` (`pipeline/base/config.py`)
 - `Env`: Enum der Umgebungen (`test`, `local`, `int`, `prod`, `dev`).
@@ -252,6 +279,7 @@ Aktuelle Liste lässt sich jederzeit per `python main.py list-step-names` ausgeb
 | `measureUnitTemplating` | `Templating`* | Maßeinheiten aus `view_measure_unit`. |
 | `measureTemplating` | `Templating`* | Kennzahlen/Measures aus `view_measure`. |
 | `observationTemplating` | `Templating`* | **Beobachtungen** (Massendaten) aus `view_observation`. |
+| `embargoedObservationTemplating` | `Templating`* | Beobachtungen innerhalb der Sperrfrist aus view_observation_embargoed`. |
 | `propertyTemplating` | `Templating`* | Properties aus `view_property`. |
 | `roomTemplating` | `Templating`* | Raum-Codes aus `view_room`. |
 | `timeTemplating` | `Templating`* | Zeit-Codes aus `view_time`. |
@@ -265,15 +293,19 @@ Aktuelle Liste lässt sich jederzeit per `python main.py list-step-names` ausgeb
 | `buildTermsetHierarchy` | `BuildTermsetHierarchy` | Raum-Hierarchie-Relationen aus `view_room_hierarchy`. |
 | `writePublicationStatiToHDB` | `WritePublicationStatiToHDB` | Schreibt Publikationsstatus zurück in die HDB. |
 
-\* Die `…Templating`-Steps werden über die Factory **`create_templating(env, …)`**
+\* Die `…Templating`-Steps werden über die Factory **`create_templating(env, …, output_type, …)`**
 (`pipeline/steps/optimized.py`) erzeugt. Sie wählt zur Laufzeit die Implementierung:
 - `GroupedTemplatingOptimized`, falls `options["grouped"]` gesetzt ist,
 - `TemplatingOptimized`, falls `optimized=true` (in `int`/`prod`),
 - ansonsten das einfache `Templating`.
 
+> Der `output_type`-Parameter (`OutputType`, s. Abschnitt 5) ist seit Einführung des
+> Embargo-Konzepts **Pflichtparameter** von `create_templating(...)` und muss beim Anlegen
+> eines neuen Templating-Steps immer mitgeben werden (s. Abschnitt 13.2).
+
 ### Wichtige Step-Implementierungen
 
-**`Copy` / `BuildInfo`** (`steps/copy.py`, `steps/buildInfo.py`)
+**`Copy` / `BuildInfo`** (`steps/copy.py`, `steps/build_info.py`)
 Kopiert eine Quelldatei ins Output-Verzeichnis und erzeugt eine gzip-Variante. `BuildInfo`
 schreibt zuvor dynamisch eine temporäre `info.ttl` mit aktuellem UTC-Zeitstempel.
 
@@ -300,8 +332,11 @@ Beide erben von `BaseSQLStep`. Sie lesen SQL-Dateien (`.sql` oder gerenderte `.s
 aus konfigurierten Ordnern, splitten an `GO`-Batchgrenzen und führen sie gegen die DB aus.
 
 **`ViewsStep`** (`steps/views.py`)
-Baut über `LdViewBuilder` alle LD-Views, serialisiert sie nach `ldviews/view.<id>.ttl`
-und packt sie in eine einzige gezippte Datei `<env>_ldview_<ts>_<uuid>.ttl.gz`.
+Baut über `LdViewBuilder` die LD-Views und lässt sie vom `LdViewSerializer` je View als
+eigene gzip-Datei `ldview_<id>.ttl.gz` schreiben (s. Abschnitt 9). Ohne `options["view_ids"]`
+(normaler Pipeline-Lauf) landen alle Views unter `OutputType.SHARED`; ist `view_ids`
+gesetzt (Fast-View, s. `run_fast_view.py`), wird stattdessen nur in `OutputType.PREVIEW`
+geschrieben.
 
 **`WritePublicationStatiToHDB`** (`steps/write_publication_stati_to_hdb.py`)
 Berechnet MD5-Hashes über alle Spalten von `pipe_HDB`, vergleicht sie und setzt für
@@ -355,7 +390,7 @@ sql/
 
 Die Jinja-SQL-Filter werden in `BaseSQLStep._init_jinja_env()` registriert:
 - `pipe_table_name` → `pipe_HDB` ⇒ `pipe_HDB_int` usw.
-- `table_name` → HDB-Tabellen mit `_FINAL`/`_TEST`-Suffix.
+- `table_name` → für die Tabellen `HDB`/`HDBDatenobjekte` mit `_FINAL`/`_TEST`-Suffix
 - `view_name` → Views mit Umgebungssuffix (außer `prod`/`dev`).
 
 > ℹ️ **Hinweis:** Diese Namens-/Suffix-Logik wird im Zuge von
@@ -389,7 +424,7 @@ auf die Cubes nach dem [cube.link View](https://cube.link/)-Standard.
   `Source`, `Attribute`, `Filter`, `FilterOperation`, `ViewMetadata`.
 - **`ld_view_builder.py`** – `LdViewBuilder.build_all()` liest die `view_vb_*`-Views
   (`view_vb_view`, `view_vb_source`, `view_vb_dimension`, `view_vb_filter`,
-  `view_vb_measure`, `view_vb_room_hierarchy`) und baut daraus `View`-Objekte:
+  `view_vb_measure`, `view_vb_room_hierarchy`, `view_dimension_hierarchy`) und baut daraus `View`-Objekte:
   statische Dimensionen (`ZEIT`, `RAUM`, optional `DATENSTATUS`), Lookup-Dimensionen
   (`_LANG`/`_CODE`/`_SORT`), Filter, Measures und Hierarchien. Ergebnisse werden je View
   gecacht.
@@ -457,6 +492,17 @@ Hinweise:
 python run_pipeline.py --env int --targetEnv int --runId $(date +%Y%m%d_%H%M%S)
 ```
 
+**Fast-View (einzelne LD-View ohne vollen Lauf)**
+
+```bash
+python run_fast_view.py --env int --view-ids BEV411OD411A,WIR400OD100B
+```
+
+Aktualisiert nur die `view_vb_*`-DB-Views (`createViewsFromSQL`) und erzeugt die
+angegebene(n) LD-View(s) neu – ohne `initPipeTables`, ohne Fuseki-Index-Neubau und ohne
+Rückschreiben des Publikationsstatus. Das Ergebnis landet im `preview`-Unterordner von
+`template_output_path`.
+
 **Docker**
 
 ```bash
@@ -472,8 +518,9 @@ docker run --mount type=bind,source="$(pwd)"/tmp,target=/out \
 **Fuseki-Index**
 
 Die Skripte `create_fuseki_index.sh` / `run_fuseki_index.sh` bauen aus den erzeugten
-`.gz`-Dateien einen neuen Jena-Fuseki-Index auf (gesteuert über Signaldateien aus
-`run_pipeline.py`). `run_pipeline.sh` ist der Signal-Wächter für den geplanten Betrieb.
+`.gz`-Dateien aus den `OutputType`-Unterordnern (`shared`, `public`, `embargoed`) neue Jena-Fuseki-Indizes auf: einen Basis-/Public-Index aus `shared` + `public` sowie – falls `embargoed`-Daten vorhanden sind – einen zusätzlichen Preview-Index, der den Public-Index um die gesperrten Beobachtungen erweitert.
+`run_fuseki_index.sh` ist der Signal-Wächter, der ein von `run_pipeline.py` geschriebenes Start-Signal erkennt und `create_fuseki_index.sh` aufruft.
+`run_pipeline.sh` ist der Signal-Wächter für den geplanten Pipeline-Betrieb (Cron/Timer).
 
 ---
 
@@ -593,6 +640,7 @@ Artefakte nötig:
                "my_type.ttl.jinja",  # Template
                "my_type.ttl",  # Ausgabedatei
                "view_my_type",  # Quell-View
+               output_type=OutputType.SHARED,  # Pflicht: shared/public/embargoed/preview
                options=options,
            ),
            "Creates triples from view_my_type with the my_type.ttl template",
@@ -600,6 +648,8 @@ Artefakte nötig:
    )
    ```
 
+   - `output_type` bestimmt das Zielunterverzeichnis und damit, in welchen Fuseki-Index die Daten später einfließen. 
+   Für öffentlich lesbare Stammdaten in der Regel `OutputType.SHARED`; für Massendaten mit Veröffentlichungsstatus analog zu `observation`/`embargoedObservation` ggf. `OutputType.PUBLIC`/`OutputType.EMBARGOED`.
    - Für gruppierte Ausgaben (mehrere Zeilen → ein Triple-Block):
      `options={**options, "grouped": True, "group_by": "<spalte>"}` setzen und ein
      Template schreiben, das über `rows` iteriert (vgl. `time_termset.ttl.jinja`).
@@ -645,7 +695,7 @@ Um einem bestehenden Datentyp zusätzliche Aussagen hinzuzufügen:
    Ordner, sortiert).
 2. **View-Template** in `sql/templates/view_definition/` anlegen (siehe 13.2).
 3. **Gerenderte SQL für `int` und `prod` committen** (analog 13.2, Test `test_pipe_tables`):
-   `sql/int/pipe_tables/<name>.sql` und `sql/prod/pipe_tables/<name>.sql`. Dateiname meist
+   `sql/int/pipe_tables/<name>.sql` und `sql/prod/pipe_tables/<name>.sql`. Dateiname 
    identisch zum Template-Basisnamen, bei `pipe_HDB`/`pipe_HDBDatenobjekte` mit Suffix
    (`…_TEST.sql` für `int`, `…_FINAL.sql` für `prod`).
 4. Lauf `initPipeTables` → `createViewsFromSQL` ausführen, dann den Templating-Step.
@@ -673,6 +723,9 @@ Um einem bestehenden Datentyp zusätzliche Aussagen hinzuzufügen:
 | **Fuseki** | Apache Jena Fuseki, der eingesetzte RDF-Triplestore. |
 | **Step** | Atomarer Pipeline-Verarbeitungsschritt (`Step.run`). |
 | **optimized** | Batch-/gzip-optimierter Verarbeitungsmodus für große Datenmengen. |
+| **OutputType** | `shared`/`public`/`embargoed`/`preview` – bestimmt das Ausgabe-Unterverzeichnis eines Steps und damit, in welchen Fuseki-Index die Daten einfließen. |
+| **Sperrfrist / Embargo** | Zeitraum, in dem eine Beobachtung noch nicht öffentlich, aber bereits zur Vorschau verfügbar ist (`embargoedObservationTemplating`, `OutputType.EMBARGOED`). |
+| **Fast-View** | Einzelner, isolierter LD-View-Lauf über `run_fast_view.py` ohne vollständigen Pipeline-Durchlauf; Ergebnis landet im `preview`-Ordner. |
 
 ---
 
