@@ -27,20 +27,21 @@ function log() {
 }
 function create_fuseki_index() {
     local index_dir="${1:?}"
-    local ttl_source_dir="${2:?}"
+    shift
+    local ttl_source_dirs=("${@}")
 
     index_dir="${index_dir%/}"
 
     if [ -d "$index_dir/Data-0001" ]; then
       log "Data-0001 found in $index_dir, using incremental load"
-      find "$ttl_source_dir" -type f -name '*.ttl.gz' -print0 \
+      find "${ttl_source_dirs[@]}" -type f -name '*.ttl.gz' -print0 \
         | xargs -r -0 "${JENA_DIR}/bin/tdb2.tdbloader" --loc "$index_dir" --loader phased \
-        || { log "tdb2.tdbloader failed to load $ttl_source_dir into $index_dir data" >&2; return 2; }
+        || { log "tdb2.tdbloader failed to load ${#ttl_source_dirs[@]} dirs (${ttl_source_dirs[*]}) into $index_dir data" >&2; return 2; }
     else
       log "$index_dir seems empty, using xloader"
-      find "$ttl_source_dir" -type f -name '*.ttl.gz' -print0 \
+      find "${ttl_source_dirs[@]}" -type f -name '*.ttl.gz' -print0 \
         | xargs -r -0 "${JENA_DIR}/bin/tdb2.xloader" --loc "$index_dir" \
-        || { log "tdb2.xloader failed to create $index_dir from $ttl_source_dir" >&2; return 2; }
+        || { log "tdb2.xloader failed to create $index_dir from ${#ttl_source_dirs[@]} dirs (${ttl_source_dirs[*]})" >&2; return 2; }
     fi
 
     log "loading complete, generating stats"
@@ -141,34 +142,27 @@ INDEXES=()
 
 INDEX_ID="$(echo "$RUN_ID" | tr -d '-')"
 [ -d "$WORKING_DIR/input/${OT_SHARED}" ] || { log "Missing shared input directory"; exit 3; }
-BASE_INDEX="base_${TARGET_ENV}_${INDEX_ID}"
-create_fuseki_index "$FUSEKI_BASE/$BASE_INDEX" "$WORKING_DIR/input/${OT_SHARED}"
-compress_fuseki_index "$FUSEKI_BASE" "$BASE_INDEX" "$FUSEKI_INDEX_DIR"
-log "Base-Archive built: $BASE_INDEX ($BASE_INDEX.tar.gz)"
-INDEXES+=("$BASE_INDEX")
 
 if [ -d "$WORKING_DIR/input/${OT_PUBLIC}" ]; then
   log "Building Public Index"
   PUBLIC_INDEX="${TARGET_ENV}_${INDEX_ID}"
-  mv "$FUSEKI_BASE/$BASE_INDEX" "$FUSEKI_BASE/$PUBLIC_INDEX"
-  create_fuseki_index "$FUSEKI_BASE/$PUBLIC_INDEX" "$WORKING_DIR/input/${OT_PUBLIC}"
+  create_fuseki_index "$FUSEKI_BASE/$PUBLIC_INDEX" "$WORKING_DIR/input/${OT_SHARED}" "$WORKING_DIR/input/${OT_PUBLIC}"
   run_data_tests "$FUSEKI_BASE/$PUBLIC_INDEX"
   compress_fuseki_index "$FUSEKI_BASE" "$PUBLIC_INDEX" "$FUSEKI_INDEX_DIR"
   rm -rf "${FUSEKI_BASE:?}/$PUBLIC_INDEX"
   log "Public Index built: $PUBLIC_INDEX ($PUBLIC_INDEX.tar.gz)"
   INDEXES+=("$PUBLIC_INDEX")
 else
-  rm -rf "${FUSEKI_BASE:?}/$BASE_INDEX"
   log "Missing public input directory, will not create public index"
 fi
 
 if [ -d "$WORKING_DIR/input/${OT_EMBARGOED}" ]; then
   log "Building Preview Index with embargoed Data"
   PREVIEW_INDEX="${OT_EMBARGOED}_${TARGET_ENV}_${INDEX_ID}"
-  unpack_fuseki_archive "$FUSEKI_INDEX_DIR/$BASE_INDEX.tar.gz" "$FUSEKI_BASE/$PREVIEW_INDEX"
-  create_fuseki_index "$FUSEKI_BASE/$PREVIEW_INDEX" "$WORKING_DIR/input/${OT_EMBARGOED}"
+  create_fuseki_index "$FUSEKI_BASE/$PREVIEW_INDEX" "$WORKING_DIR/input/${OT_SHARED}" "$WORKING_DIR/input/${OT_EMBARGOED}"
   run_data_tests "$FUSEKI_BASE/$PREVIEW_INDEX"
   compress_fuseki_index "$FUSEKI_BASE" "$PREVIEW_INDEX" "$FUSEKI_INDEX_DIR"
+  rm -rf "${FUSEKI_BASE:?}/$PREVIEW_INDEX"
   log "Preview Index built: $PREVIEW_INDEX ($PREVIEW_INDEX.tar.gz)"
   INDEXES+=("$PREVIEW_INDEX")
 else
