@@ -47,12 +47,19 @@ class InitPipeTables(BaseSQLStep):
 
                         self.logger.info(f"Executing {table.name}...")
 
-                        for stmt in statements:
-                            cursor.execute(stmt)
+                        for i, stmt in statements:
+                            try:
+                                cursor.execute(stmt)
+                            except Exception:
+                                self.logger.error(
+                                    f"Statement {i}/{len(statements)} failed in {table.name}:\n{stmt}"
+                                )
+                                raise
 
                         self.logger.info("Done")
 
                 connection.commit()
             except Exception:
+                self.logger.exception(f"Failed while executing {table.name}")
                 connection.rollback()
                 raise
