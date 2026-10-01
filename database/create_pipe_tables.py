@@ -47,7 +47,7 @@ class InitPipeTables(BaseSQLStep):
 
                         self.logger.info(f"Executing {table.name}...")
 
-                        for i, stmt in statements:
+                        for i, stmt in enumerate(statements, start=1):
                             try:
                                 cursor.execute(stmt)
                             except Exception:
