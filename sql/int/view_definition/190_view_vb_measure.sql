@@ -122,10 +122,10 @@ LEFT JOIN [dbo].[pipe_HDBDatenobjekte_int] D
     ON C.id = D.id
 LEFT JOIN [dbo].[pipe_HDBKennzahlen_int] K
     ON C.Kennzahl = K.KennzahlCode
-LEFT JOIN [dbo].[pipe_HDBFilterGruppe_int] F1
+LEFT JOIN [dbo].[pipe_HDBFilter_int] F1
     ON C.BEB = F1.FilterId
-LEFT JOIN [dbo].[pipe_HDBFilterGruppe_int] F2
+LEFT JOIN [dbo].[pipe_HDBFilter_int] F2
     ON C.GGH = F2.FilterId
-LEFT JOIN [dbo].[pipe_HDBFilterGruppe_int] F3
+LEFT JOIN [dbo].[pipe_HDBFilter_int] F3
     ON C.STK = F3.FilterId
 ;
