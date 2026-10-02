@@ -112,12 +112,13 @@ ssz-lod-pipeline/
 │   └── view_definition/     #   DB-Views, die die Templates speisen
 ├── static/static.ttl        # Statische Triples (Vokabular/Präfixe/Organisation)
 ├── scripts/                 # Fuseki-Index-Skripte, Teams-Notify
-│   ├── create_start_signal.sh  #   Legt manuell ein Start_pipeline_*.txt-Signal an
+│   ├── create_start_signal.sh  #   Legt manuell ein Start_pipeline_*- oder Start_fastview_*-Signal an
 │   ├── teams-notify.sh         #   Sendet Teams-Webhook-Benachrichtigungen
 │   └── msteams/*.json          #   Nachrichten-Vorlagen (pipeline-status, pipeline-error, index-created)
 ├── create_fuseki_index.sh   # Baut Fuseki-Index aus den Output-Dateien
 ├── run_fuseki_index.sh      # Signal-Wächter: erkennt Start-Signal und ruft create_fuseki_index.sh
 ├── run_pipeline.sh          # Signal-Wächter für den geplanten Betrieb (Cron/Timer): Git-Update, run_pipeline.py, Teams-Notify
+├── run_fast_view.sh         # Signal-Wächter Fast-View: run_fast_view.py + CSV-Erzeugung aus Preview-Index
 ├── cleanup.sh               # Räumt alte Signal-/Log-/Index-Dateien auf (Cron)
 └── tests/                   # unit/ + integration/
 ```
@@ -199,6 +200,13 @@ run_fuseki_index.sh  ──(findet Signal)──►  create_fuseki_index.sh
 > Fuseki-Index-Neubau und ohne Rückschreiben des Publikationsstatus auskommt und nur
 > `createViewsFromSQL` + `generateViews` für eine gezielt ausgewählte LD-View (oder
 > mehrere) ausführt. Das Ergebnis wird in den `preview`-Ordner geschrieben (s. Abschnitt 11).
+>
+> Darauf setzt der Signal-Wächter `run_fast_view.sh` auf: Er erkennt ein
+> `Start_fastview_*`-Signal, ruft `run_fast_view.py` auf und lädt das jüngste
+> `embargoed`-Archiv der Dropzone zusammen mit den frisch geschriebenen
+> `preview`-Triples in einen temporären TDB2-Index, aus dem je View eine CSV erzeugt
+> wird. Dieser Index ist ein reines Zwischenergebnis und wird nicht in die Dropzone
+> kopiert (s. Abschnitt 11).
 
 ---
 
@@ -503,6 +511,33 @@ angegebene(n) LD-View(s) neu – ohne `initPipeTables`, ohne Fuseki-Index-Neubau
 Rückschreiben des Publikationsstatus. Das Ergebnis landet im `preview`-Unterordner von
 `template_output_path`.
 
+**Fast-View über Signaldatei (`run_fast_view.sh`)**
+
+```bash
+scripts/create_start_signal.sh --view BEV411OD411A --view WIR400OD100B
+```
+
+Legt ein `Start_fastview_*.txt`-Signal an, das die View-IDs als Inhalt trägt. Werden
+View-IDs übergeben, ignoriert `create_start_signal.sh` die übrigen Optionen und erzeugt
+ausschließlich dieses Signal. Der extern getaktete Wächter `run_fast_view.sh` erkennt es
+und führt nacheinander aus:
+
+1. `run_fast_view.py` für die übergebenen View-IDs – Ergebnis als `ldview_*.ttl.gz` im
+   `preview`-Unterordner von `template_output_path`.
+2. `riot --validate` über die erzeugten Triple-Dateien.
+3. Entpacken des jüngsten `embargoed`-Archivs aus der Dropzone und Laden von Archiv und
+   Preview-Triples in einen temporären TDB2-Index (`tdb2.tdbloader`).
+4. `ssz-view-csv.js` aus dem trifid-Container-Image gegen diesen Index – je View eine
+   CSV unter `$DROPZONE_DIR/csv/<RUN_ID>/`.
+
+Der Lauf nutzt dieselbe Signal-Mechanik wie `run_pipeline.sh` (`Running_fastview_*`,
+`Finished_fastview_*`, `Failed_fastview_*`, Verschieben des Start-Signals nach `done/`)
+und sperrt über `flock` gegen parallele Läufe. Der temporäre Index wird beim Beenden
+wieder abgeräumt; er dient nur der CSV-Erzeugung und wird nicht in die Dropzone kopiert.
+
+> Für `tar`/`tdb2.tdbloader` wird `${TMPDIR:-/tmp}` verwendet – dort muss Platz für den
+> entpackten Index der jeweiligen Umgebung vorhanden sein.
+
 **Docker**
 
 ```bash
@@ -520,7 +555,8 @@ docker run --mount type=bind,source="$(pwd)"/tmp,target=/out \
 Die Skripte `create_fuseki_index.sh` / `run_fuseki_index.sh` bauen aus den erzeugten
 `.gz`-Dateien aus den `OutputType`-Unterordnern (`shared`, `public`, `embargoed`) neue Jena-Fuseki-Indizes auf: einen Basis-/Public-Index aus `shared` + `public` sowie – falls `embargoed`-Daten vorhanden sind – einen zusätzlichen Preview-Index, der den Public-Index um die gesperrten Beobachtungen erweitert.
 `run_fuseki_index.sh` ist der Signal-Wächter, der ein von `run_pipeline.py` geschriebenes Start-Signal erkennt und `create_fuseki_index.sh` aufruft.
-`run_pipeline.sh` ist der Signal-Wächter für den geplanten Pipeline-Betrieb (Cron/Timer).
+`run_pipeline.sh` ist der Signal-Wächter für den geplanten Pipeline-Betrieb (Cron/Timer),
+`run_fast_view.sh` der entsprechende Wächter für Fast-View-Signale.
 
 ---
 
@@ -725,7 +761,7 @@ Um einem bestehenden Datentyp zusätzliche Aussagen hinzuzufügen:
 | **optimized** | Batch-/gzip-optimierter Verarbeitungsmodus für große Datenmengen. |
 | **OutputType** | `shared`/`public`/`embargoed`/`preview` – bestimmt das Ausgabe-Unterverzeichnis eines Steps und damit, in welchen Fuseki-Index die Daten einfließen. |
 | **Sperrfrist / Embargo** | Zeitraum, in dem eine Beobachtung noch nicht öffentlich, aber bereits zur Vorschau verfügbar ist (`embargoedObservationTemplating`, `OutputType.EMBARGOED`). |
-| **Fast-View** | Einzelner, isolierter LD-View-Lauf über `run_fast_view.py` ohne vollständigen Pipeline-Durchlauf; Ergebnis landet im `preview`-Ordner. |
+| **Fast-View** | Einzelner, isolierter LD-View-Lauf über `run_fast_view.py` ohne vollständigen Pipeline-Durchlauf; Ergebnis landet im `preview`-Ordner. `run_fast_view.sh` ergänzt den signalgesteuerten Betrieb inkl. CSV-Erzeugung. |
 
 ---
 
