@@ -96,7 +96,7 @@ class TemplatingOptimized(Step):
             batch_query = (
                 f"{query} OFFSET {offset} ROWS FETCH NEXT {db_batch_size} ROWS ONLY"
             )
-            self.logger.info("Downloading data ...")
+            self.logger.debug("Downloading data ...")
             cursor.execute(batch_query)
             rows = cursor.fetchall()
             if not rows:
@@ -105,16 +105,16 @@ class TemplatingOptimized(Step):
                 break
             number_rows = len(rows)
             number_rows_total += number_rows
-            self.logger.info(
+            self.logger.debug(
                 f"{number_rows} rows downloaded in the {counter}. iteration."
             )
 
-            self.logger.info("Generating triples ...")
+            self.logger.debug("Generating triples ...")
             for row in rows:
                 counter_rows += 1
                 triples = template.render(row)
                 batch.append(triples)
-            self.logger.info(f"Done with {counter_rows} rows")
+            self.logger.debug(f"Done with {counter_rows} rows")
 
             end_time = time.time()
             iteration_time = end_time - start_time
@@ -132,7 +132,7 @@ class TemplatingOptimized(Step):
             self.logger.info(f"{counter}. iteration took {iteration_time:.2f} seconds.")
 
             delay = self._cooldown(delay, iteration_durations, max_delay)
-            self.logger.info(f"{counter}. iteration is finished.")
+            self.logger.debug(f"{counter}. iteration is finished.")
         self.logger.info(f"Total number of rows processed: {number_rows_total}")
 
         if batch:
@@ -152,7 +152,7 @@ class TemplatingOptimized(Step):
             delay_decrease = (adaptive_threshold - last_iteration_duration) * 0.5
             delay = max(0.0, delay - delay_decrease)
         if delay > 0:
-            self.logger.info(
+            self.logger.debug(
                 f"Delaying next iteration by {delay:.2f} seconds to reduce load."
             )
             time.sleep(delay)
@@ -205,13 +205,13 @@ class TemplatingOptimized(Step):
                         f" FROM ({query} WHERE ({like_conditions})) AS original_query"
                     )
 
-                self.logger.info(f"Creating temporary table #{tablename} ...")
+                self.logger.debug(f"Creating temporary table #{tablename} ...")
                 cursor.execute(query_tmp_table)
-                self.logger.info("Creating an index on the _sort_order column ...")
+                self.logger.debug("Creating an index on the _sort_order column ...")
                 cursor.execute(
                     f"CREATE INDEX idx_sort_order ON #{tablename} (_sort_order)"
                 )
-                self.logger.info("done")
+                self.logger.debug("done")
 
                 with environment.get_template_engine(
                     self._template_filename,

@@ -31,7 +31,7 @@ class TestLdViews:
             "dataquality": None,
         }
 
-    def _mock_database_query(self, query_name, view_id):
+    def _mock_database_query(self, connection, query_name, view_id):
         if query_name == "view_vb_view":
             return [
                 self._mock_view_props("WIR100OD100A"),
@@ -102,6 +102,7 @@ class TestLdViews:
                 "template_path": TestUtils.abs_path("../../pipeline/templates"),
             }[arg]
         )
+        env.get_db_connection = MagicMock()
 
         try:
             view_builder = LdViewBuilder(env)

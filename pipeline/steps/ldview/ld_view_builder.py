@@ -12,6 +12,7 @@ from .ld_view_model import (
     View,
     ViewMetadata,
 )
+from ...interfaces.services import DbConnection
 
 
 class LdViewBuilder(Base):
@@ -23,115 +24,116 @@ class LdViewBuilder(Base):
 
     def build_all(self, view_ids: set[str] | None = None) -> list[View]:
         views = []
-        for view_dict in self._list_views():
-            if view_ids is not None and view_dict["id"] not in view_ids:
-                continue
-            view = self._create_view_from_dict(view_dict)
-
-            source_dict_list = self._list_sources_by_view_id(view.id)
-            sources = [
-                self._create_source_from_dict(source_dict)
-                for source_dict in source_dict_list
-            ]
-
-            static_dimension_dicts: list[dict[str, Any]] = [
-                {
-                    "identifier": "ZEIT",
-                    "name": "Key Zeit",
-                    "label": "Zeit",
-                    "description": "Zeitdimension",
-                },
-                {
-                    "identifier": "RAUM",
-                    "name": "Key Raum",
-                    "label": "Raum",
-                    "description": "Raumdimension",
-                },
-            ]
-
-            if view.include_datenstatus:
-                static_dimension_dicts.append(
-                    {
-                        "identifier": "DATENSTATUS",
-                        "name": "Datenstatus",
-                        "description": "Datenstatus des Datenpunktes",
-                        "path": [
-                            "https://ld.stadt-zuerich.ch/statistics/property/STATUS",
-                            "https://schema.org/name",
-                        ],
-                        "column": Attribute(
-                            "Datenstatus (lang)",
-                            "DATENSTATUS",
-                            "Datenstatus des Datenpunktes",
-                        ),
-                        "skip_lookups": True,
-                    }
-                )
-
-            hierarchy_dict_list = self._list_hierarchies_by_view_id(view.id)
-            dimension_identifiers_with_hierarchy = {
-                h["dimension"] for h in hierarchy_dict_list
-            }
-
-            dimension_dict_list = (
-                static_dimension_dicts + self._list_dimensions_by_view_id(view.id)
-            )
-            for dimension_dict in dimension_dict_list:
-                view.dimensions.extend(
-                    self._create_dimensions_from_dimension_dict(
-                        dimension_dict,
-                        sources,
-                        skip_lookups=dimension_dict.get("skip_lookups", False)
-                        or dimension_dict["identifier"]
-                        in dimension_identifiers_with_hierarchy,
-                    )
-                )
-
-            filter_dict_list = self._list_filters_by_view_id(view.id)
-            for filter_dict in filter_dict_list:
-                _filter, dimension = self._create_filter_from_dict(
-                    filter_dict, view.dimensions
-                )
-
-                if _filter is not None:
-                    view.filters.append(_filter)
-
-                if dimension is not None:
-                    view.dimensions.append(dimension)
-
-            measurement_dict_list = self._list_measurements_by_view_id(view.id)
-            for measurement_dict in measurement_dict_list:
-                view.dimensions.append(
-                    self._create_measurement_from_dimension_dict(
-                        measurement_dict, sources
-                    )
-                )
-
-            dimensions_by_name = {
-                d.identifier: d
-                for d in view.dimensions
-                if isinstance(d, BasicDimension)
-            }
-
-            hierarchies_by_dimension = {}
-            for h in hierarchy_dict_list:
-                hierarchies_by_dimension.setdefault(h["dimension"], []).append(h)
-
-            for dim_name, hierarchies in hierarchies_by_dimension.items():
-                parent_dimension = dimensions_by_name.get(dim_name)
-                if parent_dimension is None:
-                    self.logger.warning(
-                        f"Hierarchy references unknown dimension '{dim_name}', skipping."
-                    )
+        with self._environment.get_db_connection() as db_con:
+            for view_dict in self._list_views(db_con):
+                if view_ids is not None and view_dict["id"] not in view_ids:
                     continue
-                for hierarchy_dict in hierarchies:
+                view = self._create_view_from_dict(view_dict)
+
+                source_dict_list = self._list_sources_by_view_id(db_con, view.id)
+                sources = [
+                    self._create_source_from_dict(source_dict)
+                    for source_dict in source_dict_list
+                ]
+
+                static_dimension_dicts: list[dict[str, Any]] = [
+                    {
+                        "identifier": "ZEIT",
+                        "name": "Key Zeit",
+                        "label": "Zeit",
+                        "description": "Zeitdimension",
+                    },
+                    {
+                        "identifier": "RAUM",
+                        "name": "Key Raum",
+                        "label": "Raum",
+                        "description": "Raumdimension",
+                    },
+                ]
+
+                if view.include_datenstatus:
+                    static_dimension_dicts.append(
+                        {
+                            "identifier": "DATENSTATUS",
+                            "name": "Datenstatus",
+                            "description": "Datenstatus des Datenpunktes",
+                            "path": [
+                                "https://ld.stadt-zuerich.ch/statistics/property/STATUS",
+                                "https://schema.org/name",
+                            ],
+                            "column": Attribute(
+                                "Datenstatus (lang)",
+                                "DATENSTATUS",
+                                "Datenstatus des Datenpunktes",
+                            ),
+                            "skip_lookups": True,
+                        }
+                    )
+
+                hierarchy_dict_list = self._list_hierarchies_by_view_id(db_con, view.id)
+                dimension_identifiers_with_hierarchy = {
+                    h["dimension"] for h in hierarchy_dict_list
+                }
+
+                dimension_dict_list = (
+                    static_dimension_dicts + self._list_dimensions_by_view_id(db_con, view.id)
+                )
+                for dimension_dict in dimension_dict_list:
                     view.dimensions.extend(
-                        self._create_dimensions_from_hierarchy_dict(
-                            hierarchy_dict, parent_dimension
+                        self._create_dimensions_from_dimension_dict(
+                            dimension_dict,
+                            sources,
+                            skip_lookups=dimension_dict.get("skip_lookups", False)
+                            or dimension_dict["identifier"]
+                            in dimension_identifiers_with_hierarchy,
                         )
                     )
-            view.sort_and_numerate_dimensions()
-            views.append(view)
+
+                filter_dict_list = self._list_filters_by_view_id(db_con, view.id)
+                for filter_dict in filter_dict_list:
+                    _filter, dimension = self._create_filter_from_dict(
+                        filter_dict, view.dimensions
+                    )
+
+                    if _filter is not None:
+                        view.filters.append(_filter)
+
+                    if dimension is not None:
+                        view.dimensions.append(dimension)
+
+                measurement_dict_list = self._list_measurements_by_view_id(db_con, view.id)
+                for measurement_dict in measurement_dict_list:
+                    view.dimensions.append(
+                        self._create_measurement_from_dimension_dict(
+                            measurement_dict, sources
+                        )
+                    )
+
+                dimensions_by_name = {
+                    d.identifier: d
+                    for d in view.dimensions
+                    if isinstance(d, BasicDimension)
+                }
+
+                hierarchies_by_dimension = {}
+                for h in hierarchy_dict_list:
+                    hierarchies_by_dimension.setdefault(h["dimension"], []).append(h)
+
+                for dim_name, hierarchies in hierarchies_by_dimension.items():
+                    parent_dimension = dimensions_by_name.get(dim_name)
+                    if parent_dimension is None:
+                        self.logger.warning(
+                            f"Hierarchy references unknown dimension '{dim_name}', skipping."
+                        )
+                        continue
+                    for hierarchy_dict in hierarchies:
+                        view.dimensions.extend(
+                            self._create_dimensions_from_hierarchy_dict(
+                                hierarchy_dict, parent_dimension
+                            )
+                        )
+                view.sort_and_numerate_dimensions()
+                views.append(view)
 
         if view_ids is not None:
             self.logger.info(
@@ -142,38 +144,38 @@ class LdViewBuilder(Base):
 
         return views
 
-    def _get_view_data(self, view_name, view_id=None):
+    def _get_view_data(self, connection: DbConnection, view_name: str, view_id=None):
         cache_ident = view_name + "_" + str(view_id)
         if cache_ident in self._cache:
             return self._cache[cache_ident]
-        with self._environment.get_db_connection() as connection:
-            _sql_view_name = self._environment.view_name(view_name)
-            with connection.cursor() as cursor:
-                query = f"SELECT * FROM {_sql_view_name}"
-                cursor.execute(query)
-                result = cursor.fetchall()
-                if view_id is not None:
-                    result = [row for row in result if row["view_id"] == view_id]
-                self._cache[cache_ident] = result
-                return result
+
+        _sql_view_name = self._environment.view_name(view_name)
+        with connection.cursor() as cursor:
+            query = f"SELECT * FROM {_sql_view_name}"
+            cursor.execute(query)
+            result = cursor.fetchall()
+            if view_id is not None:
+                result = [row for row in result if row["view_id"] == view_id]
+            self._cache[cache_ident] = result
+            return result
 
     ###### QUERIES #######
-    def _list_views(self) -> list:
+    def _list_views(self, connection: DbConnection) -> list:
         # id = viewId
         # name = like all attributes from Datenobjekte table
         # return [{"id":"WIR100OD100A", "name": "Haushaltseinkommen nach ...", "include_datenstatus": True}]
-        return self._get_view_data("view_vb_view", None)
+        return self._get_view_data(connection,"view_vb_view", None)
 
-    def _list_sources_by_view_id(self, view_id: str) -> list:
+    def _list_sources_by_view_id(self, connection: DbConnection, view_id: str) -> list:
         """
         return [
             {"cube_id": "000610", "name": "Haushaltseinkommen 25%"},
             {"cube_id": "000609", "name": "Haushaltseinkommen 50%"}
         ]
         """
-        return self._get_view_data("view_vb_source", view_id)
+        return self._get_view_data(connection, "view_vb_source", view_id)
 
-    def _list_filters_by_view_id(self, view_id: str) -> list:
+    def _list_filters_by_view_id(self, connection: DbConnection, view_id: str) -> list:
         """
         return [
             {"termset": "KreiseZH", "dimension": "RAUM"},
@@ -181,34 +183,34 @@ class LdViewBuilder(Base):
             {"termset": "HYTLevel1", "dimension": "HTY", "view_id": view_id},
         ]
         """
-        return self._get_view_data("view_vb_filter", view_id)
+        return self._get_view_data(connection, "view_vb_filter", view_id)
 
-    def _list_dimensions_by_view_id(self, view_id) -> list:
+    def _list_dimensions_by_view_id(self, connection: DbConnection, view_id) -> list:
         """
         return [
             # HTY|HYTLEVEL1
             {"identifier": "HTY", "name": "Haushaltstyp", "description": "Haushaltstyp nach Haushaltstyp 1"}
         ]
         """
-        return self._get_view_data("view_vb_dimension", view_id)
+        return self._get_view_data(connection, "view_vb_dimension", view_id)
 
-    def _list_measurements_by_view_id(self, view_id) -> list:
+    def _list_measurements_by_view_id(self, connection: DbConnection, view_id) -> list:
         """
         return [
             {"identifier": "HAE", "identifier_full": "HAE_GGH1400_STK1025", "cube_id": "000610", "name": "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 25%-Perzentil", "description": "Haushaltsäquivalenzeinkommen: Für die Berechnung wird die Haushaltsgrösse über die Äquivalenzskala ..."},
             {"identifier": "HAE", "identifier_full": "HAE_GGH1400_STK1050", "cube_id": "000609", "name": "Haushaltsäquivalenzeinkommen / Steuerpflichtige Bevölkerung / 50%-Perzentil", "description": "Haushaltsäquivalenzeinkommen: Für die Berechnung wird die Haushaltsgrösse über die Äquivalenzskala ..."}
         ]
         """
-        return self._get_view_data("view_vb_measure", view_id)
+        return self._get_view_data(connection, "view_vb_measure", view_id)
 
-    def _list_hierarchies_by_view_id(self, view_id):
+    def _list_hierarchies_by_view_id(self, connection: DbConnection, view_id):
         """
         return [
             {"termset": "KreiseZH", "dimension": "RAUM"},
             {"termset": "QuartiereZH", "dimension": "RAUM"},
         ]
         """
-        hierarchies = self._get_view_data("view_vb_room_hierarchy", view_id)
+        hierarchies = self._get_view_data(connection, "view_vb_room_hierarchy", view_id)
         existing_relations = self._get_existing_hierarchy_relations()
         filtered = [
             h
