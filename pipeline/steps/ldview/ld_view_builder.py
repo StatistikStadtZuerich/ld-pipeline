@@ -2,6 +2,7 @@ from typing import Any
 
 from pipeline.base import Base, Environment
 
+from ...interfaces.services import DbConnection
 from .ld_view_model import (
     Attribute,
     BasicDimension,
@@ -12,7 +13,6 @@ from .ld_view_model import (
     View,
     ViewMetadata,
 )
-from ...interfaces.services import DbConnection
 
 
 class LdViewBuilder(Base):
@@ -76,7 +76,8 @@ class LdViewBuilder(Base):
                 }
 
                 dimension_dict_list = (
-                    static_dimension_dicts + self._list_dimensions_by_view_id(db_con, view.id)
+                    static_dimension_dicts
+                    + self._list_dimensions_by_view_id(db_con, view.id)
                 )
                 for dimension_dict in dimension_dict_list:
                     view.dimensions.extend(
@@ -101,7 +102,9 @@ class LdViewBuilder(Base):
                     if dimension is not None:
                         view.dimensions.append(dimension)
 
-                measurement_dict_list = self._list_measurements_by_view_id(db_con, view.id)
+                measurement_dict_list = self._list_measurements_by_view_id(
+                    db_con, view.id
+                )
                 for measurement_dict in measurement_dict_list:
                     view.dimensions.append(
                         self._create_measurement_from_dimension_dict(
@@ -164,7 +167,7 @@ class LdViewBuilder(Base):
         # id = viewId
         # name = like all attributes from Datenobjekte table
         # return [{"id":"WIR100OD100A", "name": "Haushaltseinkommen nach ...", "include_datenstatus": True}]
-        return self._get_view_data(connection,"view_vb_view", None)
+        return self._get_view_data(connection, "view_vb_view", None)
 
     def _list_sources_by_view_id(self, connection: DbConnection, view_id: str) -> list:
         """
