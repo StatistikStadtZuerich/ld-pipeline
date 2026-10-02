@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBFilterGruppe' | pipe_table_name }}];
+DROP TABLE IF EXISTS [{{ 'dbo.pipe_HDBFilter' | pipe_table_name }}];
 
 GO
 
@@ -6,5 +6,5 @@ SELECT
     FilterID,
     Filterbeschreibung,
     Filtername
-INTO [{{ 'dbo.pipe_HDBFilterGruppe' | pipe_table_name }}]
-FROM [{{ 'dbo.HDBFilterGruppe' | table_name }}];
+INTO [{{ 'dbo.pipe_HDBFilter' | pipe_table_name }}]
+FROM [{{ 'dbo.HDBFilter' | table_name }}];
