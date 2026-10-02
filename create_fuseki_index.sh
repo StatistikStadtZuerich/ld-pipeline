@@ -134,7 +134,7 @@ if ! "${JENA_DIR}/bin/riot" --validate "${INPUT_FILES[@]}" &>>"$RIOT_LOG"; then
   exit 3
 fi
 
-log "Building base archive from shared data"
+log "Building Fuseki Indexes"
 FUSEKI_BASE="$WORKING_DIR/fuseki"
 mkdir -p "$FUSEKI_BASE"
 
