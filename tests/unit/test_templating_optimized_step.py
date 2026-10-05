@@ -125,3 +125,42 @@ def test_templating_optimized_splits_batches_correctly():
 
     finally:
         shutil.rmtree(tmp_dir)
+
+
+def test_templating_optimized_empty_result_writes_no_file():
+    tmp_dir = TestUtils.abs_path("tmp")
+    os.makedirs(tmp_dir, exist_ok=True)
+
+    env = Environment(Env.test)
+    env.config.get = Mock(
+        side_effect=lambda name, _return_type=str, fallback=None: {
+            "template_output_path": TestUtils.abs_path("tmp"),
+            "template_path": TestUtils.abs_path("data"),
+        }.get(name, fallback)
+    )
+    env.get_db_connection = MagicMock()
+    cursor = env.get_db_connection().__enter__().cursor().__enter__()
+    cursor.fetchall.side_effect = [[]]
+
+    sql_filepath = TestUtils.abs_path("data/sample.sql")
+    template_filename = "template.ttl.jinja"
+    output_filename = "test_output.ttl"
+
+    try:
+        TemplatingOptimized(
+            template_filename,
+            output_filename,
+            "view_property",
+            OutputType.SHARED,
+            sql_filepath=sql_filepath,
+        ).run(env)
+
+        assert cursor.fetchall.call_count == 1
+
+        output_files = [
+            filename for _, _, filenames in os.walk(tmp_dir) for filename in filenames
+        ]
+        assert output_files == []
+
+    finally:
+        shutil.rmtree(tmp_dir)
