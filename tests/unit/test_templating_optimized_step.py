@@ -223,3 +223,49 @@ def test_grouped_templating_optimized_keeps_group_across_fetch_boundary():
 
     finally:
         shutil.rmtree(tmp_dir)
+
+
+def test_templating_optimized_leaves_no_leftover_files_on_success():
+    tmp_dir = TestUtils.abs_path("tmp")
+    os.makedirs(tmp_dir, exist_ok=True)
+
+    env, _ = _create_environment(
+        [
+            [
+                {"property_code": "P1", "title": "Titel 1"},
+                {"property_code": "P2", "title": "Titel 2"},
+            ],
+            [
+                {"property_code": "P3", "title": "Titel 3"},
+            ],
+            [],
+        ]
+    )
+
+    sql_filepath = TestUtils.abs_path("data/sample.sql")
+    template_filename = "template.ttl.jinja"
+    output_filename = "test_output.ttl"
+
+    try:
+        TemplatingOptimized(
+            template_filename,
+            output_filename,
+            "view_property",
+            OutputType.SHARED,
+            sql_filepath=sql_filepath,
+            options={"db_batch_size": 2, "write_batch_size": 2},
+        ).run(env)
+
+        output_entries = sorted(
+            os.path.relpath(os.path.join(dirpath, name), tmp_dir).replace("\\", "/")
+            for dirpath, dirnames, filenames in os.walk(tmp_dir)
+            for name in dirnames + filenames
+        )
+        assert output_entries == [
+            "shared",
+            "shared/test_output_batch001.ttl.gz",
+            "shared/test_output_batch002.ttl.gz",
+        ]
+
+    finally:
+        shutil.rmtree(tmp_dir)
