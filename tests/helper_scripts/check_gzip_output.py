@@ -65,10 +65,21 @@ DEFAULT_FOLDER = os.path.join(os.getcwd(), "output", "int")
 # behandelt, da dort pro View eine eigene Datei mit wechselndem Namen entsteht
 # (ldview_<view-id>.ttl.gz) - eine feste Namensliste waere hier nicht sinnvoll.
 EXPECTED_TYPES = [
-    "static", "info", "termset_hierarchy",
-    "code", "cube", "group_code", "hierarchy",
-    "measure_unit", "measure", "observation", "property", "room",
-    "time", "time_termset", "termset_dimension_hierarchy",
+    "static",
+    "info",
+    "termset_hierarchy",
+    "code",
+    "cube",
+    "group_code",
+    "hierarchy",
+    "measure_unit",
+    "measure",
+    "observation",
+    "property",
+    "room",
+    "time",
+    "time_termset",
+    "termset_dimension_hierarchy",
 ]
 
 # Typen, die in einem KONKRETEN Testlauf bereits einmal nachweislich 0 Zeilen aus
@@ -102,6 +113,7 @@ _USE_COLOR = sys.stdout.isatty()
 if _USE_COLOR and sys.platform == "win32":
     try:
         import ctypes
+
         kernel32 = ctypes.windll.kernel32
         kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
     except (AttributeError, OSError):
@@ -129,7 +141,9 @@ def format_pass_fail(is_ok: bool) -> str:
     return f"{color}{bold}{symbol} {label}{reset}"
 
 
-def check_gzip_content(path: str, chunk_size: int = 8 * 1024 * 1024) -> tuple[bool, str]:
+def check_gzip_content(
+    path: str, chunk_size: int = 8 * 1024 * 1024
+) -> tuple[bool, str]:
     """
     "Deep Check": entpackt die komplette Datei (in 8-MB-Stuecken, damit auch sehr
     grosse Dateien nicht komplett in den Arbeitsspeicher geladen werden muessen)
@@ -208,10 +222,12 @@ def check_gzip_output(
     entries = sorted(f for f in os.listdir(folder) if f.endswith(".gz"))
 
     # Sammelstellen fuer die Auswertung, waehrend wir durch die Dateien gehen:
-    batch_groups: dict[str, list[int]] = defaultdict(list)  # Typ -> Liste der Batch-Nummern
-    single_types: set[str] = set()                          # Typen ohne Batch-Nummer (z.B. "static")
-    ldview_files: list[str] = []                             # generateViews-Dateien, separat gezaehlt
-    structure_errors: list[str] = []                         # alles, was bei Punkt 2 ("Struktur") schiefgeht
+    batch_groups: dict[str, list[int]] = defaultdict(
+        list
+    )  # Typ -> Liste der Batch-Nummern
+    single_types: set[str] = set()  # Typen ohne Batch-Nummer (z.B. "static")
+    ldview_files: list[str] = []  # generateViews-Dateien, separat gezaehlt
+    structure_errors: list[str] = []  # alles, was bei Punkt 2 ("Struktur") schiefgeht
 
     # ---------------------------------------------------------------
     # Schritt A: jede Datei einzeln pruefen (Struktur) und einsortieren
@@ -221,7 +237,11 @@ def check_gzip_output(
         size_kb = os.path.getsize(full_path) / 1024
 
         if verbose:
-            print(f"[{index}/{len(entries)}] {filename} ({size_kb:,.1f} KB) ...", end=" ", flush=True)
+            print(
+                f"[{index}/{len(entries)}] {filename} ({size_kb:,.1f} KB) ...",
+                end=" ",
+                flush=True,
+            )
 
         # A.1: Ist die Datei ueberhaupt gross genug, um ein plausibles Gzip zu sein?
         if os.path.getsize(full_path) < MIN_PLAUSIBLE_SIZE:
@@ -306,7 +326,9 @@ def check_gzip_output(
     # Wurde keine explizite Erwartungsliste uebergeben, vergleichen wir "found"
     # praktisch mit sich selbst - dann kann nichts als fehlend/unerwartet auffallen,
     # das Script prueft in diesem Fall nur noch die Struktur (Punkt 2).
-    expected_types_set = set(expected_types) if expected_types is not None else found_types
+    expected_types_set = (
+        set(expected_types) if expected_types is not None else found_types
+    )
 
     known_empty_set = set(known_empty_types or [])
 
@@ -342,18 +364,26 @@ def check_gzip_output(
         f"({len(found_types)} Typen"
         f"{f' + {len(ldview_files)}x ldview_*' if ldview_files else ''})"
     )
-    print(f"Modus:   {'DEEP (vollstaendige Dekompression)' if deep else 'FAST (nur Gzip-Header)'}")
+    print(
+        f"Modus:   {'DEEP (vollstaendige Dekompression)' if deep else 'FAST (nur Gzip-Header)'}"
+    )
     print("-" * 72)
 
     # Punkt 1: Vollstaendigkeit
-    print(f"1) Alle erwarteten RDF/TTL-Files enthalten ..... {format_pass_fail(completeness_ok)}")
+    print(
+        f"1) Alle erwarteten RDF/TTL-Files enthalten ..... {format_pass_fail(completeness_ok)}"
+    )
     if missing_confirmed_empty:
-        print(f"     bestaetigt leer (kein Fehler): {', '.join(sorted(missing_confirmed_empty))}")
+        print(
+            f"     bestaetigt leer (kein Fehler): {', '.join(sorted(missing_confirmed_empty))}"
+        )
     if missing_unexplained:
         print(f"     FEHLEND: {', '.join(sorted(missing_unexplained))}")
 
     # Punkt 2: Struktur (Gzip-Validitaet + Namensschema + Batch-Nummerierung)
-    print(f"2) Struktur entspricht der Vorgabe (Gzip + Namensschema) ... {format_pass_fail(structure_ok)}")
+    print(
+        f"2) Struktur entspricht der Vorgabe (Gzip + Namensschema) ... {format_pass_fail(structure_ok)}"
+    )
     if structure_errors or naming_errors:
         for error in structure_errors + naming_errors:
             print(f"     - {error}")
@@ -361,7 +391,9 @@ def check_gzip_output(
         print(f"     alle {len(entries)} Dateien valide, Batch-Nummerierung lueckenlos")
 
     # Punkt 3: keine fehlenden UND keine unerwarteten Dateien
-    print(f"3) Keine fehlenden / keine ueberzaehligen Dateien ... {format_pass_fail(completeness_ok and no_extra_files_ok)}")
+    print(
+        f"3) Keine fehlenden / keine ueberzaehligen Dateien ... {format_pass_fail(completeness_ok and no_extra_files_ok)}"
+    )
     if unexpected_types:
         print(f"     UNERWARTET: {', '.join(sorted(unexpected_types))}")
     elif not missing_unexplained:
@@ -397,7 +429,9 @@ def check_gzip_output(
 # Dieser Block laeuft nur, wenn die Datei direkt per
 # "python tests/helper_scripts/check_gzip_output.py" gestartet wird (nicht, wenn sie aus einem anderen Skript importiert wird).
 if __name__ == "__main__":
-    command_line_args = sys.argv[1:]  # sys.argv[0] ist der Skriptname selbst, daher ab Index 1
+    command_line_args = sys.argv[
+        1:
+    ]  # sys.argv[0] ist der Skriptname selbst, daher ab Index 1
 
     deep_mode = "--deep" in command_line_args
     verbose_mode = "--verbose" in command_line_args
