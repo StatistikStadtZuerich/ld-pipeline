@@ -1,3 +1,5 @@
+import time
+
 from .base import Base, Environment, StepDefinition
 
 
@@ -11,7 +13,7 @@ class Pipeline(Base):
     ):
         """
         initializes environment for pipeline and configures logger
-        :param env: an environment
+        :param environment: an environment
         """
         super().__init__()
         self._environment = environment
@@ -40,5 +42,12 @@ class Pipeline(Base):
         self.logger.info(
             "Running step '%s' (%s)", step.name, step.step.__class__.__name__
         )
-        step.step.run(self._environment)
-        self.logger.info("Completed step '%s'", step.name)
+        started_at = time.perf_counter()
+        try:
+            step.step.run(self._environment)
+            duration = time.perf_counter() - started_at
+            self.logger.info("Completed step '%s' in %.2f seconds", step.name, duration)
+        except Exception as e:
+            duration = time.perf_counter() - started_at
+            self.logger.error("Step '%s' failed after %.2f seconds: %s", step.name, duration, e)
+            raise
