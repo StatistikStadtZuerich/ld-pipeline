@@ -1,6 +1,7 @@
 import time
 
 from .base import Base, Environment, StepDefinition
+from .base.utils import format_duration
 
 
 class Pipeline(Base):
@@ -46,8 +47,8 @@ class Pipeline(Base):
         try:
             step.step.run(self._environment)
             duration = time.perf_counter() - started_at
-            self.logger.info("Completed step '%s' in %.2f seconds", step.name, duration)
+            self.logger.info("Completed step '%s' in %s", step.name, format_duration(duration))
         except Exception as e:
             duration = time.perf_counter() - started_at
-            self.logger.error("Step '%s' failed after %.2f seconds: %s", step.name, duration, e)
+            self.logger.error("Step '%s' failed after %s: %s", step.name, format_duration(duration), e)
             raise

@@ -9,6 +9,7 @@ from database import BaseSQLStep
 
 from ..base import Environment, Step, Utils
 from .templating import OutputType
+from ..base.utils import format_duration
 
 
 class TemplatingOptimized(Step):
@@ -125,11 +126,11 @@ class TemplatingOptimized(Step):
                 self._write_batch(
                     batch_counter,
                     batch,
-                    output_folder,
+                    output_folder,F
                 )
                 batch.clear()
             offset += db_batch_size
-            self.logger.info(f"{counter}. iteration took {iteration_time:.2f} seconds.")
+            self.logger.info(f"{counter}. iteration took {format_duration(iteration_time)}.")
 
             delay = self._cooldown(delay, iteration_durations, max_delay)
             self.logger.debug(f"{counter}. iteration is finished.")
