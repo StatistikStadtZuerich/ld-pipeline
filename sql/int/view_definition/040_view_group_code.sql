@@ -50,7 +50,7 @@ SELECT
     F.FilterID as term_sets
     
 FROM [dbo].[pipe_HDBFilterCode_int] as F
-LEFT JOIN [dbo].[pipe_HDBFilterGruppe_int] as G
+LEFT JOIN [dbo].[pipe_HDBFilter_int] as G
 ON F.FilterID = G.FilterID
 
 UNION ALL 

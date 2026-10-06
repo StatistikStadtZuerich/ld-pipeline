@@ -2,8 +2,14 @@
 
 ENV_NAME=""
 CONTENT=""
+VIEW_IDS=""
 while [ $# -gt 0 ]; do
     case "$1" in
+    --view)
+      # Repeatable; a comma separated list in a single --view works as well.
+      [ -n "${2:-}" ] || { echo "--view needs a value" >&2; exit 1; }
+      VIEW_IDS="${VIEW_IDS:+$VIEW_IDS,}$2"
+      shift ;;
     --branch)
       CONTENT="${CONTENT}branch=$2\n"
       shift ;;
@@ -40,7 +46,17 @@ if [ -z "$SIGNAL_FOLDER" ]; then
   esac
 fi
 
-SIGNAL="Start_pipeline_$(date '+%F-%H-%M-%S').txt"
+# With view-ids this becomes a fast-view signal. That one carries nothing but the
+# ids - branch and target-env have no meaning for it.
+if [ -n "$VIEW_IDS" ]; then
+  [ -z "$CONTENT" ] || echo "Ignoring --branch/--target, a fast-view signal only carries view-ids" >&2
+  SIGNAL_PREFIX="Start_fastview_"
+  CONTENT="$VIEW_IDS"
+else
+  SIGNAL_PREFIX="Start_pipeline_"
+fi
+
+SIGNAL="${SIGNAL_PREFIX}$(date '+%F-%H-%M-%S').txt"
 echo "Creating Signal '$SIGNAL' in $SIGNAL_FOLDER"
 mkdir -p "$SIGNAL_FOLDER"
 echo -en "$CONTENT" >"${SIGNAL_FOLDER%/}/$SIGNAL"

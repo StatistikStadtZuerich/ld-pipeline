@@ -50,7 +50,7 @@ SELECT
     F.FilterID as term_sets
     
 FROM [{{ 'dbo.pipe_HDBFilterCode' | pipe_table_name }}] as F
-LEFT JOIN [{{ 'dbo.pipe_HDBFilterGruppe' | pipe_table_name }}] as G
+LEFT JOIN [{{ 'dbo.pipe_HDBFilter' | pipe_table_name }}] as G
 ON F.FilterID = G.FilterID
 
 UNION ALL 

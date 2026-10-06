@@ -122,10 +122,10 @@ LEFT JOIN [{{ 'pipe_HDBDatenobjekte' | pipe_table_name }}] D
     ON C.id = D.id
 LEFT JOIN [{{ 'dbo.pipe_HDBKennzahlen' | pipe_table_name }}] K
     ON C.Kennzahl = K.KennzahlCode
-LEFT JOIN [{{ 'pipe_HDBFilterGruppe' | pipe_table_name }}] F1
+LEFT JOIN [{{ 'pipe_HDBFilter' | pipe_table_name }}] F1
     ON C.BEB = F1.FilterId
-LEFT JOIN [{{ 'pipe_HDBFilterGruppe' | pipe_table_name }}] F2
+LEFT JOIN [{{ 'pipe_HDBFilter' | pipe_table_name }}] F2
     ON C.GGH = F2.FilterId
-LEFT JOIN [{{ 'pipe_HDBFilterGruppe' | pipe_table_name }}] F3
+LEFT JOIN [{{ 'pipe_HDBFilter' | pipe_table_name }}] F3
     ON C.STK = F3.FilterId
 ;

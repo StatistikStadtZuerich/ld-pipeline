@@ -31,7 +31,7 @@ SELECT
     F.FilterID as term_set
     
 FROM [dbo].[pipe_HDBFilterCode_prod] as F
-LEFT JOIN [dbo].[pipe_HDBFilterGruppe_prod] as G
+LEFT JOIN [dbo].[pipe_HDBFilter_prod] as G
 ON F.FilterID = G.FilterID
 
 UNION ALL 
