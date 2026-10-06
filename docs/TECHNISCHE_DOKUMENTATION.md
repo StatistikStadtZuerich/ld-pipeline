@@ -514,7 +514,7 @@ Rückschreiben des Publikationsstatus. Das Ergebnis landet im `preview`-Unterord
 **Fast-View über Signaldatei (`run_fast_view.sh`)**
 
 ```bash
-scripts/create_start_signal.sh --view BEV411OD411A --view WIR400OD100B
+scripts/create_start_signal.sh int --view BEV411OD411A --view WIR400OD100B
 ```
 
 Legt ein `Start_fastview_*.txt`-Signal an, das die View-IDs als Inhalt trägt. Werden
