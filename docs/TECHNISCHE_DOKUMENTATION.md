@@ -533,8 +533,9 @@ SSZ_DB_TYPE=mock python -m pytest tests/unit                       # Unit-Tests
 python -m pytest --container-scope=session tests/integration       # Integration (Docker)
 ```
 
-Unit-Tests decken u.a. Templating, Jinja-Filter, SQL-Templating, LD-Views, Kompression
-und Termset-Hierarchie ab (`tests/unit/`).
+Unit-Tests decken u.a. Templating (Standard und optimiert inkl. GZIP-Batch-Output),
+Jinja-Filter, SQL-Templating, LD-Views, Kompression und Termset-Hierarchie ab
+(`tests/unit/`).
 
 **Linting/Format**
 
