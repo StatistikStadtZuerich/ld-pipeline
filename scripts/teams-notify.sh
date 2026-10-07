@@ -67,4 +67,13 @@ FILTER_EXPR='walk(if type == "string" then reduce ($ARGS.named | keys_unsorted[]
 
 PAYLOAD="$(jq "${JQ_ARGS[@]}" "$FILTER_EXPR" "$TEMPLATE")"
 
-curl -s -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$TEAMS_HOOK_URL"
+body_file=$(mktemp)
+http_code=$(curl -sS -o "$body_file" -w "%{http_code}" -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$TEAMS_HOOK_URL")
+if [ "$http_code" -ge 400 ]; then
+  echo "Sending Teams-Notification failed with HTTP-$http_code:" >&2
+  echo "##################" >&2
+  cat "$body_file" >&2
+  echo "##################" >&2
+  # Do not exit with an error-code
+fi
+rm -f "$body_file"
