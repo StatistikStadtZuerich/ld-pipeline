@@ -11,7 +11,6 @@ TARGET_ENV="${3:-test}"
 
 # Those ENVs should be passed by the calling script
 JENA_DIR="${JENA_DIR:-/home/lod_pipeline/apache-jena-fuseki-4.9.0/jena}"
-FUSEKI_INDEX_DIR="${FUSEKI_INDEX_DIR:-${SCRIPT_HOME%/}/fuseki_index/${TARGET_ENV}}"
 INPUT_DIR="${INPUT_DIR:-${SCRIPT_HOME%/}/output/${ENV_NAME}}"
 DROPZONE_BASE=${DROPZONE_BASE:-/home/lod_pipeline/hdb_dropzone}
 DROPZONE_DIR=${DROPZONE_DIR:-${DROPZONE_BASE%/}/${ENV_NAME_UC}}
@@ -104,8 +103,8 @@ function secure_copy() {
   log "$source successfully copied to $target_dir"
 }
 
-log "Start building Fuseki-Index for '$TARGET_ENV' with Run-ID '$RUN_ID' to '$FUSEKI_INDEX_DIR'"
-WORKING_DIR="$(mktemp -d "fuseki_$RUN_ID.XXXX")"
+log "Start building Fuseki-Index for '$TARGET_ENV' with Run-ID '$RUN_ID'"
+WORKING_DIR="$(mktemp -d --tmpdir "fuseki_$RUN_ID.XXXX")"
 trap 'rm -rf "$WORKING_DIR"' EXIT
 
 log "Moving Data-Input to the Working-Dir at $WORKING_DIR"
@@ -136,6 +135,7 @@ fi
 
 log "Building Fuseki Indexes"
 FUSEKI_BASE="$WORKING_DIR/fuseki"
+FUSEKI_INDEX_DIR="$WORKING_DIR"
 mkdir -p "$FUSEKI_BASE"
 
 INDEXES=()
@@ -151,7 +151,7 @@ if [ -d "$WORKING_DIR/input/${OT_PUBLIC}" ]; then
   compress_fuseki_index "$FUSEKI_BASE" "$PUBLIC_INDEX" "$FUSEKI_INDEX_DIR"
   rm -rf "${FUSEKI_BASE:?}/$PUBLIC_INDEX"
   log "Public Index built: $PUBLIC_INDEX ($PUBLIC_INDEX.tar.gz)"
-  INDEXES+=("$PUBLIC_INDEX")
+  INDEXES+=("$PUBLIC_INDEX.tar.gz")
 else
   log "Missing public input directory, will not create public index"
 fi
@@ -164,7 +164,7 @@ if [ -d "$WORKING_DIR/input/${OT_EMBARGOED}" ]; then
   compress_fuseki_index "$FUSEKI_BASE" "$PREVIEW_INDEX" "$FUSEKI_INDEX_DIR"
   rm -rf "${FUSEKI_BASE:?}/$PREVIEW_INDEX"
   log "Preview Index built: $PREVIEW_INDEX ($PREVIEW_INDEX.tar.gz)"
-  INDEXES+=("$PREVIEW_INDEX")
+  INDEXES+=("$PREVIEW_INDEX.tar.gz")
 else
   log "Missing embargoed input directory, will not create preview/embargoed index"
 fi
@@ -172,7 +172,7 @@ fi
 log "Copying Archives to Dropzone"
 for a in "${INDEXES[@]}"; do
   log "Copy $a to $PIPELINE_DATA_DIR"
-  secure_copy "$FUSEKI_INDEX_DIR/$a.tar.gz" "$PIPELINE_DATA_DIR"
+  secure_copy "$FUSEKI_INDEX_DIR/$a" "$PIPELINE_DATA_DIR"
   log "$a copied to $PIPELINE_DATA_DIR"
 done
 
