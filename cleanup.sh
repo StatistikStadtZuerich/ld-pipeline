@@ -41,7 +41,7 @@ function cleanup_files() {
     fi
 
     local files
-    files=$(ls -1t "$dir"/$pattern 2>/dev/null || true)
+    files=$(ls -1t "${dir%/}"/$pattern 2>/dev/null || true)
     
     if [ -n "$files" ]; then
         # Skip the newest <keep_count> files
@@ -80,7 +80,8 @@ done
 
 # 3) Lösche alle *.tar.gz Dateien in $PIPELINE_DATA_DIR, die älter als 30 Tage sind
 #    behalte die 5 neuesten aber immer, egal wie alt sie sind.
-cleanup_files "$PIPELINE_DATA_DIR" "*.tar.gz" 30 5
+cleanup_files "$PIPELINE_DATA_DIR" "${ENV_NAME}_*.tar.gz" 30 5
+cleanup_files "$PIPELINE_DATA_DIR" "embargoed_${ENV_NAME}_*.tar.gz" 30 5
 # 4) Cleanup der alten Log-Files (in $LOG_DIR)
 #    Alter: 30 Tage, die letzten 7 immer, egal wie alt sie sind.
 cleanup_files "$LOGS_DIR" "pipeline_${ENV_NAME}_*.log" 30 7
