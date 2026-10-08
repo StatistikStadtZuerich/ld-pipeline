@@ -3,6 +3,7 @@ import time
 from database import BaseSQLStep
 
 from ..base import Environment
+from ..base.utils import format_duration
 
 
 class CreateViewsFromSQL(BaseSQLStep):
@@ -22,7 +23,7 @@ class CreateViewsFromSQL(BaseSQLStep):
         end_time = time.time()
         execution_time = end_time - start_time
         self.logger.info(
-            f"Execution time for creating views: {execution_time:.2f} seconds"
+            f"Execution time for creating views: {format_duration(execution_time)}"
         )
 
     def _execute_sql_files(self, environment: Environment):

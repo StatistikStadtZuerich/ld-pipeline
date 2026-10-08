@@ -4,6 +4,7 @@ import time
 
 from database import BaseSQLStep
 from pipeline.base import Environment
+from pipeline.base.utils import format_duration
 
 
 class InitPipeTables(BaseSQLStep):
@@ -24,7 +25,7 @@ class InitPipeTables(BaseSQLStep):
         end_time = time.time()
         execution_time = end_time - start_time
         self.logger.info(
-            f"Execution time for initializing pipe tables: {execution_time:.2f} seconds"
+            f"Execution time for initializing pipe tables: {format_duration(execution_time)}"
         )
 
     def _create_pipe_tables(self, environment: Environment, tables: list[pathlib.Path]):

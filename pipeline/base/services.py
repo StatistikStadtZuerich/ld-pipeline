@@ -25,11 +25,12 @@ class MySQLDbConnection(DbConnection):
         """
         Executes sql query and returns cursor.
         """
-        self._cursor.execute(sql_query)
-        return self._cursor
+        cursor = self.cursor()
+        cursor.execute(sql_query)
+        return cursor
 
     def cursor(self):
-        return self._cursor
+        return self._connection.cursor(dictionary=True)
 
     def commit(self):
         self._connection.commit()
@@ -48,7 +49,6 @@ class MySQLDbConnection(DbConnection):
         self.logger.info(
             f"Database connection to {self._config.get('db_host')}:{self._config.get('db_port', fallback=3306)}/{self._config.get('db_dbname')} established..."
         )
-        self._cursor = self._connection.cursor(dictionary=True)
         return self
 
     def __exit__(self, *exc_details):

@@ -17,11 +17,12 @@ class MSSQLDbConnection(DbConnection):
         """
         Executes query and returns cursor.
         """
-        self._cursor.execute(query)
-        return self._cursor
+        cursor = self.cursor()
+        cursor.execute(query)
+        return cursor
 
     def cursor(self):
-        return self._cursor
+        return self._connection.cursor(as_dict=True)
 
     def commit(self):
         self._connection.commit()
@@ -37,14 +38,13 @@ class MSSQLDbConnection(DbConnection):
             user=self._config.get("db_user"),
             password=self._config.get("db_password"),
         )
-        self._cursor = self._connection.cursor(as_dict=True)
-        self.logger.info(
+        self.logger.debug(
             f"Database connection to {self._config.get('db_host')}:{self._config.get('db_port', fallback=1433)}/{self._config.get('db_dbname')} established..."
         )
         return self
 
     def __exit__(self, *exc_details):
         self._connection.close()
-        self.logger.info(
+        self.logger.debug(
             f"Database connection to {self._config.get('db_host')}:{self._config.get('db_port', fallback=1433)}/{self._config.get('db_dbname')} closed"
         )
