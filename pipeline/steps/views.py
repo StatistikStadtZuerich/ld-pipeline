@@ -5,6 +5,9 @@ from pipeline.base import Environment, Step, Utils
 from pipeline.steps.ldview import LdViewBuilder, LdViewSerializer
 from pipeline.steps.templating import OutputType
 
+# Suffix for the id of a fast-view preview.
+PREVIEW_ID_SUFFIX = "-PREVIEW"
+
 
 class ViewsStep(Step):
     def __init__(self, options: dict[str, Any] | None = None):
@@ -26,6 +29,8 @@ class ViewsStep(Step):
         self.logger.info("Start building ld-views")
 
         for view in LdViewBuilder(environment).build_all(view_ids=view_ids):
+            if view_ids:
+                view.id = f"{view.id}{PREVIEW_ID_SUFFIX}"
             self.logger.info(f"Start building ld-view {view.id}")
             serializer.serialize(view)
             self.logger.info(f"Written ld-view {view.id}")
