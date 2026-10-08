@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from .base import Base
 from .environment import Environment
 
+
 def format_duration(seconds: float) -> str:
     if seconds < 60:
         return f"{seconds:.2f}s"
@@ -18,6 +19,7 @@ def format_duration(seconds: float) -> str:
         return f"{hours}h {minutes:02d}m {remaining_seconds:02d}s"
 
     return f"{minutes}m {remaining_seconds:02d}s"
+
 
 class Utils(Base):
     _instance = None

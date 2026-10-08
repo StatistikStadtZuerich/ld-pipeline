@@ -47,8 +47,12 @@ class Pipeline(Base):
         try:
             step.step.run(self._environment)
             duration = time.perf_counter() - started_at
-            self.logger.info("Completed step '%s' in %s", step.name, format_duration(duration))
+            self.logger.info(
+                "Completed step '%s' in %s", step.name, format_duration(duration)
+            )
         except Exception as e:
             duration = time.perf_counter() - started_at
-            self.logger.error("Step '%s' failed after %s: %s", step.name, format_duration(duration), e)
+            self.logger.error(
+                "Step '%s' failed after %s: %s", step.name, format_duration(duration), e
+            )
             raise

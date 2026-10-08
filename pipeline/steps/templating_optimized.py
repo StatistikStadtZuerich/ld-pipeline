@@ -8,8 +8,8 @@ from typing import Any
 from database import BaseSQLStep
 
 from ..base import Environment, Step, Utils
-from .templating import OutputType
 from ..base.utils import format_duration
+from .templating import OutputType
 
 
 class TemplatingOptimized(Step):
@@ -72,7 +72,7 @@ class TemplatingOptimized(Step):
         if "write_batch_size" in self._options:
             write_batch_size = self._options["write_batch_size"]
         if "max_iteration" in self._options:
-            max_iteration = self._options["max_iteration"]
+            max_iteration = int(self._options["max_iteration"])
 
         batch: list[str] = []
 
@@ -126,11 +126,13 @@ class TemplatingOptimized(Step):
                 self._write_batch(
                     batch_counter,
                     batch,
-                    output_folder,F
+                    output_folder,
                 )
                 batch.clear()
             offset += db_batch_size
-            self.logger.info(f"{counter}. iteration took {format_duration(iteration_time)}.")
+            self.logger.info(
+                f"{counter}. iteration took {format_duration(iteration_time)}."
+            )
 
             delay = self._cooldown(delay, iteration_durations, max_delay)
             self.logger.debug(f"{counter}. iteration is finished.")
