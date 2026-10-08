@@ -29,11 +29,13 @@ DROPZONE_DIR=${DROPZONE_DIR:-${DROPZONE_BASE%/}/${ENV_NAME_UC}}
 START_SIGNAL_FOLDER="${START_SIGNAL_FOLDER:-${DROPZONE_DIR%/}/Pipeline}"
 JENA_DIR="${JENA_DIR:-/home/lod_pipeline/apache-jena-fuseki-4.9.0/jena}"
 PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-${DROPZONE_DIR%/}/Pipeline_Data}"
-VIEW_OUTPUT_DIR="${VIEW_OUTPUT_DIR:-${SCRIPT_HOME%/}/output/triples/preview}"
+VIEW_OUTPUT_DIR="${VIEW_OUTPUT_DIR:-${SCRIPT_HOME%/}/output/${ENV_NAME}/preview}"
 # Container image carrying the trifid CSV cli
 SSZ_VIEW_CSV_IMAGE_TAG="${SSZ_VIEW_CSV_IMAGE_TAG:-latest}"
 SSZ_VIEW_CSV_IMAGE="${SSZ_VIEW_CSV_IMAGE:-cmp-registry.stzh.ch/ssz-lod/ld.stadt-zuerich.ch:${SSZ_VIEW_CSV_IMAGE_TAG}}"
 CSV_OUTPUT_BASE="${CSV_OUTPUT_BASE:-${DROPZONE_DIR%/}/csv}"
+# run_fast_view.py writes the preview under this suffix
+PREVIEW_ID_SUFFIX="${PREVIEW_ID_SUFFIX:--PREVIEW}"
 ##############################################
 debug() {
   if [ "${DEBUG:-false}" = "true" ]; then
@@ -112,6 +114,8 @@ echo "Started: $(date -u +%FT%TZ)" >&1001
 
 [ -n "${VIEW_IDS[*]:-}" ] || { echo "No view-ids found in '$startSignal'" >&2; exit 3; }
 
+PREVIEW_VIEW_IDS=("${VIEW_IDS[@]/%/$PREVIEW_ID_SUFFIX}")
+
 export PYENV_VERSION=3.12.1
 PY_VENV="${PY_VENV:-/home/lod_pipeline/venv-ld-pipeline-2024/}"
 
@@ -171,7 +175,7 @@ while IFS= read -r -d '' file; do
   TRIPLE_FILES+=("$file")
 done < <(find "$VIEW_OUTPUT_DIR" -type f -name '*.ttl.gz' -print0)
 if [ "${#TRIPLE_FILES[@]}" -eq 0 ]; then
-  echo "No generated triples found in '$VIEW_OUTPUT_DIR' for view id(s) ${VIEW_IDS[*]}" >&2
+  echo "No generated triples found in '$VIEW_OUTPUT_DIR' for view id(s) ${PREVIEW_VIEW_IDS[*]}" >&2
   exit 5
 fi
 debug "Found ${#TRIPLE_FILES[@]} generated triple file(s) in $VIEW_OUTPUT_DIR"
@@ -208,7 +212,7 @@ docker pull "$SSZ_VIEW_CSV_IMAGE"
 
 mkdir -p "$CSV_OUTPUT_DIR"
 
-debug "Generating CSVs for ${VIEW_IDS[*]} into $CSV_OUTPUT_DIR"
+debug "Generating CSVs for ${PREVIEW_VIEW_IDS[*]} into $CSV_OUTPUT_DIR"
 docker run --rm --network none \
   --hostname localhost \
   --user "$(id -u):$(id -g)" \
@@ -218,7 +222,7 @@ docker run --rm --network none \
   node /app/src/ssz-views/bin/ssz-view-csv.js \
     --endpoint /index \
     --output-dir /out \
-    "${VIEW_IDS[@]}"
+    "${PREVIEW_VIEW_IDS[@]}"
 
 debug "CSVs written to $CSV_OUTPUT_DIR"
 
