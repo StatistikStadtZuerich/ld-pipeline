@@ -67,11 +67,11 @@ class TemplatingOptimized(Step):
         max_iteration = None
         max_delay = 0
 
-        if "db_batch_size" in self._options:
+        if self._options.get("db_batch_size") is not None:
             db_batch_size = self._options["db_batch_size"]
-        if "write_batch_size" in self._options:
+        if self._options.get("write_batch_size") is not None:
             write_batch_size = self._options["write_batch_size"]
-        if "max_iteration" in self._options:
+        if self._options.get("max_iteration") is not None:
             max_iteration = int(self._options["max_iteration"])
 
         batch: list[str] = []

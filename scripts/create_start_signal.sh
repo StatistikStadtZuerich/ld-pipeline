@@ -35,7 +35,7 @@ if [ -z "$SIGNAL_FOLDER" ]; then
     SIGNAL_FOLDER=/home/lod_pipeline/hdb_dropzone/PROD/Final/Pipeline
     ;;
   int)
-    SIGNAL_FOLDER=/home/lod_pipeline/hdb_dropzone/PROD/Test/Pipeline
+    SIGNAL_FOLDER=/home/lod_pipeline/hdb_dropzone/INT/Pipeline
     ;;
   dev)
     SIGNAL_FOLDER=/home/lod_pipeline/hdb_dropzone/DEV/Pipeline
