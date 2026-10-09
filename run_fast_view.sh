@@ -191,7 +191,7 @@ fi
 
 # The index is only a scratch artifact for the CSV generation below and is
 # removed by the cleanup trap together with the working directory.
-FUSEKI_WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/fastview_fuseki_${RUN_ID}.XXXX")"
+FUSEKI_WORK_DIR="$(mktemp -d --tmpdir "fastview_fuseki_${RUN_ID}.XXXX")"
 FAST_VIEW_INDEX_LOC="$FUSEKI_WORK_DIR/fastview_${ENV_NAME}_${RUN_ID}"
 
 debug "Unpacking $(basename "$BASE_ARCHIVE") to $FAST_VIEW_INDEX_LOC"
