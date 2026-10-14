@@ -55,7 +55,7 @@ SELECT
 FROM [{{ 'dbo.pipe_HDBFilterCode' | pipe_table_name }}] as F
 LEFT JOIN [{{ 'dbo.pipe_HDBFilter' | pipe_table_name }}] as G
 ON F.FilterID = G.FilterID
-LEFT JOIN [{{ 'dbo.pipe_HDBAbgeleiteteGruppen_int| pipe_table_name }}] ag
+LEFT JOIN [{{ 'dbo.pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] ag
 ON F.GRUPPE = ag.gruppe
 
 UNION ALL 
@@ -77,7 +77,6 @@ SELECT DISTINCT
 FROM [{{ 'dbo.pipe_HDBLevelCode' | pipe_table_name }}] as L
 LEFT JOIN [{{ 'dbo.pipe_HDBLevelGruppe' | pipe_table_name }}] as G
 ON G.LevelID = L.LevelID
-LEFT JOIN [{{ 'dbo.pipe_HDBAbgeleiteteGruppen_int| pipe_table_name }}] ag
+LEFT JOIN [{{ 'dbo.pipe_HDBAbgeleiteteGruppen' | pipe_table_name }}] ag
 ON L.GRUPPE = ag.gruppe
 ;
-
