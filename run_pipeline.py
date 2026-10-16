@@ -120,6 +120,7 @@ def configure_logging(
         },
     }
 
+    log_file_name.parent.mkdir(parents=True, exist_ok=True)
     logging.config.dictConfig(logger_config)
     logging.getLogger("logging").debug("Logging configured")
 
