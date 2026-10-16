@@ -84,7 +84,7 @@ class JinjaTemplateEngine(TemplateEngine):
         def uri_encode_filter(value) -> str:
             value = str(value)
             value = remove_umlauts(value)
-            value = re.sub(r"[^A-Za-z0-9-]", "", value)
+            value = re.sub(r"[^A-Za-z0-9_-]", "", value)
             return quote(value)
 
         def literal_encode_filter(value) -> str:
