@@ -26,22 +26,32 @@ LEFT JOIN [dbo].[pipe_HDBHierarchien_int] h
 UNION ALL 
 
 SELECT 
-    F.Gruppencode as term_code, 
+    CASE 
+        WHEN ag.gruppe IS NOT NULL THEN REPLACE(F.Gruppencode, ag.gruppe, ag.origin)
+        ELSE F.Gruppencode
+    END AS term_code,
     G.FilterName as term_set_name, 
     F.FilterID as term_set
     
 FROM [dbo].[pipe_HDBFilterCode_int] as F
 LEFT JOIN [dbo].[pipe_HDBFilter_int] as G
 ON F.FilterID = G.FilterID
+LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
+ON F.GRUPPE = ag.gruppe
 
 UNION ALL 
 
 SELECT DISTINCT
-    L.Gruppencode as term_code,  
+    CASE 
+        WHEN ag.gruppe IS NOT NULL THEN REPLACE(L.Gruppencode, ag.gruppe, ag.origin)
+        ELSE L.Gruppencode
+    END AS term_code,
     G.LevelName as term_set_name, 
     L.LevelID as term_set
     
 FROM [dbo].[pipe_HDBLevelCode_int] as L
 LEFT JOIN [dbo].[pipe_HDBLevelGruppe_int] as G
 ON G.LevelID = L.LevelID
+LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
+ON L.GRUPPE = ag.gruppe
 ;
