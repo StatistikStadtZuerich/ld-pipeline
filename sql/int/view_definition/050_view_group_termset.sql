@@ -36,7 +36,7 @@ SELECT
 FROM [dbo].[pipe_HDBFilterCode_int] as F
 LEFT JOIN [dbo].[pipe_HDBFilter_int] as G
 ON F.FilterID = G.FilterID
-LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] ag
+LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
 ON F.GRUPPE = ag.gruppe
 
 UNION ALL 
@@ -52,6 +52,6 @@ SELECT DISTINCT
 FROM [dbo].[pipe_HDBLevelCode_int] as L
 LEFT JOIN [dbo].[pipe_HDBLevelGruppe_int] as G
 ON G.LevelID = L.LevelID
-LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_prod] ag
+LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
 ON L.GRUPPE = ag.gruppe
 ;

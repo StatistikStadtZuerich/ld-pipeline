@@ -43,7 +43,7 @@ UNION ALL
 
 SELECT DISTINCT
     CASE 
-        WHEN ag.gruppe IS NOT NULL THEN REPLACE(F.Gruppencode, ag.gruppe, ag.origin)
+        WHEN ag.gruppe IS NOT NULL THEN REPLACE(L.Gruppencode, ag.gruppe, ag.origin)
         ELSE L.Gruppencode
     END AS term_code,
     G.LevelName as term_set_name, 
