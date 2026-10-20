@@ -206,18 +206,43 @@ debug "Fast-View index ready at $FAST_VIEW_INDEX_LOC"
 ##############################################
 # Generate one CSV per view. The trifid cli runs from its container image
 ##############################################
+# We want to support both, podman and docker
+CONTAINER_ENGINE="${CONTAINER_ENGINE:-}"
+if [[ -z "$CONTAINER_ENGINE" ]]; then
+  if command -v podman >/dev/null 2>&1; then
+    debug "'podman' detected"
+    CONTAINER_ENGINE="podman"
+  elif command -v docker >/dev/null 2>&1; then
+    debug "'docker' detected"
+    CONTAINER_ENGINE="docker"
+  else
+    debug "Error: weder podman noch docker im PATH gefunden"
+    exit 1
+  fi
+fi
+
 # Always fetch the current image - the preview should reflect the latest build.
 debug "Pulling $SSZ_VIEW_CSV_IMAGE"
-docker pull "$SSZ_VIEW_CSV_IMAGE"
+"$CONTAINER_ENGINE" pull "$SSZ_VIEW_CSV_IMAGE"
 
 mkdir -p "$CSV_OUTPUT_DIR"
 
 debug "Generating CSVs for ${PREVIEW_VIEW_IDS[*]} into $CSV_OUTPUT_DIR"
-docker run --rm --network none \
-  --hostname localhost \
-  --user "$(id -u):$(id -g)" \
-  -v "$FAST_VIEW_INDEX_LOC:/index" \
-  -v "$CSV_OUTPUT_DIR:/out" \
+# Common args for all engines
+CONTAINER_RUN_ARGS=(
+  run --rm
+  --network none
+  --hostname localhost
+  --user "$(id -u):$(id -g)"
+  -v "$FAST_VIEW_INDEX_LOC:/index:z"
+  -v "$CSV_OUTPUT_DIR:/out:z"
+)
+# Podman needs some extra things
+if [[ "$CONTAINER_ENGINE" == "podman" ]]; then
+  CONTAINER_RUN_ARGS+=(--userns=keep-id)
+fi
+
+"$CONTAINER_ENGINE" "${CONTAINER_RUN_ARGS[@]}" \
   "$SSZ_VIEW_CSV_IMAGE" \
   node /app/src/ssz-views/bin/ssz-view-csv.js \
     --endpoint /index \
