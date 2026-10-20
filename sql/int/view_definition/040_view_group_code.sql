@@ -39,7 +39,10 @@ LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
 UNION ALL 
 
 SELECT 
-    F.Gruppencode as term_code, 
+    CASE 
+        WHEN ag.gruppe IS NOT NULL THEN REPLACE(F.GRUPPENCODE, ag.gruppe, ag.origin)
+        ELSE F.GRUPPENCODE
+    END AS term_code,
     F.Gruppencodename as title, 
     G.FilterBeschreibung as description, 
     CASE 
@@ -61,7 +64,10 @@ ON F.GRUPPE = ag.gruppe
 UNION ALL 
 
 SELECT DISTINCT
-    L.Gruppencode as term_code, 
+    CASE 
+        WHEN ag.gruppe IS NOT NULL THEN REPLACE(L.GRUPPENCODE, ag.gruppe, ag.origin)
+        ELSE L.GRUPPENCODE
+    END AS term_code,
     L.Gruppencodename as title, 
     G.LevelBeschreibung as description, 
     CASE 
@@ -69,7 +75,10 @@ SELECT DISTINCT
         ELSE L.GRUPPE
     END AS term_group_code,
     '0' as position, 
-    NULL as part_of, 
+    CASE 
+        WHEN ag.gruppe IS NOT NULL THEN REPLACE(L.PARENTCODE, ag.gruppe, ag.origin)
+        ELSE L.PARENTCODE
+    END AS part_of,
     NULL as sameAs, 
     G.LevelName as term_sets_name, 
     L.LevelID as term_sets
