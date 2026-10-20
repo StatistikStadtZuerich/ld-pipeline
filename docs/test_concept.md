@@ -18,7 +18,42 @@ Das führt zu:
 - **Schnellere Development Loops**
 - **Mehr Stabilität im Gesamtsystem**
 
-![Mermaid-Vorschau.png](Mermaid-Vorschau.png)
+```mermaid
+flowchart LR
+    SP["SharePoint<br/>Listen/Formulare<br/>(Metadaten, Views)"]
+    VB["ViewBuilder (SAS)<br/>Erzeugt HDB Datenobjekte"]
+    HDB["HDB: Datenobjekte-Tabelle"]
+    SQL["Pipeline: SQL Copy + Views<br/>(pipe_* Tabellen)"]
+    PY["Pipeline: Python Templating<br/>RDF/Turtle erzeugen"]
+    TTL["TTL Files"]
+    IDX["Index Build (Fuseki Index)<br/>Schema-Validierung TTL"]
+    ROLL["Indexmanager Rollout"]
+    TRIFIT["Trifit Cache Warmup<br/>CSV/View Abrufe"]
+    SPARQL["SPARQL ASK Quality Checks"]
+    HARV["Harvester Trigger"]
+    OGD["OGD Portal"]
+
+    T_SP["[Formular-Pflichtfelder<br/>(bestehend)]"]
+    T_VB["[SAS Unit Tests (neu)<br/>+ Warnings/Mails (bestehend)]"]
+    T_SQL["[SQL Validierungs-Step (neu)<br/>FAIL FAST + Teams Alert]"]
+    T_PY["[Unit Tests (bestehend)<br/>+ Integration Tests (reaktivieren)]"]
+    T_IDX["[TTL Schema Validierung<br/>(bestehend)]"]
+    T_TRIFIT["[CSV nicht leer (neu)<br/>+ Teams Alert]"]
+    T_SPARQL["[SPARQL ASK Checks (neu)<br/>+ Teams Alert]"]
+
+    SP --> VB --> HDB --> SQL --> PY --> TTL --> IDX --> ROLL
+    ROLL --> TRIFIT
+    ROLL --> SPARQL
+    ROLL --> HARV --> OGD
+
+    SP -.-> T_SP
+    VB -.-> T_VB
+    SQL -.-> T_SQL
+    PY -.-> T_PY
+    IDX -.-> T_IDX
+    TRIFIT -.-> T_TRIFIT
+    SPARQL -.-> T_SPARQL
+```
 
 ---
 
@@ -30,7 +65,7 @@ Das führt zu:
 - Integration Tests / Unit Tests
 - Datenqualitäts-Checks innerhalb der Pipeline
 - RDF / SPARQL Validierung
-- Trifit / CSV Checks
+- Trifid / CSV Checks
 
 ---
 
@@ -102,7 +137,6 @@ Das führt zu:
 - Optimierten Pfad (aktiv in int/prod) abdecken:
     - Templating (`TemplatingOptimized`, `GroupedTemplatingOptimized`)
     - GZIP-Output: Vollständigkeit und Struktur der Batch-Dateien
-    - Upload (`UploadToFusekiOptimized`)
 - Tests für bisher ungetestete Steps ergänzen (z.B. `InitPipeTables`, `WritePublicationStatiToHDB`)
 
 **Besonderheit:**
