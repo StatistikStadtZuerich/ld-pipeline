@@ -54,7 +54,8 @@ findStartSignal() {
 loadViewIDs() {
   local config_file="${1:?}"
   [ -f "$config_file" ] || return 1
-  <"$config_file" tr ',\n' ' ' | xargs
+  # Signals written on the Windows share carry CRLF line endings.
+  <"$config_file" tr -d '\r' | tr ',\n' ' ' | xargs
 }
 ##############################################
 runningSignal="$(findRunningSignal)"
