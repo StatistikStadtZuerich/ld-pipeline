@@ -96,12 +96,22 @@ Started: $(date -u +%FT%TZ)
   VIEW_IDS: ${VIEW_IDS[*]}
 EOF
 
+# Built before the trap, which uses it on every failure path.
+NOTIFY_ARGS=(
+  --environment "$ENV_NAME_UC"
+  --runId "$RUN_ID"
+  --viewIDs "${VIEW_IDS[*]}"
+)
+
 function cleanup() {
   local rc=$?
   [ -z "${FUSEKI_WORK_DIR:-}" ] || rm -rf "$FUSEKI_WORK_DIR"
   if [ "$rc" -ne 0 ] && [ -f "$_runFile" ]; then
     echo "Failed: $(date -u +%FT%TZ) (exit $rc)" >>"$_runFile" || true
     mv -f "$_runFile" "$START_SIGNAL_FOLDER/${_failed_signal_prefix}${RUN_ID}.txt" || true
+    # In the trap, so every failing step is reported - not just run_fast_view.py.
+    "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" fast_view-status --status failed \
+      --icon "🚨" --message "Fast-View failed: $rc" "${NOTIFY_ARGS[@]}" || true
   fi
   exit "$rc"
 }
@@ -116,6 +126,7 @@ echo "Started: $(date -u +%FT%TZ)" >&1001
 [ -n "${VIEW_IDS[*]:-}" ] || { echo "No view-ids found in '$startSignal'" >&2; exit 3; }
 
 PREVIEW_VIEW_IDS=("${VIEW_IDS[@]/%/$PREVIEW_ID_SUFFIX}")
+
 
 export PYENV_VERSION=3.12.1
 PY_VENV="${PY_VENV:-/home/lod_pipeline/venv-ld-pipeline-2024/}"
@@ -137,11 +148,6 @@ if [ -f "$SCRIPT_HOME/config-$ENV_NAME.ini" ]; then
 fi
 ARGS+=(--view-ids "$(IFS=,; echo "${VIEW_IDS[*]}")")
 
-NOTIFY_ARGS=(
-  --environment "$ENV_NAME_UC"
-  --runId "$RUN_ID"
-  --viewIDs "${VIEW_IDS[*]}"
-)
 "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" fast_view-status --status started --icon "🏎️" --message "Fast-View started" "${NOTIFY_ARGS[@]}"
 
 
@@ -156,11 +162,7 @@ fi
   cd "$SCRIPT_HOME" || { debug "Could not change to '$SCRIPT_HOME'"; exit 2; }
   debug "${PY_VENV%/}/bin/python" "${SCRIPT_HOME}/run_fast_view.py" "${ARGS[@]}"
   "${PY_VENV%/}/bin/python" "${SCRIPT_HOME}/run_fast_view.py" "${ARGS[@]}"
-) || {
-  exit_code="$?"
-  "${SCRIPT_HOME:-.}/scripts/teams-notify.sh" fast_view-status --status failed --icon "🚨" --message "Fast-View failed: $exit_code" "${NOTIFY_ARGS[@]}" || true
-  exit "${exit_code}"
-}
+) || exit "$?"   # the cleanup trap reports the failure
 
 ##############################################
 # Unpack the embargoed index - it provides the cube data the CSV queries run
