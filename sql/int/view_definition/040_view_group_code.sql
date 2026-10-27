@@ -49,7 +49,7 @@ SELECT
         WHEN ag.gruppe IS NOT NULL THEN REPLACE(F.GRUPPE, ag.gruppe, ag.origin)
         ELSE F.GRUPPE
     END AS term_group_code,
-    '0' as position, 
+    t.GRUPPENCODESORT as position, 
     NULL as part_of, 
     NULL as sameAs, 
     G.FilterName as term_sets_name, 
@@ -60,6 +60,8 @@ LEFT JOIN [dbo].[pipe_HDBFilter_int] as G
 ON F.FilterID = G.FilterID
 LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
 ON F.GRUPPE = ag.gruppe
+LEFT JOIN [dbo].[pipe_HDBGruppenliste_int] t
+ON F.GRUPPENCODE = t.GRUPPENCODE
 
 UNION ALL 
 
@@ -74,7 +76,7 @@ SELECT DISTINCT
         WHEN ag.gruppe IS NOT NULL THEN REPLACE(L.GRUPPE, ag.gruppe, ag.origin)
         ELSE L.GRUPPE
     END AS term_group_code,
-    '0' as position, 
+    t.GRUPPENCODESORT as position, 
     CASE 
         WHEN ag.gruppe IS NOT NULL THEN REPLACE(L.PARENTCODE, ag.gruppe, ag.origin)
         ELSE L.PARENTCODE
@@ -88,4 +90,6 @@ LEFT JOIN [dbo].[pipe_HDBLevelGruppe_int] as G
 ON G.LevelID = L.LevelID
 LEFT JOIN [dbo].[pipe_HDBAbgeleiteteGruppen_int] ag
 ON L.GRUPPE = ag.gruppe
+LEFT JOIN [dbo].[pipe_HDBGruppenliste_int] t
+ON L.GRUPPENCODE = t.GRUPPENCODE
 ;
