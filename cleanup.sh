@@ -93,3 +93,4 @@ cleanup_files "$LOGS_DIR" "fuseki_index_${ENV_NAME}_*.log" 30 7
 #    Alter: 7 Tage, die letzte Version immer.
 cleanup_files "$LOGS_DIR" "cronjob_pipe*.log" 7 1
 cleanup_files "$LOGS_DIR" "cronjob_fuseki*.log" 7 1
+cleanup_files "$LOGS_DIR" "cleanup*.log" 7 1
