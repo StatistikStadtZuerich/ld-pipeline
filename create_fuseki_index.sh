@@ -16,6 +16,9 @@ DROPZONE_BASE=${DROPZONE_BASE:-/home/lod_pipeline/hdb_dropzone}
 DROPZONE_DIR=${DROPZONE_DIR:-${DROPZONE_BASE%/}/${ENV_NAME_UC}}
 PIPELINE_DATA_DIR="${PIPELINE_DATA_DIR:-${DROPZONE_DIR%/}/Pipeline_Data}"
 
+TMPDIR="${TMPDIR:-/tmp}"
+WORKING_DIR_BASE="${WORKING_DIR_BASE:-$TMPDIR}"
+
 # These are conventional names - MUST be synced with OutputType in templating.py
 OT_SHARED="shared"
 OT_PUBLIC="public"
@@ -104,7 +107,7 @@ function secure_copy() {
 }
 
 log "Start building Fuseki-Index for '$TARGET_ENV' with Run-ID '$RUN_ID'"
-WORKING_DIR="$(mktemp -d --tmpdir "fuseki_$RUN_ID.XXXX")"
+WORKING_DIR="$(mktemp -d --tmpdir "${WORKING_DIR_BASE}" "fuseki_$RUN_ID.XXXX")"
 trap 'rm -rf "$WORKING_DIR"' EXIT
 
 log "Moving Data-Input to the Working-Dir at $WORKING_DIR"
