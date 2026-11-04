@@ -107,7 +107,7 @@ function secure_copy() {
 }
 
 log "Start building Fuseki-Index for '$TARGET_ENV' with Run-ID '$RUN_ID'"
-WORKING_DIR="$(mktemp -d --tmpdir "${WORKING_DIR_BASE}" "fuseki_$RUN_ID.XXXX")"
+WORKING_DIR="$(mktemp -d -p "${WORKING_DIR_BASE}" "fuseki_$RUN_ID.XXXX")"
 trap 'rm -rf "$WORKING_DIR"' EXIT
 
 log "Moving Data-Input to the Working-Dir at $WORKING_DIR"
