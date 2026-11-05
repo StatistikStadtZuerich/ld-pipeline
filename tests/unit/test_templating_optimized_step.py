@@ -1,8 +1,10 @@
 import gzip
 import os
-import re
 import shutil
 from unittest.mock import MagicMock, Mock
+
+from rdflib import Graph, Namespace
+from rdflib.compare import graph_diff, isomorphic, to_isomorphic
 
 from pipeline.base import Env, Environment
 from pipeline.steps import TemplatingOptimized
@@ -25,6 +27,18 @@ def _create_environment(
     cursor = env.get_db_connection().__enter__().cursor().__enter__()
     cursor.fetchall.side_effect = fetch_results
     return env, cursor
+
+
+def _read_graph(filepath: str) -> Graph:
+    with gzip.open(filepath, "rt", encoding="utf-8") as generated:
+        return Graph().parse(data=generated.read(), format="turtle")
+
+
+def _local_name(uri) -> str:
+    return str(uri).rsplit("/", 1)[-1]
+
+
+SCHEMA = Namespace("https://schema.org/")
 
 
 def test_templating_optimized_writes_complete_and_valid_gzip():
@@ -58,15 +72,19 @@ def test_templating_optimized_writes_complete_and_valid_gzip():
         assert os.listdir(output_dir) == ["test_output_batch001.ttl.gz"]
 
         output_filepath = os.path.join(output_dir, "test_output_batch001.ttl.gz")
-        with open(output_filepath, "rb") as f:
-            assert f.read(2) == b"\x1f\x8b"
-
-        with gzip.open(output_filepath, "rt", encoding="utf-8") as generated:
-            content = generated.read()
-        expected_content = TestUtils.read_file(
-            TestUtils.abs_path("data/expected_content.ttl"), encoding="utf-8"
+        actual_graph = _read_graph(output_filepath)
+        expected_graph = Graph().parse(
+            TestUtils.abs_path("data/expected_content.ttl"),
+            format="turtle",
+            encoding="utf-8",
         )
-        TestUtils.assert_text_equals(expected_content, content)
+        _, only_expected, only_actual = graph_diff(
+            to_isomorphic(expected_graph), to_isomorphic(actual_graph)
+        )
+        assert isomorphic(expected_graph, actual_graph), (
+            f"Fehlende Triples:\n{only_expected.serialize(format='nt')}\n"
+            f"Unerwartete Triples:\n{only_actual.serialize(format='nt')}"
+        )
 
     finally:
         shutil.rmtree(tmp_dir)
@@ -99,12 +117,8 @@ def test_templating_optimized_splits_batches_correctly():
     output_dir = os.path.join(tmp_dir, OutputType.SHARED)
 
     def read_property_codes(filename: str) -> list[str]:
-        with gzip.open(
-            os.path.join(output_dir, filename), "rt", encoding="utf-8"
-        ) as generated:
-            return re.findall(
-                r'<https://schema.org/identifier> "(\w+)"', generated.read()
-            )
+        graph = _read_graph(os.path.join(output_dir, filename))
+        return sorted(str(code) for code in graph.objects(None, SCHEMA.identifier))
 
     try:
         TemplatingOptimized(
@@ -185,17 +199,14 @@ def test_grouped_templating_optimized_keeps_group_across_fetch_boundary():
     output_filename = "test_output.ttl"
     output_dir = os.path.join(tmp_dir, OutputType.SHARED)
 
-    def read_groups(filename: str) -> list[tuple[str, list[str]]]:
-        with gzip.open(
-            os.path.join(output_dir, filename), "rt", encoding="utf-8"
-        ) as generated:
-            return [
-                (termset, re.findall(r"/code/(\w+)>", codes))
-                for termset, codes in re.findall(
-                    r"/termset/(\w+)> <https://schema.org/hasPart> (.*) \.",
-                    generated.read(),
-                )
-            ]
+    def read_groups(filename: str) -> dict[str, list[str]]:
+        graph = _read_graph(os.path.join(output_dir, filename))
+        return {
+            _local_name(termset): sorted(
+                _local_name(code) for code in graph.objects(termset, SCHEMA.hasPart)
+            )
+            for termset in set(graph.subjects(SCHEMA.hasPart, None))
+        }
 
     try:
         GroupedTemplatingOptimized(
@@ -217,9 +228,9 @@ def test_grouped_templating_optimized_keeps_group_across_fetch_boundary():
             "test_output_batch003.ttl.gz",
         ]
 
-        assert read_groups("test_output_batch001.ttl.gz") == [("T1", ["A", "B"])]
-        assert read_groups("test_output_batch002.ttl.gz") == [("T2", ["C", "D", "E"])]
-        assert read_groups("test_output_batch003.ttl.gz") == [("T3", ["F"])]
+        assert read_groups("test_output_batch001.ttl.gz") == {"T1": ["A", "B"]}
+        assert read_groups("test_output_batch002.ttl.gz") == {"T2": ["C", "D", "E"]}
+        assert read_groups("test_output_batch003.ttl.gz") == {"T3": ["F"]}
 
     finally:
         shutil.rmtree(tmp_dir)
