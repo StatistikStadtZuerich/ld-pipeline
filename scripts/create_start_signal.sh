@@ -32,7 +32,7 @@ done
 if [ -z "$SIGNAL_FOLDER" ]; then
   case "$ENV_NAME" in
   prod)
-    SIGNAL_FOLDER=/home/lod_pipeline/hdb_dropzone/PROD/Final/Pipeline
+    SIGNAL_FOLDER=/home/lod_pipeline/hdb_dropzone/PROD/Pipeline
     ;;
   int)
     SIGNAL_FOLDER=/home/lod_pipeline/hdb_dropzone/INT/Pipeline
