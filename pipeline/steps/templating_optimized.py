@@ -57,7 +57,7 @@ class TemplatingOptimized(Step):
             f"Writing batch {counter} data to {os.path.basename(dest_file)} ..."
         )
         os.makedirs(dest_file.parent, exist_ok=True)
-        with gzip.open(dest_file, "wt") as f_out:
+        with gzip.open(dest_file, "wt", encoding="utf-8") as f_out:
             f_out.write("\n".join(batch) + "\n")
         self.logger.info(f"Batch {counter} written to {dest_file}.")
 

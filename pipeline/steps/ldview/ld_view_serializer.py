@@ -19,7 +19,7 @@ class LdViewSerializer:
             f"ldview_{view.id}.ttl.gz",
         )
         os.makedirs(os.path.dirname(out), exist_ok=True)
-        with gzip.open(out, "wt") as ttl_file:
+        with gzip.open(out, "wt", encoding="utf-8") as ttl_file:
             # serialize base
             with self._templater("ldviews/metadata.ttl.jinja") as engine:
                 ttl_file.write(engine.render({"view": view}) + "\n")

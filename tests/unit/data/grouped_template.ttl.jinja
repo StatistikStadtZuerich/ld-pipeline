@@ -1,0 +1,1 @@
+<https://ld.stadt-zuerich.ch/statistics/termset/{{ rows[0].termset_code }}> <https://schema.org/hasPart> {% for row in rows %}<https://ld.stadt-zuerich.ch/statistics/code/{{ row.code }}>{% if not loop.last %}, {% endif %}{% endfor %} .
