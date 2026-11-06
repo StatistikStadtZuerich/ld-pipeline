@@ -90,7 +90,9 @@ cleanup_files "$PIPELINE_DATA_DIR" "embargoed_${ENV_NAME}_*.tar.gz" 30 5
 #    Alter: 30 Tage, die letzten 7 immer, egal wie alt sie sind.
 cleanup_files "$LOGS_DIR" "pipeline_${ENV_NAME}_*.log" 30 7
 cleanup_files "$LOGS_DIR" "fuseki_index_${ENV_NAME}_*.log" 30 7
+cleanup_files "$LOGS_DIR" "fast_view_${ENV_NAME}_*.log" 30 7
 #    Alter: 7 Tage, die letzte Version immer.
-cleanup_files "$LOGS_DIR" "cronjob_pipe*.log" 7 1
-cleanup_files "$LOGS_DIR" "cronjob_fuseki*.log" 7 1
+cleanup_files "$LOGS_DIR" "cronjob_pipeline_*.log" 7 1
+cleanup_files "$LOGS_DIR" "cronjob_fuseki_*.log" 7 1
+cleanup_files "$LOGS_DIR" "cronjob_fast_view_*.log" 7 1
 cleanup_files "$LOGS_DIR" "cleanup*.log" 7 1
