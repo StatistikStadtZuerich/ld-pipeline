@@ -61,6 +61,11 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+# Make sure the proxy-settings are loaded
+if [ -z "${http_proxy}" ] && [ -f /etc/profile.d/proxy.sh ]; then
+    source /etc/profile.d/proxy.sh
+fi
+
 # Construct jq filter to replace variables
 # shellcheck disable=SC2016
 FILTER_EXPR='walk(if type == "string" then reduce ($ARGS.named | keys_unsorted[]) as $k (.; gsub("\\$" + $k + "|\\$\\{" + $k + "\\}"; $ARGS.named[$k])) else . end)'
