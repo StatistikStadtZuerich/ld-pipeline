@@ -62,7 +62,7 @@ while [ $# -gt 0 ]; do
 done
 
 # Make sure the proxy-settings are loaded
-if [ -z "${http_proxy}" ] && [ -f /etc/profile.d/proxy.sh ]; then
+if [ -z "${http_proxy:-}" ] && [ -f /etc/profile.d/proxy.sh ]; then
     source /etc/profile.d/proxy.sh
 fi
 
