@@ -16,8 +16,8 @@ class CreateViewsFromSQL(BaseSQLStep):
 
         try:
             self._execute_sql_files(environment)
-        except Exception as e:
-            self.logger.error(f"Error while creating views: {e}")
+        except Exception:
+            self.logger.exception("Error while creating views")
             raise
 
         end_time = time.time()
@@ -64,6 +64,6 @@ class CreateViewsFromSQL(BaseSQLStep):
                 if batch.strip():  # Nur ausführen, wenn nicht leer
                     cursor.execute(batch)
             self.logger.info(f"{sql_file} executed successfully.")
-        except Exception as e:
-            self.logger.error(f"Failed to execute {sql_file}: {e}")
+        except Exception:
+            self.logger.exception(f"Failed to execute {sql_file}")
             raise
