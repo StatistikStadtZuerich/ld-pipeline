@@ -36,6 +36,9 @@ SSZ_VIEW_CSV_IMAGE="${SSZ_VIEW_CSV_IMAGE:-cmp-registry.stzh.ch/ssz-lod/ld.stadt-
 CSV_OUTPUT_BASE="${CSV_OUTPUT_BASE:-${DROPZONE_DIR%/}/csv}"
 # run_fast_view.py writes the preview under this suffix
 PREVIEW_ID_SUFFIX="${PREVIEW_ID_SUFFIX:--PREVIEW}"
+
+TMPDIR="${TMPDIR:-/tmp}"
+WORKING_DIR_BASE="${WORKING_DIR_BASE:-$TMPDIR}"
 ##############################################
 debug() {
   if [ "${DEBUG:-false}" = "true" ]; then
@@ -194,7 +197,7 @@ fi
 
 # The index is only a scratch artifact for the CSV generation below and is
 # removed by the cleanup trap together with the working directory.
-FUSEKI_WORK_DIR="$(mktemp -d --tmpdir "fastview_fuseki_${RUN_ID}.XXXX")"
+FUSEKI_WORK_DIR="$(mktemp -d -p "${WORKING_DIR_BASE}" "fastview_fuseki_${RUN_ID}.XXXX")"
 FAST_VIEW_INDEX_LOC="$FUSEKI_WORK_DIR/fastview_${ENV_NAME}_${RUN_ID}"
 
 debug "Unpacking $(basename "$BASE_ARCHIVE") to $FAST_VIEW_INDEX_LOC"
