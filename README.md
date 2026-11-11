@@ -7,6 +7,12 @@ and then transferring it into an RDF database.
 
 The pipeline code is developed on GitLab and mirrored on GitHub.
 
+## Glossary
+
+The terms used in this project (e.g. Cube, Dimension, Kennzahl, LD-View) are explained in the
+[Glossar zu Linked Data](https://confluence-ssz.szh.loc/display/TD/Glossar+zu+Linked+Data)
+on Confluence (internal network only).
+
 ## Getting Started
 
 These instructions will help you get a copy of the project up and running on your
