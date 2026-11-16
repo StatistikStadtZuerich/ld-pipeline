@@ -34,6 +34,7 @@ VIEW_OUTPUT_DIR="${VIEW_OUTPUT_DIR:-${SCRIPT_HOME%/}/output/${ENV_NAME}/preview}
 SSZ_VIEW_CSV_IMAGE_TAG="${SSZ_VIEW_CSV_IMAGE_TAG:-latest}"
 SSZ_VIEW_CSV_IMAGE="${SSZ_VIEW_CSV_IMAGE:-cmp-registry.stzh.ch/ssz-lod/ld.stadt-zuerich.ch:${SSZ_VIEW_CSV_IMAGE_TAG}}"
 CSV_OUTPUT_BASE="${CSV_OUTPUT_BASE:-${DROPZONE_DIR%/}/csv}"
+CSV_OUTPUT_DIR="${CSV_OUTPUT_DIR:-${CSV_OUTPUT_BASE%/}/LOD-Previews-${ENV_NAME_UC}}"
 # run_fast_view.py writes the preview under this suffix
 PREVIEW_ID_SUFFIX="${PREVIEW_ID_SUFFIX:--PREVIEW}"
 
@@ -82,8 +83,6 @@ flock -sn 999 || { debug "Could not acquire lock on '$SCRIPT_HOME'"; exit 0; }
 
 # Extract the run-id
 RUN_ID="$(basename "$startSignal" .txt | sed "s/$_start_signal_prefix//")"
-
-CSV_OUTPUT_DIR="${CSV_OUTPUT_DIR:-${CSV_OUTPUT_BASE%/}/${RUN_ID}}"
 
 # Read the view-ids while the start-signal is still in place
 IFS=" " read -r -a VIEW_IDS <<< "$(loadViewIDs "$startSignal")"
