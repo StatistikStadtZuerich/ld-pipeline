@@ -61,17 +61,24 @@ loadViewIDs() {
   <"$config_file" sed '1s/^\xEF\xBB\xBF//' | tr -d '\r' | tr ',\n' ' ' | xargs
 }
 ##############################################
-runningSignal="$(findRunningSignal)"
-[ -z "$runningSignal" ] || { debug "Detected running pipeline: '$runningSignal'; STOP"; exit 0; }
-
 startSignal="$(findStartSignal)"
 [ -z "$startSignal" ] && { debug "No start-signal found in '$(readlink -f "$START_SIGNAL_FOLDER")'"; exit 0; }
 [ -r "$startSignal" ] || { debug "Could not read start-signal '$startSignal'"; exit 1; }
 
-exec 999<"$SCRIPT_HOME" 1001>>"$startSignal"
+# Check again that we're alone
+LOCK_FILE="$START_SIGNAL_FOLDER/$(basename "$SCRIPT" ".sh").lock"
+if ! ( set -o noclobber; echo $$ > "$LOCK_FILE" ) 2>/dev/null; then
+    debug "Already running (PID $(cat "$LOCK_FILE"))"
+    exit 1
+fi
+trap 'rm -f "$LOCK_FILE"' EXIT
+runningSignal="$(findRunningSignal)"
+[ -z "$runningSignal" ] || { debug "Detected running pipeline: '$runningSignal'; STOP"; exit 0; }
+
+exec 999<"$SCRIPT_HOME"
 
 # Lock the start-signal for execution
-flock -xn 1001 || { debug "Could not acquire exclusive lock on '$startSignal'"; exit 0; }
+flock -sn 999 || { debug "Could not acquire lock on '$SCRIPT_HOME'"; exit 0; }
 
 # Extract the run-id
 RUN_ID="$(basename "$startSignal" .txt | sed "s/$_start_signal_prefix//")"
@@ -108,6 +115,7 @@ NOTIFY_ARGS=(
 
 function cleanup() {
   local rc=$?
+  [ -z "${LOCK_FILE:-}" ] || rm -rf "$LOCK_FILE"
   [ -z "${FUSEKI_WORK_DIR:-}" ] || rm -rf "$FUSEKI_WORK_DIR"
   if [ "$rc" -ne 0 ] && [ -f "$_runFile" ]; then
     echo "Failed: $(date -u +%FT%TZ) (exit $rc)" >>"$_runFile" || true
