@@ -53,17 +53,17 @@ case "$ENV_NAME" in
     ;;
 esac
 
-runningSignal="$(findRunningSignal)"
-[ -z "$runningSignal" ] || { debug "Detected running pipeline: '$runningSignal'; STOP"; exit 0; }
-
 startSignal="$(findStartSignal)"
 [ -z "$startSignal" ] && { debug "No start-signal found in '$(readlink -f "$START_SIGNAL_FOLDER")'"; exit 0; }
 [ -r "$startSignal" ] || { debug "Could not read start-signal '$startSignal'"; exit 1; }
 
-exec 999<"$SCRIPT_HOME" 1001>>"$startSignal"
+runningSignal="$(findRunningSignal)"
+[ -z "$runningSignal" ] || { debug "Detected running pipeline: '$runningSignal'; STOP"; exit 0; }
+
+exec 999<"$SCRIPT_HOME"
 
 # Lock the start-signal for execution
-flock -xn 1001 || { debug "Could not acquire exclusive lock on '$startSignal'"; exit 0; }
+flock -sn 999 || { debug "Could not acquire lock on '$SCRIPT_HOME'"; exit 0; }
 
 # Extract the run-id
 RUN_ID="$(basename "$startSignal" .txt | sed "s/$_start_signal_prefix//")"
@@ -103,6 +103,16 @@ branch=$(cd "$SCRIPT_HOME" && git rev-parse --abbrev-ref HEAD)
 # From now on, a read-lock is sufficient
 flock -sn 999 || { debug "Could not acquire read-lock"; exit 0; }
 
+# Check again that we're still alone
+LOCK_FILE="$START_SIGNAL_FOLDER/$(basename "$SCRIPT" ".sh").lock"
+if ! ( set -o noclobber; echo $$ > "$LOCK_FILE" ) 2>/dev/null; then
+    debug "Already running (PID $(cat "$LOCK_FILE"))"
+    exit 1
+fi
+trap 'rm -f "$LOCK_FILE"' EXIT
+runningSignal="$(findRunningSignal)"
+[ -z "$runningSignal" ] || { debug "Detected running pipeline: '$runningSignal'; STOP"; exit 0; }
+
 # Create Running-Signal
 _runFile="$START_SIGNAL_FOLDER/${_running_signal_prefix}${RUN_ID}.txt"
 cat >"$_runFile" <<EOF
@@ -115,8 +125,8 @@ Started: $(date -u +%FT%TZ)
 EOF
 # Move start-signal out of the way
 mkdir -p "$START_SIGNAL_FOLDER/done"
+echo "Started: $(date -u +%FT%TZ)" >>"$startSignal"
 mv "$startSignal" "$START_SIGNAL_FOLDER/done/"
-echo "Started: $(date -u +%FT%TZ)" >&1001
 
 export PYENV_VERSION=3.12.1
 PY_VENV="${PY_VENV:-/home/lod_pipeline/venv-ld-pipeline-2024/}"
